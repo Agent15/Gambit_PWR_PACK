@@ -1,0 +1,51 @@
+# Build output
+**/bin/
+**/obj/
+
+# Vendor binaries the user must dump from their own game install.
+# These are copyrighted by Unity / Blukulele and must NOT be redistributed.
+refs/
+recon/
+downloads/
+
+# IDE & editor
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+*~
+
+# AI assistants
+.claude/
+CLAUDE.md
+AGENTS.md
+.cursor/
+.cursorrules
+.cursorignore
+.aider*
+.aiderignore
+.codex/
+.gemini/
+.continue/
+.windsurf/
+.copilot*
+.openai/
+.openhands/
+.crush/
+.devin*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.Spotlight-V100
+.Trashes
+.directory
+
+# Logs / temp
+*.log
+*.tmp
+nuget.lock.json
+project.lock.json

@@ -1,0 +1,10 @@
+{
+    "id": "GambitApi",
+    "name": "Gambit Creation API",
+    "version": "1.0.0",
+    "author": "Mod Community",
+    "entry": "Gambonanza.GambitApi.GambitApiMod",
+    "enabled": true,
+    "gameVersion": ">=1.0",
+    "description": "Streamlined API for creating custom gambits. Other mods can reference Gambonanza.GambitApi.dll to build and register gambits at runtime."
+}
