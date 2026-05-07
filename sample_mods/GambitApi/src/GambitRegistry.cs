@@ -251,10 +251,10 @@ namespace Gambonanza.GambitApi
 
             // Override the cloned template's in-game sprite with the modded visual.
             // The collection UI reads SO_Gambit.GambitVisual (already set), but the
-            // in-game piece reads GambitBehaviour.m_Sprite. Custom mod sprites are usually
-            // small (e.g. 17x26) and would render tiny at the default PPU; rebuild the sprite
-            // with a PPU computed from the template's world height so the modded gambit
-            // matches vanilla on-board size.
+            // in-game piece reads GambitBehaviour.m_Sprite. Custom mod sprites can be any
+            // pixel size — we rebuild the sprite with a PPU computed from the template's
+            // world height so the modded gambit ends up at the same on-board size as vanilla,
+            // and warn (below) if the aspect ratio differs enough to look squashed.
             if (def.Visual != null)
             {
                 var spriteField = typeof(GambitBehaviour).GetField("m_Sprite", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -271,11 +271,32 @@ namespace Gambonanza.GambitApi
                     try { tex.wrapMode = TextureWrapMode.Clamp; } catch { /* read-only texture */ }
 
                     var templateSprite = templateSr.sprite;
+                    var templateRect = templateSprite.rect;
+                    float templateAspect = templateRect.height > 0 ? templateRect.width / templateRect.height : 0f;
+                    float ourAspect = tex.height > 0 ? (float)tex.width / tex.height : 0f;
+                    if (templateAspect > 0f && ourAspect > 0f)
+                    {
+                        float aspectDelta = Mathf.Abs(ourAspect - templateAspect) / templateAspect;
+                        // The PPU rescale below makes any size render at the correct on-board height,
+                        // but a wildly different aspect ratio will look squashed/stretched compared
+                        // to vanilla cards. Warn (not error) so the modder knows the canonical size.
+                        if (aspectDelta > 0.10f)
+                        {
+                            Debug.LogWarning(
+                                $"[GambitApi] Gambit '{def.Id}' visual is {tex.width}x{tex.height}; " +
+                                $"vanilla template is {(int)templateRect.width}x{(int)templateRect.height}. " +
+                                $"Aspect ratio differs by {aspectDelta:P0} — sprite will render but look squashed/stretched.");
+                        }
+                    }
+
                     float templateWorldH = templateSprite.bounds.size.y;
                     float ourPixelH = tex.height;
                     if (templateWorldH > 0.0001f && ourPixelH > 0)
                     {
-                        float ppu = ourPixelH / templateWorldH;
+                        // ppu = ourPixelH / desiredWorldH. desiredWorldH = templateWorldH * scale,
+                        // so dividing by scale shrinks (scale < 1) or grows (scale > 1) the sprite.
+                        float scale = def.VisualScale > 0f ? def.VisualScale : 1f;
+                        float ppu = ourPixelH / (templateWorldH * scale);
                         // Match the template sprite's pivot so the in-game piece sits on the same
                         // anchor (vanilla pieces are typically bottom-pivoted so they stand on the
                         // sell UI base; using center-pivot offsets the sprite vertically).

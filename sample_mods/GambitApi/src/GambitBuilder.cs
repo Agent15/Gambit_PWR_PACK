@@ -76,6 +76,18 @@ namespace Gambonanza.GambitApi
         }
 
         /// <summary>
+        /// Multiplier applied to the on-board sprite's world height. 1.0 (default) matches
+        /// the cloned vanilla template exactly. Drop below 1 if your art looks slightly
+        /// large in-game (usually because it's more tightly cropped than vanilla cards).
+        /// Collection art is unaffected.
+        /// </summary>
+        public GambitBuilder WithVisualScale(float scale)
+        {
+            _def.VisualScale = scale;
+            return this;
+        }
+
+        /// <summary>
         /// Set the unlock requirement shown to the player.
         /// Use Unlock_Infos.NONE for no requirement.
         /// </summary>

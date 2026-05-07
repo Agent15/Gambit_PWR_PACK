@@ -29,7 +29,7 @@ namespace Gambonanza.KamikazeGambit
             {
                 Debug.Log("[KamikazeGambit] No custom sprite found, generating fallback...");
                 sprite = GenerateFallbackSprite();
-                context.LogLine("[KamikazeGambit] Using fallback sprite. Place a 17x26 kamikaze.png in the mod folder for the real sprite.");
+                context.LogLine("[KamikazeGambit] Using fallback sprite. Drop a kamikaze.png in the mod folder for the real one (any size; the API rescales to match the vanilla template).");
             }
             else
             {
@@ -45,6 +45,10 @@ namespace Gambonanza.KamikazeGambit
                 .WithFocus(Gambit_Focus.SACRIFICE, Gambit_Focus.LANDING)
                 .WithPrice(8)
                 .WithVisual(sprite)
+                // Our art is more tightly cropped than vanilla cards, so matching the
+                // template's world height 1:1 makes it look slightly oversized in-game.
+                // 0.85 brings it back in line.
+                .WithVisualScale(0.85f)
                 // No .CloneFrom() - let the API use the first available vanilla prefab as template
                 .WithBaseGambit<GambitKamikaze>()
                 .ShowLanding()

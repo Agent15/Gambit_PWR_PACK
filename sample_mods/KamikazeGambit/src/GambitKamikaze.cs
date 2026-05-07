@@ -96,6 +96,11 @@ namespace Gambonanza.KamikazeGambit
                     if (tile == null) continue;
                     var p = tile.Piece;
                     if (p == null || p.PieceColor != PieceColor.BLACK) continue;
+                    // Elite (BOSS) enemies are off-limits — the gambit is broken if you can
+                    // erase the must-be-captured-last piece on turn one. Leave vanilla's
+                    // BlockedPlacement overlay intact so the player sees the elite tile is
+                    // genuinely forbidden.
+                    if (p.EnemyAbilityModifier != null && p.EnemyAbilityModifier.IsBoss) continue;
                     var sr = spriteField.GetValue(tile) as SpriteRenderer;
                     if (sr == null) continue;
                     sr.enabled = false;
@@ -157,6 +162,10 @@ namespace Gambonanza.KamikazeGambit
             var enemy = tile.Piece;
             if (enemy == null) return;
             if (enemy.PieceColor != PieceColor.BLACK) return;
+
+            // Elite (BOSS) pieces are immune — they're meant to be captured last, and bypassing
+            // that ordering trivially breaks every elite encounter.
+            if (enemy.EnemyAbilityModifier != null && enemy.EnemyAbilityModifier.IsBoss) return;
 
             // Check board capacity limit (so we don't bypass normal restrictions)
             var boardManager = SingletonMonoBehaviour<BoardManager>.Instance;
