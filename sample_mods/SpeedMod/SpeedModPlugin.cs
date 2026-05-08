@@ -97,6 +97,11 @@ namespace Gambonanza.SpeedMod
     {
         private float _lastWrittenByUs = -1f;
 
+        // Cap the physics fixed-step rate to its original real-time frequency.
+        // Without this, Time.timeScale=4 makes Unity fire ~4x more FixedUpdate /
+        // Physics2D.Simulate ticks per real second, burning CPU on idle scenes.
+        private float _baseFixedDelta = 0.02f;
+
         // Settings injection state
         private const string InjectedRowName = "SpeedMod_AnimationSpeedRow";
         private GameObject _injectedRow;
@@ -111,7 +116,7 @@ namespace Gambonanza.SpeedMod
         /// <summary>Called from SpeedModMain.OnDisable before destroying this GameObject.</summary>
         public void TearDown()
         {
-            try { Time.timeScale = 1f; DOTween.timeScale = 1f; } catch { }
+            try { Time.timeScale = 1f; DOTween.timeScale = 1f; Time.fixedDeltaTime = _baseFixedDelta; } catch { }
             _lastWrittenByUs = -1f;
             if (_injectedRow != null)
             {
@@ -124,6 +129,7 @@ namespace Gambonanza.SpeedMod
 
         private void Awake()
         {
+            _baseFixedDelta = Time.fixedDeltaTime;
             Speed.Load();
             ApplyImmediate();
         }
@@ -147,6 +153,8 @@ namespace Gambonanza.SpeedMod
                 _lastWrittenByUs = Speed.Current;
             }
             DOTween.timeScale = Speed.Current;
+            // Rescale physics step so it ticks at the original real-time frequency.
+            Time.fixedDeltaTime = _baseFixedDelta * Speed.Current;
         }
 
         // ---- Settings modal injection ---------------------------------------
