@@ -11,13 +11,15 @@ namespace Gambonanza.ModHost
     {
         public string ModId        { get; }
         public string ModDirectory { get; }
+        public IConsoleApi Console { get; }
 
         public event Action<MonoBehaviour> OnSettingsOpened;
 
-        public ModContext(string modId, string modDirectory)
+        public ModContext(string modId, string modDirectory, IConsoleApi console)
         {
             ModId = modId;
             ModDirectory = modDirectory;
+            Console = console;
         }
 
         public void LogLine(string message)

@@ -270,23 +270,37 @@ namespace Gambonanza.GameUI
             var headerPath       = Hierarchy.PathFromAncestor(panel, header.transform);
             var gameplayContPath = Hierarchy.PathFromAncestor(panel, gameplayCont.transform);
 
-            var graphicsCont = (t.GetField("m_GraphicsContainer", F)?.GetValue(settings)) as GameObject;
-            var audioCont    = (t.GetField("m_AudioContainer",    F)?.GetValue(settings)) as GameObject;
-            var twitchCont   = (t.GetField("m_TwitchContainer",   F)?.GetValue(settings)) as GameObject;
-            var gameplayBtn  = (t.GetField("m_GameplayButton",    F)?.GetValue(settings)) as MonoBehaviour;
-            var graphicsBtn  = (t.GetField("m_GraphicsButton",    F)?.GetValue(settings)) as MonoBehaviour;
-            var audioBtn     = (t.GetField("m_AudioButton",       F)?.GetValue(settings)) as MonoBehaviour;
-            var twitchBtn    = (t.GetField("m_TwitchButton",      F)?.GetValue(settings)) as MonoBehaviour;
-
+            // Discover every "tab" container and tab button by reflection. Hard-coding
+            // the names (Graphics / Audio / Twitch) breaks whenever the game ships a
+            // new tab — the post-2026-05 update added a "Customize" tab whose
+            // container + button + label leaked through the Mods modal. We now destroy
+            // ANY m_*Container GameObject that isn't m_GameplayContainer, and any
+            // m_*Button MonoBehaviour that isn't m_GameplayButton.
             var destroyPaths = new List<List<int>>();
             void AddP(Transform tr) { if (tr != null) destroyPaths.Add(Hierarchy.PathFromAncestor(panel, tr)); }
-            if (graphicsCont != null) AddP(graphicsCont.transform);
-            if (audioCont    != null) AddP(audioCont.transform);
-            if (twitchCont   != null) AddP(twitchCont.transform);
-            if (gameplayBtn  != null) AddP(gameplayBtn.transform);
-            if (graphicsBtn  != null) AddP(graphicsBtn.transform);
-            if (audioBtn     != null) AddP(audioBtn.transform);
-            if (twitchBtn    != null) AddP(twitchBtn.transform);
+
+            int reflectedDestroys = 0;
+            foreach (var f in t.GetFields(F))
+            {
+                bool isContainer = f.Name.EndsWith("Container", StringComparison.Ordinal)
+                                && f.Name != "m_GameplayContainer";
+                bool isTabButton = f.Name.EndsWith("Button", StringComparison.Ordinal)
+                                && f.Name != "m_GameplayButton";
+                if (!isContainer && !isTabButton) continue;
+                object val;
+                try { val = f.GetValue(settings); } catch { continue; }
+                if (val == null) continue;
+
+                Transform target = null;
+                if (val is GameObject go) target = go.transform;
+                else if (val is MonoBehaviour mb) target = mb.transform;
+                else if (val is Component co) target = co.transform;
+                if (target == null) continue;
+
+                AddP(target);
+                reflectedDestroys++;
+            }
+            Log.Line($"CreateModalLive: queued {reflectedDestroys} reflected tab/container destroy(s)");
 
             // Holder GameObject + a fresh Overlay canvas of our own. The cloned
             // panel becomes a child of this canvas — no SettingsCanvas state to
@@ -388,6 +402,16 @@ namespace Gambonanza.GameUI
             foreach (var tr in resolved)
                 if (tr != null) UnityEngine.Object.DestroyImmediate(tr.gameObject);
             Log.Line($"CreateModalLive: destroyed {resolved.Count} unwanted nodes");
+
+            // Diagnostic: list every direct child of the cloned panel that survived.
+            // If something unwanted bleeds through (a future Settings tab whose field
+            // doesn't follow the m_*Container / m_*Button naming), it shows up here
+            // and we can decide whether to add a smarter filter.
+            for (int i = 0; i < clonedPanel.transform.childCount; i++)
+            {
+                var ch = clonedPanel.transform.GetChild(i);
+                Log.Line($"CreateModalLive: panel child[{i}] '{ch.name}' active={ch.gameObject.activeSelf}");
+            }
 
             // Force every remaining GameObject + Canvas + CanvasGroup to be visible.
             foreach (var trA in clonedPanel.GetComponentsInChildren<Transform>(true))

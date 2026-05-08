@@ -54,10 +54,6 @@
       <HintPath>..\..\refs\UnityEngine.SpriteMaskModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\refs\UnityEngine.InputLegacyModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="DOTween">
       <HintPath>..\..\refs\DOTween.dll</HintPath>
       <Private>false</Private>

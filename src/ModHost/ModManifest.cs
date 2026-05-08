@@ -20,6 +20,12 @@ namespace Gambonanza.ModHost
         public bool enabled = true;
         /// <summary>Optional. Currently informational; future use for compatibility checks.</summary>
         public string gameVersion;
+        /// <summary>
+        /// Optional. IDs of other mods that must be loaded before this one. ModHost will
+        /// topologically sort discovered mods so dependencies' OnLoad runs first. Missing
+        /// dependencies log a warning but do not block load (the mod is loaded last).
+        /// </summary>
+        public string[] dependencies;
 
         public bool IsValid(out string error)
         {

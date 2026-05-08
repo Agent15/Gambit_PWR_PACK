@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 
@@ -9,21 +8,25 @@ namespace Gambonanza.ModHost
     /// Single static entry point. The Cecil patcher injects:
     ///   - ModHost.LoadAll()                              at GameManager.Start
     ///   - ModHost.OnSettingsOpenedInvoke(this)           at SettingsCanvas.OnEnable
-    ///   - ModHost.OnHomeMenuOpenedInvoke(this)           at CanvasMenu.OnEnable
     /// </summary>
     public static class ModHost
     {
         private static bool _loaded;
         private static ModRegistry _registry;
         private static string _modsDirectory;
-        private static HomeMenuInjector _menuInjector;
 
         public static void LoadAll()
         {
             if (_loaded) return;
             _loaded = true;
             _registry = new ModRegistry();
-            _menuInjector = new HomeMenuInjector(() => OpenModManagerUI());
+
+            // Create the console BEFORE iterating mods so each mod's OnLoad
+            // receives a valid IConsoleApi via ModContext.Console. The UI itself
+            // is spawned later — printing into the buffer before the UI exists is
+            // fine; the UI reads the buffer state on first open.
+            var console = ModConsole.CreateOnce();
+            BuiltinCommands.Register(console);
 
             try
             {
@@ -34,11 +37,12 @@ namespace Gambonanza.ModHost
                 {
                     try { Directory.CreateDirectory(_modsDirectory); } catch { }
                     LogLine("Mods folder did not exist; created it (empty).");
-                    return;
                 }
-
-                foreach (var modDir in Directory.GetDirectories(_modsDirectory))
-                    LoadOne(modDir);
+                else
+                {
+                    foreach (var modDir in OrderByDependencies(Directory.GetDirectories(_modsDirectory)))
+                        LoadOne(modDir);
+                }
 
                 LogLine($"loaded {_registry.Count} mod(s).");
             }
@@ -46,6 +50,15 @@ namespace Gambonanza.ModHost
             {
                 LogLine("LoadAll failed: " + ex);
             }
+
+            // UI is created on a fresh GameObject; it survives scene loads via
+            // DontDestroyOnLoad. From here on, F1 / backtick toggles it.
+            ModConsoleUI.SpawnOnce(console);
+
+            // Boot summary into the console itself (not just Debug.Log) so the
+            // user sees it immediately on first open.
+            int n = _registry.Count;
+            console.PrintInfo($"ModHost online — {n} mod{(n == 1 ? "" : "s")} loaded. Press F1 or ` to toggle. Type 'help' for commands.");
         }
 
         public static void OnSettingsOpenedInvoke(MonoBehaviour settingsCanvas)
@@ -55,59 +68,19 @@ namespace Gambonanza.ModHost
             catch (Exception ex) { LogLine("OnSettingsOpenedInvoke failed: " + ex); }
         }
 
-        public static void OnHomeMenuOpenedInvoke(MonoBehaviour canvasMenu)
-        {
-            if (!_loaded) LoadAll();
-            LogLine("OnHomeMenuOpenedInvoke fired.");
-            try { _menuInjector?.InjectButton(canvasMenu); }
-            catch (Exception ex) { LogLine("OnHomeMenuOpenedInvoke failed: " + ex); }
-        }
-
-        // ----- API exposed to the modal UI --------------------------------------
-
-        internal static string ModsDirectory => _modsDirectory;
-
+        // Exposed to BuiltinCommands so the `mods` / `mod <id>` console commands
+        // can introspect the registry.
         internal static System.Collections.Generic.IReadOnlyList<ModRegistry.LoadedMod> AllMods()
             => _registry?.Mods ?? (System.Collections.Generic.IReadOnlyList<ModRegistry.LoadedMod>)
                    System.Array.Empty<ModRegistry.LoadedMod>();
 
-        internal static bool TryEnable(string modId, out string error)
-            => _registry.TryEnable(modId, out error);
-
-        internal static bool TryDisable(string modId, out string error)
-            => _registry.TryDisable(modId, out error);
-
-        internal static int Rescan()
-            => _registry?.Rescan(_modsDirectory) ?? 0;
-
-        internal static void OpenModsFolderInFinder()
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(_modsDirectory)) return;
-                if (!Directory.Exists(_modsDirectory)) Directory.CreateDirectory(_modsDirectory);
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName        = "open",
-                    Arguments       = $"\"{_modsDirectory}\"",
-                    UseShellExecute = false,
-                });
-            }
-            catch (Exception ex) { LogLine("OpenModsFolder failed: " + ex.Message); }
-        }
-
-        // -----------------------------------------------------------------------
+        internal static bool TryEnable(string id, out string error)  => _registry.TryEnable(id, out error);
+        internal static bool TryDisable(string id, out string error) => _registry.TryDisable(id, out error);
+        internal static int  Rescan() => _registry?.Rescan(_modsDirectory) ?? 0;
 
         internal static void LogLine(string s)
         {
             try { UnityEngine.Debug.Log("[ModHost] " + s); } catch { }
-        }
-
-        private static void OpenModManagerUI()
-        {
-            LogLine("OpenModManagerUI: MODS button clicked");
-            try { ModManagerUI.Show(); }
-            catch (Exception ex) { LogLine("Show modal failed: " + ex); }
         }
 
         private static void LoadOne(string modDir)
@@ -137,6 +110,94 @@ namespace Gambonanza.ModHost
 
             try { _registry.LoadMod(modDir, manifest); }
             catch (Exception ex) { LogLine($"failed to load '{manifest.id}': {ex.Message}"); }
+        }
+
+        /// <summary>
+        /// Topologically sorts mod directories so a mod's dependencies (declared in mod.json
+        /// "dependencies") load before it does. Mods with unparseable manifests, missing
+        /// dependencies, or that participate in a cycle are appended at the end so the rest
+        /// can still load in a useful order.
+        /// </summary>
+        private static System.Collections.Generic.List<string> OrderByDependencies(string[] modDirs)
+        {
+            var manifestByDir = new System.Collections.Generic.Dictionary<string, ModManifest>();
+            var dirById = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var unparsed = new System.Collections.Generic.List<string>();
+
+            // Pass 1: parse every manifest. Anything that fails to parse goes to the tail —
+            // LoadOne will re-emit the same diagnostic and skip it.
+            Array.Sort(modDirs, StringComparer.Ordinal);
+            foreach (var dir in modDirs)
+            {
+                var manifestPath = Path.Combine(dir, "mod.json");
+                if (!File.Exists(manifestPath)) { unparsed.Add(dir); continue; }
+                string json;
+                try { json = File.ReadAllText(manifestPath); }
+                catch { unparsed.Add(dir); continue; }
+                var m = ModManifest.TryParse(json, out _);
+                if (m == null || !m.IsValid(out _)) { unparsed.Add(dir); continue; }
+                manifestByDir[dir] = m;
+                if (!dirById.ContainsKey(m.id)) dirById[m.id] = dir;
+            }
+
+            // Pass 2: Kahn's algorithm. ready = mods whose unmet deps are zero.
+            var unmet = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            var dependents = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kv in manifestByDir)
+            {
+                var id = kv.Value.id;
+                var deps = new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                if (kv.Value.dependencies != null)
+                {
+                    foreach (var d in kv.Value.dependencies)
+                    {
+                        if (string.IsNullOrWhiteSpace(d)) continue;
+                        // Drop deps we cannot satisfy from the discovered set; LoadOne will
+                        // surface the actual failure when the mod tries to use them.
+                        if (!dirById.ContainsKey(d))
+                        {
+                            LogLine($"'{id}' declares missing dependency '{d}'; loading anyway after the rest.");
+                            continue;
+                        }
+                        deps.Add(d);
+                        if (!dependents.TryGetValue(d, out var list))
+                            dependents[d] = list = new System.Collections.Generic.List<string>();
+                        list.Add(id);
+                    }
+                }
+                unmet[id] = deps;
+            }
+
+            var ready = new System.Collections.Generic.SortedSet<string>(StringComparer.Ordinal);
+            foreach (var kv in unmet) if (kv.Value.Count == 0) ready.Add(kv.Key);
+
+            var ordered = new System.Collections.Generic.List<string>();
+            while (ready.Count > 0)
+            {
+                var next = ready.Min;
+                ready.Remove(next);
+                ordered.Add(dirById[next]);
+                if (dependents.TryGetValue(next, out var deps))
+                {
+                    foreach (var d in deps)
+                    {
+                        if (unmet[d].Remove(next) && unmet[d].Count == 0) ready.Add(d);
+                    }
+                }
+            }
+
+            // Anything still with unmet deps is in a cycle. Append in stable alphabetical order.
+            if (ordered.Count < manifestByDir.Count)
+            {
+                LogLine("dependency cycle detected; cycle members will be loaded after the rest.");
+                foreach (var kv in manifestByDir)
+                {
+                    if (unmet[kv.Value.id].Count > 0) ordered.Add(kv.Key);
+                }
+            }
+
+            ordered.AddRange(unparsed);
+            return ordered;
         }
 
         private static string ResolveModsDirectory()

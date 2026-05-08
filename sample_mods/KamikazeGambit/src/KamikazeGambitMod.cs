@@ -66,11 +66,6 @@ namespace Gambonanza.KamikazeGambit
             {
                 Debug.LogError("[KamikazeGambit] Register() returned null!");
             }
-
-            // Debug-only hotkey: F9 injects the kamikaze gambit into a free slot of the current run.
-            var hotkeyHost = new GameObject("KamikazeDebugHost");
-            UnityEngine.Object.DontDestroyOnLoad(hotkeyHost);
-            hotkeyHost.AddComponent<KamikazeDebugHotkey>();
         }
 
         private static Sprite GenerateFallbackSprite()

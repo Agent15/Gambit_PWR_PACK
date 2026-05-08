@@ -135,7 +135,7 @@ namespace Gambonanza.ModHost
                 throw new InvalidCastException($"{manifest.entry} does not implement Gambonanza.ModSdk.IMod");
 
             var instance = (IMod)Activator.CreateInstance(entryType);
-            var ctx = new ModContext(manifest.id, modDirectory);
+            var ctx = new ModContext(manifest.id, modDirectory, ModConsole.Instance);
             try { instance.OnLoad(ctx); }
             catch (Exception ex) { ctx.LogLine("OnLoad threw: " + ex); }
 

@@ -93,8 +93,23 @@ namespace Gambonanza.GambitApi
                 return;
             }
 
-            // 1. Create ScriptableObject
+            // Fall back to a clearly-debug placeholder when no visual was supplied. Without this,
+            // BuildGambitPrefab leaves the cloned vanilla template's sprite untouched and whichever
+            // vanilla gambit was used as the clone source (currently the slot machine) bleeds
+            // through, looking like the registration "worked" when it actually didn't.
+            if (def.Visual == null)
+            {
+                Debug.LogWarning($"[GambitApi] Gambit '{def.Id}' has no visual. Using a magenta placeholder. Pass a sprite via WithVisual(...) to fix.");
+                def.Visual = BuildPlaceholderSprite(def.Id);
+            }
+
+            // 1. Create ScriptableObject. Unity's Object.name defaults to the
+            // type name ("SO_Gambit") when CreateInstance returns — every modded
+            // SO would share that name, and vanilla's GambitLibrary.SelectGambits
+            // dedup keys on it (the May-2026 patch tightened the check). Always
+            // assign a unique value derived from def.Id.
             var soGambit = ScriptableObject.CreateInstance<SO_Gambit>();
+            soGambit.name = def.Id;
             soGambit.ID = def.Id;
             soGambit.GambitName = $"{def.Id}_name";
             soGambit.GambitDescription = $"{def.Id}_description";
@@ -119,6 +134,17 @@ namespace Gambonanza.GambitApi
             soGambit.ShowPhantomTile = def.ShowPhantomTile;
             soGambit.ShowLanding = def.ShowLanding;
             soGambit.ShowConsideredAs = def.ShowConsideredAs;
+
+            // Defensive: backfill every public string field whose name looks
+            // name- or id-related and that is still empty after our explicit
+            // setup. Vanilla's GambitLibrary.SelectGambits dedupes on one of
+            // these fields (the May-2026 game patch added a new one we didn't
+            // know about), and two modded gambits with the SAME empty value
+            // throws "Duplicate Gambit name detected: , index: N" — that
+            // exception bubbles into ShopCanvas.ComputeGambits and renders the
+            // shop empty. Filling every name/id field with a unique-per-id
+            // value sidesteps any future renames the same way.
+            BackfillEmptyNameFields(soGambit, def.Id);
 
             // 2. Build prefab
             GambitBehaviour prefab = BuildPrefab(def, soGambit, library);
@@ -177,6 +203,105 @@ namespace Gambonanza.GambitApi
             gambitNode[descKey] = def.Description;
 
             Debug.Log($"[GambitApi] Injected localization: '{nameKey}' = '{def.Name}', '{descKey}' = '{def.Description}'");
+        }
+
+        // Walk every public/non-public instance string field AND settable string
+        // property on the SO, filling any blank value whose name looks
+        // name/id-related with an id-suffixed token. Properties are scanned in
+        // addition to fields because Unity surfaces some name-ish fields only
+        // through wrappers (e.g. Object.name is property-only, no settable
+        // backing field). This is the second-line defence behind the explicit
+        // soGambit.name / .ID / .GambitName assignments earlier — if a future
+        // patch adds yet another required name field we cover it automatically.
+        private static bool _diagnosticsLogged;
+        private static void BackfillEmptyNameFields(SO_Gambit so, string id)
+        {
+            if (so == null || string.IsNullOrEmpty(id)) return;
+            var t = typeof(SO_Gambit);
+            const BindingFlags F = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+            foreach (var f in t.GetFields(F))
+            {
+                if (f.FieldType != typeof(string)) continue;
+                if (!LooksNameOrIdField(f.Name)) continue;
+                string current;
+                try { current = (string)f.GetValue(so); } catch { continue; }
+                if (!string.IsNullOrWhiteSpace(current)) continue;
+                try { f.SetValue(so, $"{id}_{StripBackingPrefix(f.Name)}"); }
+                catch (Exception ex) { Debug.LogWarning($"[GambitApi] could not backfill SO_Gambit.{f.Name}: {ex.Message}"); }
+            }
+
+            foreach (var p in t.GetProperties(F))
+            {
+                if (p.PropertyType != typeof(string)) continue;
+                if (!p.CanRead || !p.CanWrite) continue;
+                if (p.GetIndexParameters().Length != 0) continue;
+                if (!LooksNameOrIdField(p.Name)) continue;
+                string current;
+                try { current = (string)p.GetValue(so); } catch { continue; }
+                if (!string.IsNullOrWhiteSpace(current)) continue;
+                try { p.SetValue(so, $"{id}_{StripBackingPrefix(p.Name)}"); }
+                catch (Exception ex) { Debug.LogWarning($"[GambitApi] could not backfill SO_Gambit.{p.Name}: {ex.Message}"); }
+            }
+
+            // One-time snapshot of every string-typed field+property on a
+            // vanilla SO vs ours. If the shop crashes again with the same
+            // duplicate-name exception, the diff in the log identifies the
+            // offender immediately.
+            if (!_diagnosticsLogged) { LogStringFieldDiff(so); _diagnosticsLogged = true; }
+        }
+
+        private static void LogStringFieldDiff(SO_Gambit ours)
+        {
+            try
+            {
+                if (!SingletonMonoBehaviour<GambitLibrary>.IsCreated()) return;
+                var lib = SingletonMonoBehaviour<GambitLibrary>.Instance;
+                if (lib?.GambitsInfo == null || lib.GambitsInfo.Count == 0) return;
+                SO_Gambit vanilla = null;
+                foreach (var v in lib.GambitsInfo) { if (v != null && v != ours) { vanilla = v; break; } }
+                if (vanilla == null) return;
+                var t = typeof(SO_Gambit);
+                const BindingFlags F = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                Debug.Log($"[GambitApi][diag] vanilla.name='{vanilla.name}' ours.name='{ours.name}'");
+                foreach (var f in t.GetFields(F))
+                {
+                    if (f.FieldType != typeof(string)) continue;
+                    string v = null, o = null;
+                    try { v = (string)f.GetValue(vanilla); } catch { }
+                    try { o = (string)f.GetValue(ours);    } catch { }
+                    if (string.IsNullOrEmpty(v) == string.IsNullOrEmpty(o)) continue; // both empty or both filled — uninteresting
+                    Debug.Log($"[GambitApi][diag]   field {f.Name}: vanilla='{v}', ours='{o}'");
+                }
+                foreach (var p in t.GetProperties(F))
+                {
+                    if (p.PropertyType != typeof(string) || !p.CanRead || p.GetIndexParameters().Length != 0) continue;
+                    string v = null, o = null;
+                    try { v = (string)p.GetValue(vanilla); } catch { }
+                    try { o = (string)p.GetValue(ours);    } catch { }
+                    if (string.IsNullOrEmpty(v) == string.IsNullOrEmpty(o)) continue;
+                    Debug.Log($"[GambitApi][diag]   prop  {p.Name}: vanilla='{v}', ours='{o}'");
+                }
+            }
+            catch (Exception ex) { Debug.LogWarning($"[GambitApi][diag] string-field diff dump threw: {ex.Message}"); }
+        }
+
+        private static bool LooksNameOrIdField(string fieldName)
+        {
+            if (string.IsNullOrEmpty(fieldName)) return false;
+            // Match "name", "id", "key" (loc keys) — case-insensitive substring.
+            return fieldName.IndexOf("name", StringComparison.OrdinalIgnoreCase) >= 0
+                || fieldName.IndexOf("identifier", StringComparison.OrdinalIgnoreCase) >= 0
+                || fieldName.Equals("m_ID", StringComparison.Ordinal)
+                || fieldName.Equals("ID", StringComparison.Ordinal)
+                || fieldName.IndexOf("key", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string StripBackingPrefix(string fieldName)
+        {
+            if (fieldName.StartsWith("m_", StringComparison.Ordinal) && fieldName.Length > 2) return fieldName.Substring(2);
+            if (fieldName.StartsWith("_",  StringComparison.Ordinal) && fieldName.Length > 1) return fieldName.Substring(1);
+            return fieldName;
         }
 
         private static void ReinitializeLibrary(GambitLibrary library)
@@ -329,6 +454,60 @@ namespace Gambonanza.GambitApi
             _prefabRegistry.SetActive(false);
             UnityEngine.Object.DontDestroyOnLoad(_prefabRegistry);
             return _prefabRegistry;
+        }
+
+        /// <summary>
+        /// 21x30 magenta-on-purple square stamped with the gambit ID's first letter so a missing
+        /// sprite is impossible to confuse with a real card. Aspect (~0.7) matches the reference
+        /// kamikaze sample so the in-game piece doesn't show the squashed-aspect warning.
+        /// </summary>
+        private static Sprite BuildPlaceholderSprite(string id)
+        {
+            const int W = 21, H = 30;
+            var bg = new Color(0.45f, 0.0f, 0.55f, 1f);
+            var fg = new Color(1f, 0.15f, 1f, 1f);
+            var tex = new Texture2D(W, H, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            var pixels = new Color[W * H];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = bg;
+            // 1px border so it reads as a card outline at low PPU.
+            for (int x = 0; x < W; x++) { pixels[x] = fg; pixels[(H - 1) * W + x] = fg; }
+            for (int y = 0; y < H; y++) { pixels[y * W] = fg; pixels[y * W + (W - 1)] = fg; }
+            // 5x7 question mark glyph centered horizontally and biased downward so it reads on
+            // the in-game card. Two rows of '?' so the placeholder is unmistakable.
+            char glyph = string.IsNullOrEmpty(id) ? '?' : char.ToUpperInvariant(id[0]);
+            DrawGlyph(pixels, W, H, glyph, originX: (W - 5) / 2, originY: 11, fg);
+            DrawGlyph(pixels, W, H, '?', originX: (W - 5) / 2, originY: 2, fg);
+            tex.SetPixels(pixels);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, W, H), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        // Tiny 5x7 bitmap font; each entry is rows top-to-bottom of a 5-bit bitmask.
+        // Only covers letters used by sample mod IDs and '?'. Unknown chars fall back to '?'.
+        private static readonly System.Collections.Generic.Dictionary<char, byte[]> _Glyphs = new()
+        {
+            ['?'] = new byte[] { 0b01110, 0b10001, 0b00010, 0b00100, 0b00100, 0b00000, 0b00100 },
+            ['A'] = new byte[] { 0b01110, 0b10001, 0b10001, 0b11111, 0b10001, 0b10001, 0b10001 },
+            ['K'] = new byte[] { 0b10001, 0b10010, 0b10100, 0b11000, 0b10100, 0b10010, 0b10001 },
+        };
+
+        private static void DrawGlyph(Color[] pixels, int w, int h, char ch, int originX, int originY, Color color)
+        {
+            if (!_Glyphs.TryGetValue(ch, out var rows)) rows = _Glyphs['?'];
+            // rows[0] is the top row; iterate bottom-up because pixels[] is bottom-origin.
+            for (int row = 0; row < rows.Length; row++)
+            {
+                int y = originY + (rows.Length - 1 - row);
+                if (y < 0 || y >= h) continue;
+                byte mask = rows[row];
+                for (int col = 0; col < 5; col++)
+                {
+                    if ((mask & (1 << (4 - col))) == 0) continue;
+                    int x = originX + col;
+                    if (x < 0 || x >= w) continue;
+                    pixels[y * w + x] = color;
+                }
+            }
         }
 
         private static GambitBehaviour FindPrefabById(GambitLibrary library, string id)

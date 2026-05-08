@@ -19,6 +19,13 @@ namespace Gambonanza.ModSdk
         void LogLine(string message);
 
         /// <summary>
+        /// In-game developer console. Always non-null — the console is created
+        /// before any mod's OnLoad runs. Use it to print info and register custom
+        /// commands.
+        /// </summary>
+        IConsoleApi Console { get; }
+
+        /// <summary>
         /// Fires every time SettingsCanvas.OnEnable runs. Argument is the SettingsCanvas instance.
         /// Subscribers should be idempotent — the modal may be opened many times in one session.
         /// </summary>

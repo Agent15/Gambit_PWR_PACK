@@ -305,13 +305,6 @@ namespace Gambonanza.KamikazeGambit
             }
         }
 
-        private Vector3 GetPointerPosition()
-        {
-            if (Input.touchCount > 0)
-                return Input.GetTouch(0).position;
-            return Input.mousePosition;
-        }
-
         public override void Trigger()
         {
             VisualEffect();

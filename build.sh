@@ -123,12 +123,25 @@ REQUIRED_REFS=(
 echo "==> Hydrating refs/ from $MANAGED_DIR"
 mkdir -p "$REFS_DIR"
 
-# Prefer the original (pre-patch) Assembly-CSharp if available, so mods compile
-# against vanilla types and the patcher's marker class never leaks into refs.
-if [ -f "$MANAGED_DIR/Assembly-CSharp.dll.orig" ]; then
-    cp "$MANAGED_DIR/Assembly-CSharp.dll.orig" "$REFS_DIR/Assembly-CSharp.dll"
+# Pick whichever Assembly-CSharp.dll is currently vanilla so mods compile against
+# the live game's API surface. The patcher tags its output with a marker type
+# (__GambonanzaModHostPatched); we grep for it as a literal string in the binary.
+#   - .dll WITHOUT marker = vanilla (first install OR Steam just shipped an update
+#     that overwrote our patched DLL). Use it; .orig is potentially stale.
+#   - .dll WITH marker = our patched output. Use .orig (which the patcher
+#     guarantees is the matching vanilla snapshot).
+ASMCSHARP="$MANAGED_DIR/Assembly-CSharp.dll"
+ASMCSHARP_ORIG="$MANAGED_DIR/Assembly-CSharp.dll.orig"
+MARKER="__GambonanzaModHostPatched"
+if grep -q "$MARKER" "$ASMCSHARP" 2>/dev/null; then
+    if [ -f "$ASMCSHARP_ORIG" ]; then
+        cp "$ASMCSHARP_ORIG" "$REFS_DIR/Assembly-CSharp.dll"
+    else
+        echo "  warn: $ASMCSHARP is patched but no .orig backup found. Using patched dll." >&2
+        cp "$ASMCSHARP" "$REFS_DIR/Assembly-CSharp.dll"
+    fi
 else
-    cp "$MANAGED_DIR/Assembly-CSharp.dll" "$REFS_DIR/Assembly-CSharp.dll"
+    cp "$ASMCSHARP" "$REFS_DIR/Assembly-CSharp.dll"
 fi
 
 missing=()
@@ -225,6 +238,6 @@ for entry in "${SAMPLES[@]}"; do
 done
 
 echo
-echo "All done. Three sample mods are now installed in $MODS_DIR/."
-echo "Launch the game from Steam — the home screen has a MODS button to"
-echo "manage installed mods at runtime."
+echo "All done. Sample mods installed in $MODS_DIR/."
+echo "Launch the game from Steam — press F1 (or backtick) to open the"
+echo "in-game console. Type 'help' to list commands."
