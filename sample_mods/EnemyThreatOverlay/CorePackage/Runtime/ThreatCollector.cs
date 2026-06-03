@@ -24,7 +24,7 @@ namespace Gambonanza.EnemyThreatOverlay
                 else
                 {
                     AddTiles(result, piece.GetThreatTiles());
-                    AddTiles(result, piece.GetOccupiedTiles());
+                    AddOccupiedTiles(result, piece);
                 }
             }
             return result;
@@ -36,6 +36,18 @@ namespace Gambonanza.EnemyThreatOverlay
             if (tiles == null) return;
             foreach (var tile in tiles)
             {
+                result.AddEndanger(tile);
+            }
+        }
+
+        private static void AddOccupiedTiles(ThreatTileSet result, IThreatOverlayPiece piece)
+        {
+            var tiles = piece.GetOccupiedTiles();
+            if (tiles == null) return;
+            var currentTile = piece.CurrentTile;
+            foreach (var tile in tiles)
+            {
+                if (Equals(tile, currentTile)) continue;
                 result.AddEndanger(tile);
             }
         }

@@ -142,6 +142,20 @@ namespace Gambonanza.EnemyThreatOverlay.Tests
         }
 
         [Test]
+        public void NonPawnDoesNotShowItsOwnOccupiedTileAsThreatened()
+        {
+            var ownTile = new FakeTile { TileId = 7 };
+            var sameOwnTile = new FakeTile { TileId = 7 };
+            var blocked = new FakeTile { TileId = 8 };
+            var collector = new ThreatCollector(new FakePieceSource(new[] { FakePiece.EnemyNonPawn(new IThreatOverlayTile[0], new[] { sameOwnTile, blocked }, ownTile) }));
+
+            var result = collector.Collect();
+
+            Assert.AreEqual(0, Count(result.EndangerTiles, sameOwnTile));
+            Assert.AreEqual(1, Count(result.EndangerTiles, blocked));
+        }
+
+        [Test]
         public void PawnProtectedTargetsUseTheSameEndangerVisuals()
         {
             var protectedEnemy = new FakeTile();
@@ -218,8 +232,19 @@ namespace Gambonanza.EnemyThreatOverlay.Tests
 
         private sealed class FakeTile : IThreatOverlayTile
         {
+            public int TileId { get; set; }
             public bool IsStock { get; set; }
             public bool HasFell { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                return ReferenceEquals(this, obj) || obj is FakeTile other && TileId != 0 && TileId == other.TileId;
+            }
+
+            public override int GetHashCode()
+            {
+                return TileId != 0 ? TileId : base.GetHashCode();
+            }
         }
 
         private sealed class FakePiece : IThreatOverlayPiece
@@ -248,6 +273,7 @@ namespace Gambonanza.EnemyThreatOverlay.Tests
             public bool IsDead { get; set; }
             public bool IsEnabled { get; set; }
             public bool InStock { get; set; }
+            public IThreatOverlayTile CurrentTile { get; set; }
 
             public static FakePiece EnemyNonPawn(params IThreatOverlayTile[] threatTiles)
             {
@@ -257,6 +283,11 @@ namespace Gambonanza.EnemyThreatOverlay.Tests
             public static FakePiece EnemyNonPawn(IThreatOverlayTile[] threatTiles, IThreatOverlayTile[] occupiedTiles)
             {
                 return new FakePiece(true, false, threatTiles, occupiedTiles, new IThreatOverlayTile[0]);
+            }
+
+            public static FakePiece EnemyNonPawn(IThreatOverlayTile[] threatTiles, IThreatOverlayTile[] occupiedTiles, IThreatOverlayTile currentTile)
+            {
+                return new FakePiece(true, false, threatTiles, occupiedTiles, new IThreatOverlayTile[0]) { CurrentTile = currentTile };
             }
 
             public static FakePiece PlayerNonPawn(params IThreatOverlayTile[] threatTiles)

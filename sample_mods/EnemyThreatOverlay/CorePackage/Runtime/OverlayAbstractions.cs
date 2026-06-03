@@ -26,6 +26,7 @@ namespace Gambonanza.EnemyThreatOverlay
         bool IsDead { get; }
         bool IsEnabled { get; }
         bool InStock { get; }
+        IThreatOverlayTile CurrentTile { get; }
         IEnumerable<IThreatOverlayTile> GetThreatTiles();
         IEnumerable<IThreatOverlayTile> GetOccupiedTiles();
         IEnumerable<IThreatOverlayTile> GetPawnEatTiles();

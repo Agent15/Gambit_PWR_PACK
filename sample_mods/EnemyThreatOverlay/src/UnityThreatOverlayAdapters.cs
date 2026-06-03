@@ -57,6 +57,7 @@ namespace Gambonanza.EnemyThreatOverlay
         public bool IsDead => _piece.IsDead;
         public bool IsEnabled => _piece.enabled && _piece.gameObject.activeInHierarchy;
         public bool InStock => _piece.InStock;
+        public IThreatOverlayTile CurrentTile => _piece.CurrentTile == null ? null : new UnityThreatTile(_piece.CurrentTile);
 
         public IEnumerable<IThreatOverlayTile> GetThreatTiles()
         {
