@@ -283,6 +283,9 @@ DIST_DIR="$SCRIPT_DIR/Mods"
 SAMPLES_DIR="$SCRIPT_DIR/sample_mods"
 mkdir -p "$DIST_DIR"
 
+echo "==> Discovering sample mods in: $SAMPLES_DIR"
+echo "==> Sample mod install target: $MODS_DIR"
+
 find_project_file() {
     local src="$1"
     local csproj
@@ -345,6 +348,10 @@ done
 
 [ "$found" -eq 1 ] || { echo "No sample mods found under $SAMPLES_DIR" >&2; exit 1; }
 
+installed_count="$(command find "$MODS_DIR" -mindepth 2 -maxdepth 2 -name mod.json -print | wc -l | tr -d ' ')"
+echo
+echo "Installed sample mod manifests found: $installed_count"
+command find "$MODS_DIR" -mindepth 2 -maxdepth 2 -name mod.json -print | sort | sed 's/^/  - /'
 echo
 echo "All done. Sample mods installed in $MODS_DIR/."
 echo "Launch the game from Steam — press F10, F1, or backtick to open"

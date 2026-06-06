@@ -127,6 +127,13 @@ copy_extra_assets() {
 
 mkdir -p "$DIST_DIR"
 
+echo "==> Discovering sample mods in: $SAMPLES_DIR"
+if [ "$INSTALL" -eq 1 ]; then
+    echo "==> Sample mod install target: $LIVE_MODS_DIR"
+else
+    echo "==> Sample mod staging target: $DIST_DIR"
+fi
+
 found=0
 for src in "$SAMPLES_DIR"/*; do
     [ -d "$src" ] || continue
@@ -168,6 +175,10 @@ done
 
 echo
 if [ "$INSTALL" -eq 1 ]; then
+    installed_count="$(command find "$LIVE_MODS_DIR" -mindepth 2 -maxdepth 2 -name mod.json -print | wc -l | tr -d ' ')"
+    echo "Installed sample mod manifests found: $installed_count"
+    command find "$LIVE_MODS_DIR" -mindepth 2 -maxdepth 2 -name mod.json -print | sort | sed 's/^/  - /'
+    echo
     echo "All sample mods built and installed into $LIVE_MODS_DIR/."
     echo "Launch the game from Steam to pick them up."
 else
