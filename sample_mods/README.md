@@ -1,14 +1,17 @@
 # Gambonanza Sample Mods
 
-Three reference mods that show the full range of what the Gambonanza modding
+Reference mods that show the full range of what the Gambonanza modding
 framework lets you do, from a one-file tweak to a full library that other mods
 can build on.
 
 ```
 sample_mods/
-├── SpeedMod/         A 60-line mod that adds a settings row.
-├── GambitApi/        A library mod — provides a builder for adding new gambits.
-├── KamikazeGambit/   A custom gambit, built on top of GambitApi.
+├── SpeedMod/                 Adds a settings row for game speed.
+├── GambitApi/                Library mod — builder for adding new gambits.
+├── KamikazeGambit/           Custom gambit built on GambitApi.
+├── CaltropsGambit/           Custom gambit by TGM: trap tiles capture enemies.
+├── EnemyThreatOverlay/       Keybind-driven enemy threat display overlay.
+├── MightyKasparovEveryStage/ Debug/sample boss-stage modifier.
 ├── build.sh          Builds every mod and stages it into the repo's Mods/ folder.
 └── README.md         You are here.
 ```
@@ -93,7 +96,7 @@ game via reflection.
 
 ---
 
-## The three samples
+## The samples
 
 ### SpeedMod — the smallest possible mod
 
@@ -118,7 +121,8 @@ Reverse-engineers the game's gambit registry to expose a fluent
 `GambitBuilder` other mods can use to add new gambits:
 
 ```csharp
-GambitBuilder.Create("MyMod_Coolio")
+// Keep IDs short/readable: console commands use them, e.g. `give gambit coolio`.
+GambitBuilder.Create("coolio")
     .WithName("Coolio's Gambit")
     .WithDescription("Does cool things.")
     .WithRarity(Rarity.EPIC)
@@ -153,6 +157,22 @@ Builds on `GambitApi` by passing its `GambitKamikaze` MonoBehaviour to
   you don't ship debug hotkeys, because it shows how to inject a live gambit
   into a running game — useful pattern for any mod that wants to touch the
   active run.
+
+### CaltropsGambit — a didactic custom gambit by TGM
+
+[`CaltropsGambit/`](CaltropsGambit/)
+
+Adds `Caltrops' Gambit`: enemy pieces that step on vanilla TRAP tiles are
+captured instead of trapped. It is intentionally heavily commented so new
+modders can see how to:
+
+- Register a readable short gambit ID (`caltrops`) for console commands like
+  `give gambit caltrops`.
+- Use `EnemyManager.OnMove` instead of non-existent tile-mod APIs.
+- Wait for vanilla movement tweens before destroying a piece, so particles
+  spawn on the destination tile.
+- Optionally load `caltrops.png` from the mod folder, with a generated fallback
+  sprite if no PNG is shipped.
 
 ---
 
@@ -213,7 +233,8 @@ next launch.
    }
    ```
 
-5. Add it to `MODS=( ... )` in `build.sh` and run `./build.sh --install`.
+5. Run `./build.sh --install`. The build script auto-discovers every folder
+   under `sample_mods/` that has both a top-level `mod.json` and `.csproj`.
    The game picks it up on next launch.
 
 ---

@@ -1,13 +1,13 @@
 # GambonanzaMods
 
 A small, self-contained modding framework for the Steam game **Gambonanza**,
-plus three sample mods. The framework patches the game's `Assembly-CSharp.dll`
+plus sample mods. The framework patches the game's `Assembly-CSharp.dll`
 in-place to add three call sites, drops a runtime mod loader into the game's
 `Managed/` directory, and from then on any mod is a normal .NET DLL dropped
 into `Gambonanza/Mods/<ModName>/`.
 
 This repo contains everything: the SDK, the loader, the in-game mod manager
-UI, the patcher, and three sample mods that double as documentation.
+UI, the patcher, and sample mods that double as documentation.
 
 ## Quick start
 
@@ -18,7 +18,7 @@ cd GambonanzaMods
 ```
 
 That's it. The script auto-detects your Gambonanza install, patches the
-game, builds and installs the three sample mods, and leaves you ready to
+game, builds and installs the sample mods, and leaves you ready to
 launch from Steam. Re-runnable any time — the patcher always works from a
 backup of the original `Assembly-CSharp.dll`.
 
@@ -49,7 +49,7 @@ GambonanzaMods/
 │   │                Assembly.LoadFroms each DLL, dispatches lifecycle events.
 │   ├── GameUI/      Pixel.* helpers for cloning game UI into mods.
 │   └── Patcher/     Cecil-based one-shot patcher.
-├── sample_mods/     Source for SpeedMod, GambitApi, KamikazeGambit.
+├── sample_mods/     Source for SpeedMod, GambitApi, custom gambits, overlays.
 ├── Mods/            Pre-built distributables — drop a subfolder into
 │                    Gambonanza/Mods/ if you'd rather skip building.
 ├── docs/            UI_API.md (Pixel.* reference).

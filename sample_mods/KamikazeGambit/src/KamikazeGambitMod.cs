@@ -38,7 +38,9 @@ namespace Gambonanza.KamikazeGambit
 
             Debug.Log("[KamikazeGambit] Building gambit definition...");
 
-            var builder = GambitBuilder.Create("KamikazeGambit_Kamikaze")
+            // Keep the gambit ID short/readable: the in-game console uses IDs
+            // for commands like `give gambit kamikaze` and `list gambits`.
+            var builder = GambitBuilder.Create("kamikaze")
                 .WithName("Kamikaze's Gambit")
                 .WithDescription("<color=©>LANDING</color> on an enemy piece destroys both pieces.<br><i>(Once per game)</i>")
                 .WithRarity(Rarity.EPIC)
