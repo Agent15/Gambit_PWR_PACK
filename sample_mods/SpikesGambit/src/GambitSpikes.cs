@@ -4,10 +4,10 @@ using Blukulele.CHE;
 using Blukulele.Core;
 using UnityEngine;
 
-namespace Gambonanza.CaltropsGambit
+namespace Gambonanza.SpikesGambit
 {
     /// <summary>
-    /// Runtime behaviour attached to the custom Caltrops gambit prefab.
+    /// Runtime behaviour attached to the custom Spikes gambit prefab.
     ///
     /// Important mental model:
     /// - GambitBuilder creates/registers the card and tells the game to attach this
@@ -22,7 +22,7 @@ namespace Gambonanza.CaltropsGambit
     ///   so vanilla decides whether the trap actually triggered. That preserves
     ///   the TILE_EXHAUST strain: exhausted trap tiles do not fire this event.
     /// </summary>
-    public sealed class GambitCaltrops : BaseGambit
+    public sealed class GambitSpikes : BaseGambit
     {
         private bool _subscribed;
 
@@ -48,7 +48,7 @@ namespace Gambonanza.CaltropsGambit
             // TileManager.OnHunterTileUsed is fired by vanilla HunterTilePower only
             // when a TRAP tile really activates. That distinction matters for the
             // TILE_EXHAUST strain: if the trap was already used this round, vanilla
-            // suppresses this event, so Caltrops should not capture anything either.
+            // suppresses this event, so Spikes should not capture anything either.
             if (!SingletonMonoBehaviour<TileManager>.IsCreated()) return;
 
             var tileManager = SingletonMonoBehaviour<TileManager>.Instance;

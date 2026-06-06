@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>Gambonanza.CaltropsGambit</AssemblyName>
-    <RootNamespace>Gambonanza.CaltropsGambit</RootNamespace>
+    <AssemblyName>Gambonanza.SpikesGambit</AssemblyName>
+    <RootNamespace>Gambonanza.SpikesGambit</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

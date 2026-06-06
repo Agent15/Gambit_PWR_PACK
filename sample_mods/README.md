@@ -9,7 +9,7 @@ sample_mods/
 ├── SpeedMod/                 Adds a settings row for game speed.
 ├── GambitApi/                Library mod — builder for adding new gambits.
 ├── KamikazeGambit/           Custom gambit built on GambitApi.
-├── CaltropsGambit/           Custom gambit by TGM: trap tiles capture enemies.
+├── SpikesGambit/             Custom gambit by TGM: trap tiles capture enemies.
 ├── EnemyThreatOverlay/       Keybind-driven enemy threat display overlay.
 ├── MightyKasparovEveryStage/ Debug/sample boss-stage modifier.
 ├── build.sh          Builds every mod and stages it into the repo's Mods/ folder.
@@ -158,20 +158,21 @@ Builds on `GambitApi` by passing its `GambitKamikaze` MonoBehaviour to
   into a running game — useful pattern for any mod that wants to touch the
   active run.
 
-### CaltropsGambit — a didactic custom gambit by TGM
+### SpikesGambit — a didactic custom gambit by TGM
 
-[`CaltropsGambit/`](CaltropsGambit/)
+[`SpikesGambit/`](SpikesGambit/)
 
-Adds `Caltrops' Gambit`: enemy pieces that step on vanilla TRAP tiles are
+Adds `Spikes' Gambit`: enemy pieces that step on vanilla TRAP tiles are
 captured instead of trapped. It is intentionally heavily commented so new
 modders can see how to:
 
-- Register a readable short gambit ID (`caltrops`) for console commands like
-  `give gambit caltrops`.
-- Use `EnemyManager.OnMove` instead of non-existent tile-mod APIs.
+- Register a readable short gambit ID (`spikes`) for console commands like
+  `give gambit spikes`.
+- Use `TileManager.OnHunterTileUsed` instead of non-existent tile-mod APIs,
+  preserving the TILE_EXHAUST strain automatically.
 - Wait for vanilla movement tweens before destroying a piece, so particles
   spawn on the destination tile.
-- Optionally load `caltrops.png` from the mod folder, with a generated fallback
+- Optionally load `Spike.png` from the mod folder, with a generated fallback
   sprite if no PNG is shipped.
 
 ---

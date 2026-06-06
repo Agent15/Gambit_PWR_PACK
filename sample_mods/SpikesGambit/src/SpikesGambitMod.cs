@@ -4,28 +4,28 @@ using Gambonanza.GambitApi;
 using Gambonanza.ModSdk;
 using UnityEngine;
 
-namespace Gambonanza.CaltropsGambit
+namespace Gambonanza.SpikesGambit
 {
     /// <summary>
     /// Mod entry point. ModHost creates this class from mod.json and calls OnLoad.
     ///
     /// This file is only responsible for registering the card/gambit definition:
     /// name, tooltip, rarity, price, art, and which runtime behaviour to attach.
-    /// The actual gameplay logic is in GambitCaltrops.cs.
+    /// The actual gameplay logic is in GambitSpikes.cs.
     /// </summary>
-    public sealed class CaltropsGambitMod : IMod
+    public sealed class SpikesGambitMod : IMod
     {
         public void OnLoad(IModContext context)
         {
-            context.LogLine("[CaltropsGambit] registering Caltrops' Gambit.");
+            context.LogLine("[SpikesGambit] registering Spikes' Gambit.");
 
-            // Optional custom art: put `caltrops.png` next to mod.json.
+            // Optional custom art: put `Spike.png` next to mod.json.
             // In source form that means:
-            //   CaltropsGambit/caltrops.png
+            //   SpikesGambit/Spike.png
             // After building/installing, sample_mods/build.sh copies it beside the DLL:
-            //   Mods/CaltropsGambit/caltrops.png
+            //   Mods/SpikesGambit/Spike.png
             // If the file is missing, we generate a tiny placeholder so the mod still works.
-            var spritePath = Path.Combine(context.ModDirectory, "caltrops.png");
+            var spritePath = Path.Combine(context.ModDirectory, "Spike.png");
             var sprite = File.Exists(spritePath)
                 ? ModGambitApi.LoadSprite(spritePath)
                 : GenerateFallbackSprite();
@@ -34,27 +34,27 @@ namespace Gambonanza.CaltropsGambit
             // gambit prefab, fills in metadata, and attaches our BaseGambit subclass
             // to handle runtime behaviour.
             // This ID is also what the console sees for commands like
-            // `give gambit caltrops`, so keep it short and readable.
-            var def = GambitBuilder.Create("caltrops")
-                .WithName("Caltrops' Gambit")
+            // `give gambit spikes`, so keep it short and readable.
+            var def = GambitBuilder.Create("spikes")
+                .WithName("Spikes' Gambit")
                 .WithDescription("Enemy pieces that step on <color=◊>TRAP</color> tiles are captured instead of trapped.")
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.TRAP, Gambit_Focus.SACRIFICE)
                 .WithPrice(7)
                 .WithVisual(sprite)
                 .WithVisualScale(0.9f)
-                // This tells GambitApi to attach GambitCaltrops to the in-run
+                // This tells GambitApi to attach GambitSpikes to the in-run
                 // gambit object. Without this, the card would exist but do nothing.
-                .WithBaseGambit<GambitCaltrops>()
+                .WithBaseGambit<GambitSpikes>()
                 // Show the vanilla trap-tile explanation icon/text in the tooltip,
-                // because Caltrops builds on vanilla TRAP tiles.
+                // because Spikes builds on vanilla TRAP tiles.
                 .ShowTrapTile()
                 // AutoUnlock means the gambit can appear immediately without adding
                 // a separate unlock achievement.
                 .AutoUnlock(true)
                 .Register();
 
-            context.LogLine($"[CaltropsGambit] registered '{def.Id}'.");
+            context.LogLine($"[SpikesGambit] registered '{def.Id}'.");
         }
 
         private static Sprite GenerateFallbackSprite()

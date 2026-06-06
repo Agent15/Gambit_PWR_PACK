@@ -1,9 +1,9 @@
 {
-  "id": "CaltropsGambit",
-  "name": "Caltrops' Gambit",
+  "id": "SpikesGambit",
+  "name": "Spikes' Gambit",
   "version": "1.0.0",
   "author": "TGM",
-  "entry": "Gambonanza.CaltropsGambit.CaltropsGambitMod",
+  "entry": "Gambonanza.SpikesGambit.SpikesGambitMod",
   "enabled": true,
   "gameVersion": ">=1.0",
   "description": "Enemies that step on TRAP tiles are captured instead of trapped.",

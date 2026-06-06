@@ -135,6 +135,23 @@ else
     echo "==> Sample mod staging target: $DIST_DIR"
 fi
 
+# Known sample renames. Remove stale staged/live folders so users who update
+# from an older checkout do not keep loading both the old and new mod IDs.
+cleanup_legacy_mod_dirs() {
+    local legacy
+    for legacy in CaltropsGambit; do
+        if [ -d "$DIST_DIR/$legacy" ]; then
+            rm -rf "$DIST_DIR/$legacy"
+            echo "  removed legacy staged mod: $DIST_DIR/$legacy"
+        fi
+        if [ "$INSTALL" -eq 1 ] && [ -d "$LIVE_MODS_DIR/$legacy" ]; then
+            rm -rf "$LIVE_MODS_DIR/$legacy"
+            echo "  removed legacy installed mod: $LIVE_MODS_DIR/$legacy"
+        fi
+    done
+}
+cleanup_legacy_mod_dirs
+
 found=0
 for src in "$SAMPLES_DIR"/*; do
     [ -d "$src" ] || continue
