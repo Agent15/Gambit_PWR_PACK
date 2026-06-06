@@ -227,6 +227,11 @@ namespace Gambonanza.ModHost
             try { Debug.LogError("[ModConsole] " + message); } catch { }
         }
 
+        internal void PrintRich(string richText)
+        {
+            AddLine(richText ?? "");
+        }
+
         private void SetOpen(bool open)
         {
             _open = open;

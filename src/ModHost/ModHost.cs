@@ -50,7 +50,8 @@ namespace Gambonanza.ModHost
             }
 
             int n = _registry.Count;
-            _console?.PrintInfo($"ModHost online — {n} mod{(n == 1 ? "" : "s")} loaded. Press F10 or ` to toggle. Type 'help' for commands.");
+            _console?.PrintInfo($"ModHost v{ModUpdater.FrameworkVersion} online — {n} mod{(n == 1 ? "" : "s")} loaded. Press F10 or ` to toggle. Type 'help' for commands.");
+            if (_console != null) ModUpdater.SpawnOnce(_console);
         }
 
         public static void OnSettingsOpenedInvoke(MonoBehaviour settingsCanvas)
