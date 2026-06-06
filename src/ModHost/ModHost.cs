@@ -261,6 +261,24 @@ namespace Gambonanza.ModHost
                 }
             }
 
+            // Extra safety for Windows/Git-Bash installs: derive candidates from
+            // the actual loaded ModHost DLL location (Managed/) rather than only
+            // Unity's Application.dataPath. This catches both
+            // Gambonanza_Data/Managed and .app/.../Data/Managed layouts.
+            string assemblyDir = null;
+            try { assemblyDir = Path.GetDirectoryName(typeof(ModHost).Assembly.Location); } catch { }
+            LogLine($"ModHost assembly dir = {assemblyDir ?? "<null>"}");
+            if (!string.IsNullOrEmpty(assemblyDir))
+            {
+                for (int up = 1; up <= 8; up++)
+                {
+                    var sb = new System.Text.StringBuilder(assemblyDir);
+                    for (int i = 0; i < up; i++) sb.Append(Path.DirectorySeparatorChar).Append("..");
+                    sb.Append(Path.DirectorySeparatorChar).Append("Mods");
+                    candidates.Add(Path.GetFullPath(sb.ToString()));
+                }
+            }
+
             var home = Environment.GetEnvironmentVariable("HOME") ?? "";
             candidates.Add(Path.Combine(home, "Library", "Application Support", "Gambonanza", "Mods"));
 

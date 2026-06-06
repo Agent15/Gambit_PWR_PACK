@@ -45,15 +45,41 @@ done
 # 1. Locate the game install
 # ----------------------------------------------------------------------------
 
+normalize_path() {
+    # Git Bash/MSYS accepts /d/foo reliably for shell file operations. A raw
+    # Windows path like D:\SteamLibrary may be interpreted inconsistently by
+    # bash tools even though native .NET tools can use it, causing the framework
+    # to patch the real game while sample mods get copied elsewhere.
+    local p="$1"
+    case "$p" in
+        [A-Za-z]:\\*)
+            local drive="${p:0:1}"
+            p="/${drive,,}/${p:3}"
+            p="${p//\\//}"
+            ;;
+        [A-Za-z]:/*)
+            local drive="${p:0:1}"
+            p="/${drive,,}/${p:3}"
+            ;;
+    esac
+    printf '%s\n' "$p"
+}
+
 find_game_dir() {
     if [ -n "${GAMBONANZA_DIR:-}" ]; then
-        [ -d "$GAMBONANZA_DIR" ] || { echo "GAMBONANZA_DIR is set but does not exist: $GAMBONANZA_DIR" >&2; return 1; }
-        printf '%s\n' "$GAMBONANZA_DIR"
+        local normalized
+        normalized="$(normalize_path "$GAMBONANZA_DIR")"
+        [ -d "$normalized" ] || { echo "GAMBONANZA_DIR is set but does not exist: $GAMBONANZA_DIR (normalized: $normalized)" >&2; return 1; }
+        printf '%s\n' "$normalized"
         return
     fi
-    if [ -n "$GAME_ARG" ] && [ -d "$GAME_ARG" ]; then
-        printf '%s\n' "$GAME_ARG"
-        return
+    if [ -n "$GAME_ARG" ]; then
+        local normalized
+        normalized="$(normalize_path "$GAME_ARG")"
+        if [ -d "$normalized" ]; then
+            printf '%s\n' "$normalized"
+            return
+        fi
     fi
     local candidates=(
         "$HOME/Library/Application Support/Steam/steamapps/common/Gambonanza"

@@ -26,10 +26,28 @@ INSTALL=0
 [ "${1:-}" = "--install" ] && INSTALL=1
 
 if [ "$INSTALL" -eq 1 ]; then
+    normalize_path() {
+        local p="$1"
+        case "$p" in
+            [A-Za-z]:\\*)
+                local drive="${p:0:1}"
+                p="/${drive,,}/${p:3}"
+                p="${p//\\//}"
+                ;;
+            [A-Za-z]:/*)
+                local drive="${p:0:1}"
+                p="/${drive,,}/${p:3}"
+                ;;
+        esac
+        printf '%s\n' "$p"
+    }
+
     find_game_dir() {
         if [ -n "${GAMBONANZA_DIR:-}" ]; then
-            [ -d "$GAMBONANZA_DIR" ] || { echo "GAMBONANZA_DIR does not exist: $GAMBONANZA_DIR" >&2; return 1; }
-            printf '%s\n' "$GAMBONANZA_DIR"; return
+            local normalized
+            normalized="$(normalize_path "$GAMBONANZA_DIR")"
+            [ -d "$normalized" ] || { echo "GAMBONANZA_DIR does not exist: $GAMBONANZA_DIR (normalized: $normalized)" >&2; return 1; }
+            printf '%s\n' "$normalized"; return
         fi
         local candidates=(
             "$HOME/Library/Application Support/Steam/steamapps/common/Gambonanza"
