@@ -101,7 +101,8 @@ find_project_file() {
     local src="$1"
     local csproj
     csproj="$(command find "$src" -maxdepth 1 -name '*.csproj' -print | sort | head -n 1)"
-    [ -n "$csproj" ] && printf '%s\n' "$csproj"
+    if [ -n "$csproj" ]; then printf '%s\n' "$csproj"; fi
+    return 0
 }
 
 assembly_name_for() {
@@ -139,7 +140,10 @@ for src in "$SAMPLES_DIR"/*; do
     [ -d "$src" ] || continue
     [ -f "$src/mod.json" ] || continue
     csproj="$(find_project_file "$src")"
-    [ -n "$csproj" ] || continue
+    if [ -z "$csproj" ]; then
+        echo "  skip $(basename "$src"): no .csproj at top level"
+        continue
+    fi
 
     found=1
     mod="$(basename "$src")"
