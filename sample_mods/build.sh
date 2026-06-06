@@ -63,40 +63,96 @@ if [ "$INSTALL" -eq 1 ]; then
         echo "Set GAMBONANZA_DIR to the install path." >&2
         return 1
     }
+
+    find_managed_dir() {
+        local game="$1"
+        local candidates=(
+            "Gambonanza.app/Contents/Resources/Data/Managed"
+            "Gambonanza_Data/Managed"
+            "Gambonanza/Gambonanza_Data/Managed"
+        )
+        for sub in "${candidates[@]}"; do
+            [ -d "$game/$sub" ] && { printf '%s\n' "$game/$sub"; return; }
+        done
+        echo "Could not find a Managed/ directory under $game." >&2
+        return 1
+    }
+
+    derive_mods_dir() {
+        local game="$1"
+        local managed="$2"
+        local data_dir runtime_dir
+        data_dir="$(dirname "$managed")"
+        if [ "$(basename "$data_dir")" = "Gambonanza_Data" ]; then
+            runtime_dir="$(dirname "$data_dir")"
+            printf '%s\n' "$runtime_dir/Mods"
+        else
+            printf '%s\n' "$game/Mods"
+        fi
+    }
+
     GAME_DIR="$(find_game_dir)"
-    LIVE_MODS_DIR="$GAME_DIR/Mods"
+    MANAGED_DIR="$(find_managed_dir "$GAME_DIR")"
+    LIVE_MODS_DIR="$(derive_mods_dir "$GAME_DIR" "$MANAGED_DIR")"
     echo "==> Will install into: $LIVE_MODS_DIR"
 fi
 
-# Each entry: "<source folder>:<assembly name>:<extra asset 1> <extra asset 2> ..."
-MODS=(
-    "SpeedMod:Gambonanza.SpeedMod:"
-    "GambitApi:Gambonanza.GambitApi:"
-    "KamikazeGambit:Gambonanza.KamikazeGambit:kamikaze.png"
-    "EnemyThreatOverlay:Gambonanza.EnemyThreatOverlay:"
-    "MightyKasparovEveryStage:Gambonanza.MightyKasparovEveryStage:"
-)
+find_project_file() {
+    local src="$1"
+    local csproj
+    csproj="$(command find "$src" -maxdepth 1 -name '*.csproj' -print | sort | head -n 1)"
+    [ -n "$csproj" ] && printf '%s\n' "$csproj"
+}
+
+assembly_name_for() {
+    local src="$1"
+    local csproj asm
+    csproj="$(find_project_file "$src")"
+    [ -n "$csproj" ] || return 1
+    asm="$(sed -n 's:.*<AssemblyName>\(.*\)</AssemblyName>.*:\1:p' "$csproj" | head -n 1)"
+    if [ -n "$asm" ]; then printf '%s\n' "$asm"; else basename "${csproj%.csproj}"; fi
+}
+
+copy_extra_assets() {
+    local src="$1"
+    local out="$2"
+    command find "$src" -maxdepth 1 -type f \
+        ! -name 'mod.json' \
+        ! -name '*.csproj' \
+        ! -name '*.cs' \
+        -print0 | while IFS= read -r -d '' asset; do
+            cp "$asset" "$out/"
+        done
+}
 
 mkdir -p "$DIST_DIR"
 
-for entry in "${MODS[@]}"; do
-    IFS=":" read -r mod asm assets <<<"$entry"
-    src="$SAMPLES_DIR/$mod"
+found=0
+for src in "$SAMPLES_DIR"/*; do
+    [ -d "$src" ] || continue
+    [ -f "$src/mod.json" ] || continue
+    csproj="$(find_project_file "$src")"
+    [ -n "$csproj" ] || continue
+
+    found=1
+    mod="$(basename "$src")"
+    asm="$(assembly_name_for "$src")"
     out="$DIST_DIR/$mod"
 
     echo "==> Building $mod"
-    dotnet build "$src" -c Release --nologo -v minimal
+    dotnet build "$csproj" -c Release --nologo -v minimal
 
     dll="$src/bin/Release/$asm.dll"
-    [ -f "$dll" ] || { echo "missing build output: $dll" >&2; exit 1; }
+    if [ ! -f "$dll" ]; then
+        dll="$(command find "$src/bin/Release" -name "$asm.dll" -print | head -n 1)"
+    fi
+    [ -f "$dll" ] || { echo "missing build output for $mod (expected $asm.dll under $src/bin/Release)" >&2; exit 1; }
 
     rm -rf "$out"
     mkdir -p "$out"
     cp "$dll" "$out/"
     cp "$src/mod.json" "$out/"
-    for a in $assets; do
-        cp "$src/$a" "$out/"
-    done
+    copy_extra_assets "$src" "$out"
     echo "  staged -> $out"
 
     if [ "$INSTALL" -eq 1 ]; then
@@ -107,6 +163,8 @@ for entry in "${MODS[@]}"; do
         echo "  installed -> $live"
     fi
 done
+
+[ "$found" -eq 1 ] || { echo "No sample mods found under $SAMPLES_DIR" >&2; exit 1; }
 
 echo
 if [ "$INSTALL" -eq 1 ]; then

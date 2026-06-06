@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 
 namespace Gambonanza.ModHost
@@ -239,6 +240,65 @@ namespace Gambonanza.ModHost
             return ordered;
         }
 
+        private static void AddMetadataCandidates(System.Collections.Generic.List<string> candidates)
+        {
+            try
+            {
+                var managed = Path.GetDirectoryName(typeof(ModHost).Assembly.Location);
+                if (string.IsNullOrEmpty(managed)) return;
+                var path = Path.Combine(managed, "Gambonanza.ModHost.install.json");
+                if (!File.Exists(path)) return;
+                var json = File.ReadAllText(path);
+                AddIfPresent(candidates, ExtractJsonString(json, "modsDirNative"));
+                AddIfPresent(candidates, ExtractJsonString(json, "modsDir"));
+                var gameNative = ExtractJsonString(json, "gameDirNative");
+                if (!string.IsNullOrEmpty(gameNative)) AddIfPresent(candidates, Path.Combine(gameNative, "Mods"));
+                var game = ExtractJsonString(json, "gameDir");
+                if (!string.IsNullOrEmpty(game)) AddIfPresent(candidates, Path.Combine(game, "Mods"));
+            }
+            catch (Exception ex) { LogLine("metadata mods-dir candidates failed: " + ex.Message); }
+        }
+
+        private static void AddIfPresent(System.Collections.Generic.List<string> candidates, string path)
+        {
+            if (!string.IsNullOrWhiteSpace(path)) candidates.Add(NormalizeRuntimePath(path));
+        }
+
+        private static string ExtractJsonString(string json, string key)
+        {
+            if (string.IsNullOrEmpty(json) || string.IsNullOrEmpty(key)) return null;
+            var marker = "\"" + key + "\"";
+            var i = json.IndexOf(marker, StringComparison.Ordinal);
+            if (i < 0) return null;
+            i = json.IndexOf(':', i);
+            if (i < 0) return null;
+            i = json.IndexOf('"', i);
+            if (i < 0) return null;
+            var sb = new System.Text.StringBuilder();
+            for (i++; i < json.Length; i++)
+            {
+                var ch = json[i];
+                if (ch == '"') break;
+                if (ch == '\\' && i + 1 < json.Length)
+                {
+                    var next = json[++i];
+                    if (next == '\\' || next == '"') sb.Append(next);
+                    else if (next == 'n') sb.Append('\n');
+                    else sb.Append(next);
+                }
+                else sb.Append(ch);
+            }
+            return sb.ToString();
+        }
+
+        private static string NormalizeRuntimePath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return path;
+            if (Path.DirectorySeparatorChar == '\\' && path.Length > 3 && path[0] == '/' && char.IsLetter(path[1]) && path[2] == '/')
+                return char.ToUpperInvariant(path[1]) + ":\\" + path.Substring(3).Replace('/', '\\');
+            return path;
+        }
+
         private static string ResolveModsDirectory()
         {
             var candidates = new System.Collections.Generic.List<string>();
@@ -250,6 +310,8 @@ namespace Gambonanza.ModHost
             try { dataPath = Application.dataPath; } catch { }
             LogLine($"Application.dataPath = {dataPath ?? "<null>"}");
 
+            AddMetadataCandidates(candidates);
+
             if (!string.IsNullOrEmpty(dataPath))
             {
                 for (int up = 1; up <= 6; up++)
@@ -257,7 +319,7 @@ namespace Gambonanza.ModHost
                     var sb = new System.Text.StringBuilder(dataPath);
                     for (int i = 0; i < up; i++) sb.Append("/..");
                     sb.Append("/Mods");
-                    candidates.Add(Path.GetFullPath(sb.ToString()));
+                    candidates.Add(NormalizeRuntimePath(Path.GetFullPath(sb.ToString())));
                 }
             }
 
@@ -275,7 +337,7 @@ namespace Gambonanza.ModHost
                     var sb = new System.Text.StringBuilder(assemblyDir);
                     for (int i = 0; i < up; i++) sb.Append(Path.DirectorySeparatorChar).Append("..");
                     sb.Append(Path.DirectorySeparatorChar).Append("Mods");
-                    candidates.Add(Path.GetFullPath(sb.ToString()));
+                    candidates.Add(NormalizeRuntimePath(Path.GetFullPath(sb.ToString())));
                 }
             }
 

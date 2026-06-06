@@ -111,9 +111,26 @@ find_managed_dir() {
     return 1
 }
 
+derive_mods_dir() {
+    local game="$1"
+    local managed="$2"
+    local data_dir runtime_dir
+    data_dir="$(dirname "$managed")"
+    if [ "$(basename "$data_dir")" = "Gambonanza_Data" ]; then
+        # Windows/Linux layout: <runtime dir>/Gambonanza_Data/Managed.
+        # If the user passed the Steam common wrapper folder, the real Mods folder
+        # is one level deeper next to the executable, not next to the wrapper.
+        runtime_dir="$(dirname "$data_dir")"
+        printf '%s\n' "$runtime_dir/Mods"
+    else
+        # macOS .app layout: keep Mods next to Gambonanza.app.
+        printf '%s\n' "$game/Mods"
+    fi
+}
+
 GAME_DIR="$(find_game_dir)"
 MANAGED_DIR="$(find_managed_dir "$GAME_DIR")"
-MODS_DIR="$GAME_DIR/Mods"
+MODS_DIR="$(derive_mods_dir "$GAME_DIR" "$MANAGED_DIR")"
 
 echo "==> Game install:  $GAME_DIR"
 echo "==> Managed/ dir:  $MANAGED_DIR"
@@ -224,12 +241,26 @@ json_escape() {
     # Keep the installer dependency-free: no Python/jq required just to write metadata.
     printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
+native_path() {
+    # Paths under Git Bash (/d/...) are perfect for shell commands, but Unity/.NET
+    # on Windows wants D:\... when it later tries Directory.Exists(). Store both.
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -w "$1" 2>/dev/null || printf '%s' "$1"
+    else
+        printf '%s' "$1"
+    fi
+}
+GAME_DIR_NATIVE="$(native_path "$GAME_DIR")"
+MODS_DIR_NATIVE="$(native_path "$MODS_DIR")"
 cat > "$MANAGED_DIR/Gambonanza.ModHost.install.json" <<EOF
 {
   "version": "$(json_escape "$FRAMEWORK_VERSION")",
   "commit": "$(json_escape "$COMMIT")",
   "repoDir": "$(json_escape "$SCRIPT_DIR")",
   "gameDir": "$(json_escape "$GAME_DIR")",
+  "modsDir": "$(json_escape "$MODS_DIR")",
+  "gameDirNative": "$(json_escape "$GAME_DIR_NATIVE")",
+  "modsDirNative": "$(json_escape "$MODS_DIR_NATIVE")",
   "appId": "3509230"
 }
 EOF
@@ -249,38 +280,70 @@ if [ "$SKIP_SAMPLES" -eq 1 ]; then
 fi
 
 DIST_DIR="$SCRIPT_DIR/Mods"
+SAMPLES_DIR="$SCRIPT_DIR/sample_mods"
 mkdir -p "$DIST_DIR"
 
-# Each entry: "<source folder>:<assembly name>:<extra asset 1> <extra asset 2> ..."
-SAMPLES=(
-    "SpeedMod:Gambonanza.SpeedMod:"
-    "GambitApi:Gambonanza.GambitApi:"
-    "KamikazeGambit:Gambonanza.KamikazeGambit:kamikaze.png"
-    "EnemyThreatOverlay:Gambonanza.EnemyThreatOverlay:"
-    "MightyKasparovEveryStage:Gambonanza.MightyKasparovEveryStage:"
-)
+find_project_file() {
+    local src="$1"
+    local csproj
+    csproj="$(command find "$src" -maxdepth 1 -name '*.csproj' -print | sort | head -n 1)"
+    [ -n "$csproj" ] && printf '%s\n' "$csproj"
+}
 
-for entry in "${SAMPLES[@]}"; do
-    IFS=":" read -r mod asm assets <<<"$entry"
-    src="$SCRIPT_DIR/sample_mods/$mod"
+assembly_name_for() {
+    local src="$1"
+    local csproj asm
+    csproj="$(find_project_file "$src")"
+    [ -n "$csproj" ] || return 1
+    asm="$(sed -n 's:.*<AssemblyName>\(.*\)</AssemblyName>.*:\1:p' "$csproj" | head -n 1)"
+    if [ -n "$asm" ]; then printf '%s\n' "$asm"; else basename "${csproj%.csproj}"; fi
+}
+
+copy_extra_assets() {
+    local src="$1"
+    local out="$2"
+    command find "$src" -maxdepth 1 -type f \
+        ! -name 'mod.json' \
+        ! -name '*.csproj' \
+        ! -name '*.cs' \
+        -print0 | while IFS= read -r -d '' asset; do
+            cp "$asset" "$out/"
+        done
+}
+
+found=0
+for src in "$SAMPLES_DIR"/*; do
+    [ -d "$src" ] || continue
+    [ -f "$src/mod.json" ] || continue
+    csproj="$(find_project_file "$src")"
+    [ -n "$csproj" ] || continue
+
+    found=1
+    mod="$(basename "$src")"
+    asm="$(assembly_name_for "$src")"
     out="$DIST_DIR/$mod"
     live="$MODS_DIR/$mod"
 
     echo "==> Building sample: $mod"
-    dotnet build "$src" -c Release --nologo -v minimal
+    dotnet build "$csproj" -c Release --nologo -v minimal
 
     dll="$src/bin/Release/$asm.dll"
-    [ -f "$dll" ] || { echo "missing build output: $dll" >&2; exit 1; }
+    if [ ! -f "$dll" ]; then
+        dll="$(command find "$src/bin/Release" -name "$asm.dll" -print | head -n 1)"
+    fi
+    [ -f "$dll" ] || { echo "missing build output for $mod (expected $asm.dll under $src/bin/Release)" >&2; exit 1; }
 
     rm -rf "$out" "$live"
     mkdir -p "$out" "$live"
     cp "$dll" "$out/"
     cp "$src/mod.json" "$out/"
-    for a in $assets; do cp "$src/$a" "$out/"; done
+    copy_extra_assets "$src" "$out"
     cp -R "$out/." "$live/"
     echo "  staged    -> $out"
     echo "  installed -> $live"
 done
+
+[ "$found" -eq 1 ] || { echo "No sample mods found under $SAMPLES_DIR" >&2; exit 1; }
 
 echo
 echo "All done. Sample mods installed in $MODS_DIR/."
