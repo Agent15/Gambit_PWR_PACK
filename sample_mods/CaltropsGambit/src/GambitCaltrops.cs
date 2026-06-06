@@ -18,6 +18,9 @@ namespace Gambonanza.CaltropsGambit
     ///   make their normal trap effect lethal while this gambit is present.
     /// - Note: the UI/localization calls these TRAP tiles, but the internal game
     ///   API still uses older names like IsHunter and OnHunterTileUsed.
+    /// - We listen to TileManager.OnHunterTileUsed instead of EnemyManager.OnMove
+    ///   so vanilla decides whether the trap actually triggered. That preserves
+    ///   the TILE_EXHAUST strain: exhausted trap tiles do not fire this event.
     /// </summary>
     public sealed class GambitCaltrops : BaseGambit
     {
@@ -42,40 +45,40 @@ namespace Gambonanza.CaltropsGambit
         {
             if (_subscribed) return;
 
-            // EnemyManager owns enemy AI turns. Its OnMove event is the closest real
-            // equivalent to the hallucinated "OnTileModApplied" idea:
-            // it fires whenever an enemy piece has chosen and moved to a destination
-            // tile. The event gives us both the moving piece and the destination tile.
-            if (!SingletonMonoBehaviour<EnemyManager>.IsCreated()) return;
+            // TileManager.OnHunterTileUsed is fired by vanilla HunterTilePower only
+            // when a TRAP tile really activates. That distinction matters for the
+            // TILE_EXHAUST strain: if the trap was already used this round, vanilla
+            // suppresses this event, so Caltrops should not capture anything either.
+            if (!SingletonMonoBehaviour<TileManager>.IsCreated()) return;
 
-            var enemyManager = SingletonMonoBehaviour<EnemyManager>.Instance;
-            if (enemyManager == null) return;
+            var tileManager = SingletonMonoBehaviour<TileManager>.Instance;
+            if (tileManager == null) return;
 
             // Vanilla code often uses Delegate.Combine/Remove instead of +=/-=, so
             // we mirror that style. It is equivalent to subscribing to an event, but
-            // works because OnMove is a public Action field, not a C# event.
-            enemyManager.OnMove = (Action<BasePieceBehaviour, TileBehaviour>)
-                Delegate.Combine(enemyManager.OnMove, new Action<BasePieceBehaviour, TileBehaviour>(OnEnemyMove));
+            // works because OnHunterTileUsed is a public Action field, not a C# event.
+            tileManager.OnHunterTileUsed = (Action<BasePieceBehaviour, TileBehaviour>)
+                Delegate.Combine(tileManager.OnHunterTileUsed, new Action<BasePieceBehaviour, TileBehaviour>(OnTrapTileUsed));
             _subscribed = true;
         }
 
         private void Unsubscribe()
         {
             if (!_subscribed) return;
-            if (!SingletonMonoBehaviour<EnemyManager>.IsCreated()) return;
+            if (!SingletonMonoBehaviour<TileManager>.IsCreated()) return;
 
-            var enemyManager = SingletonMonoBehaviour<EnemyManager>.Instance;
-            if (enemyManager == null) return;
+            var tileManager = SingletonMonoBehaviour<TileManager>.Instance;
+            if (tileManager == null) return;
 
             // Always unsubscribe in OnDestroy. Otherwise old handlers can survive on
             // the manager and keep calling into destroyed gambit objects after the run
             // changes or the mod is disabled.
-            enemyManager.OnMove = (Action<BasePieceBehaviour, TileBehaviour>)
-                Delegate.Remove(enemyManager.OnMove, new Action<BasePieceBehaviour, TileBehaviour>(OnEnemyMove));
+            tileManager.OnHunterTileUsed = (Action<BasePieceBehaviour, TileBehaviour>)
+                Delegate.Remove(tileManager.OnHunterTileUsed, new Action<BasePieceBehaviour, TileBehaviour>(OnTrapTileUsed));
             _subscribed = false;
         }
 
-        private void OnEnemyMove(BasePieceBehaviour piece, TileBehaviour destination)
+        private void OnTrapTileUsed(BasePieceBehaviour piece, TileBehaviour destination)
         {
             if (piece == null || destination == null) return;
 
@@ -83,14 +86,14 @@ namespace Gambonanza.CaltropsGambit
             // narrow even if another system unexpectedly reuses the same event shape.
             if (piece.PieceColor != PieceColor.BLACK) return;
 
-            // We intentionally use the vanilla TRAP tile flag. Internally the game
-            // still names this `IsHunter`, but players see it as a TRAP tile. The
-            // game already knows how to create, save, display, and explain it;
-            // Caltrops only changes what happens when enemies step on it.
+            // The event itself already means "a vanilla TRAP tile activated". This
+            // extra IsHunter check is just defensive, because the internal game name
+            // for TRAP tiles is still "Hunter".
             if (!destination.IsHunter) return;
 
-            // EnemyManager invokes OnMove BEFORE it starts the visible movement tween:
-            //   OnMove(...)
+            // HunterTilePower invokes OnHunterTileUsed from EnemyManager.OnMove,
+            // BEFORE EnemyManager starts the visible movement tween:
+            //   OnHunterTileUsed(...)
             //   piece.transform.parent = destination.PlaceToPutPieces
             //   piece.transform.DOLocalMove(Vector3.zero, 0.2f)
             // So waiting only one frame fixes the references, but the piece may still
@@ -129,19 +132,9 @@ namespace Gambonanza.CaltropsGambit
 
         private static void CaptureEnemy(BasePieceBehaviour piece, TileBehaviour tile)
         {
-            // Notify vanilla systems that a TRAP tile was used. The internal event
-            // is still named OnHunterTileUsed in the game code. This keeps stats,
-            // achievements, sounds/feedback listeners, and other gambits closer to
-            // the behaviour they expect from a normal Hunter tile trigger.
-            try
-            {
-                if (SingletonMonoBehaviour<TileManager>.IsCreated())
-                    SingletonMonoBehaviour<TileManager>.Instance.OnHunterTileUsed?.Invoke(piece, tile);
-            }
-            catch { }
-
-            // Vanilla HunterTilePower sets this save flag; do the same for parity.
-            try { DataManager.Instance.Data.HunterTileUsed = true; } catch { }
+            // Do NOT invoke TileManager.OnHunterTileUsed here. Vanilla already fired
+            // that event before this coroutine started. Firing it again would double
+            // trigger trap-related vanilla gambits, and would bypass TILE_EXHAUST.
 
             // Break tile <-> piece links before destroying the GameObject. If we skip
             // this, the board can keep a stale reference to a destroyed piece.
