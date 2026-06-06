@@ -194,19 +194,19 @@ echo "==> Patching Assembly-CSharp.dll (installs ModSdk + ModHost + GameUI)"
 dotnet "$PATCHER_DLL" "$MANAGED_DIR" "$MODSDK_DLL" "$MODHOST_DLL" "$GAMEUI_DLL"
 
 COMMIT="$(git -C "$SCRIPT_DIR" rev-parse HEAD 2>/dev/null || printf 'unknown')"
-python3 - "$MANAGED_DIR/Gambonanza.ModHost.install.json" "$FRAMEWORK_VERSION" "$COMMIT" "$SCRIPT_DIR" "$GAME_DIR" "3509230" <<'PY'
-import json, sys
-path, version, commit, repo, game, appid = sys.argv[1:]
-with open(path, 'w', encoding='utf-8') as f:
-    json.dump({
-        'version': version.strip(),
-        'commit': commit.strip(),
-        'repoDir': repo,
-        'gameDir': game,
-        'appId': appid,
-    }, f, indent=2)
-    f.write('\n')
-PY
+json_escape() {
+    # Keep the installer dependency-free: no Python/jq required just to write metadata.
+    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+cat > "$MANAGED_DIR/Gambonanza.ModHost.install.json" <<EOF
+{
+  "version": "$(json_escape "$FRAMEWORK_VERSION")",
+  "commit": "$(json_escape "$COMMIT")",
+  "repoDir": "$(json_escape "$SCRIPT_DIR")",
+  "gameDir": "$(json_escape "$GAME_DIR")",
+  "appId": "3509230"
+}
+EOF
 echo "  metadata -> $MANAGED_DIR/Gambonanza.ModHost.install.json (v$FRAMEWORK_VERSION, ${COMMIT:0:7})"
 
 mkdir -p "$MODS_DIR"
