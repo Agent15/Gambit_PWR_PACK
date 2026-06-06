@@ -247,7 +247,7 @@ namespace Gambonanza.ModHost
             _welcomed = true;
             PrintInfo("Welcome to the Gambonanza console.");
             PrintInfo("Open/close it anytime with F10 or `.");
-            PrintInfo("Examples: give money 100 | give piece queen 2 | give gambit thunder | win round");
+            PrintInfo("Examples: give money 100 | give piece queen 2 | give gambit thunder | run");
             PrintInfo("Tip: press Tab to autocomplete; keep pressing Tab to cycle suggestions.");
         }
 

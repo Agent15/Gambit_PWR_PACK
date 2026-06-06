@@ -16,7 +16,6 @@ namespace Gambonanza.ModHost
         {
             console.RegisterCommand("give", "give money, stock pieces, or gambits: give money 50 | give piece queen 2 | give gambit thunder", args => Give(console, args), CompleteGive);
             console.RegisterCommand("set money", "set current money: set money 999", args => SetMoney(console, args));
-            console.RegisterCommand("win", "force win: win round | win game", args => Win(console, args), CompleteWin);
             console.RegisterCommand("run", "show current run state", _ => PrintRunState(console));
             console.RegisterCommand("wave set", "set current wave index: wave set 10", args => SetWave(console, args));
             console.RegisterCommand("wave add", "add to current wave index: wave add 5", args => AddWave(console, args));
@@ -150,28 +149,6 @@ namespace Gambonanza.ModHost
             catch (Exception ex) { console.PrintWarn("give gambit failed: " + Short(ex)); }
         }
 
-        private static void Win(IConsoleApi console, string[] args)
-        {
-            var gm = Instance("Blukulele.Core.GameManager");
-            if (gm == null) { console.PrintWarn("GameManager not ready."); return; }
-            var target = args != null && args.Length > 0 ? Norm(args[0]) : "round";
-            try
-            {
-                if (target == "round" || target == "board" || target == "wave")
-                {
-                    Invoke(gm, "Win");
-                    console.PrintInfo("forced current board win.");
-                }
-                else if (target == "game" || target == "run")
-                {
-                    Invoke(gm, "Result");
-                    console.PrintInfo("forced full run win/result.");
-                }
-                else console.PrintWarn("usage: win round | win game");
-            }
-            catch (Exception ex) { console.PrintWarn("win failed: " + Short(ex)); }
-        }
-
         private static void PrintRunState(IConsoleApi console)
         {
             var gm = Instance("Blukulele.Core.GameManager");
@@ -227,8 +204,6 @@ namespace Gambonanza.ModHost
             catch { }
             return null;
         }
-
-        private static IEnumerable<string> CompleteWin(string[] args, int argIndex) => new[] { "round", "game" };
 
         private static IEnumerable<string> CompleteGive(string[] args, int argIndex)
         {
