@@ -2,7 +2,7 @@
     "id": "SpeedMod",
     "name": "Speed Mod",
     "version": "1.0.0",
-    "author": "Mod Community",
+    "author": "Ben",
     "entry": "Gambonanza.SpeedMod.SpeedModMain",
     "enabled": true,
     "gameVersion": ">=1.0",

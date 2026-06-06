@@ -2,7 +2,7 @@
     "id": "GambitApi",
     "name": "Gambit Creation API",
     "version": "1.0.0",
-    "author": "Mod Community",
+    "author": "Ben",
     "entry": "Gambonanza.GambitApi.GambitApiMod",
     "enabled": true,
     "gameVersion": ">=1.0",

@@ -2,7 +2,7 @@
   "id": "MightyKasparovEveryStage",
   "name": "Mighty Kasparov Every Stage",
   "version": "1.0.0",
-  "author": "Mod Community",
+  "author": "Minty",
   "entry": "Gambonanza.MightyKasparovEveryStage.MightyKasparovEveryStageMod",
   "enabled": false,
   "gameVersion": ">=1.0",

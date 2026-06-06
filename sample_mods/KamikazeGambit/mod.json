@@ -2,7 +2,7 @@
     "id":           "KamikazeGambit",
     "name":         "Kamikaze Gambit",
     "version":      "1.0.0",
-    "author":       "Mod Community",
+    "author":       "Ben",
     "entry":        "Gambonanza.KamikazeGambit.KamikazeGambitMod",
     "enabled":      true,
     "gameVersion":  ">=1.0",

@@ -2,7 +2,7 @@
   "id": "EnemyThreatOverlay",
   "name": "Enemy Threat Overlay",
   "version": "1.0.0",
-  "author": "Mod Community",
+  "author": "nikaakaa",
   "entry": "Gambonanza.EnemyThreatOverlay.EnemyThreatOverlayMod",
   "enabled": true,
   "gameVersion": ">=1.0",
