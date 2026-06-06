@@ -13,7 +13,7 @@ namespace Gambonanza.EnemyThreatOverlay
         {
             _log = new UnityThreatOverlayLog(context);
             _controller = new ThreatOverlayController(
-                new UnityMiddleMouseInput(),
+                new UnityKeybindInput(context),
                 new UnityGameStateSource(),
                 new ThreatCollector(new UnityPieceSource()),
                 new UnityTileVisuals(),

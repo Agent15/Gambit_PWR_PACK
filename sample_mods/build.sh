@@ -55,6 +55,7 @@ MODS=(
     "SpeedMod:Gambonanza.SpeedMod:"
     "GambitApi:Gambonanza.GambitApi:"
     "KamikazeGambit:Gambonanza.KamikazeGambit:kamikaze.png"
+    "EnemyThreatOverlay:Gambonanza.EnemyThreatOverlay:"
 )
 
 mkdir -p "$DIST_DIR"

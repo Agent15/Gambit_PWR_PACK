@@ -7,9 +7,16 @@ using UnityEngine;
 
 namespace Gambonanza.EnemyThreatOverlay
 {
-    internal sealed class UnityMiddleMouseInput : IThreatOverlayInput
+    internal sealed class UnityKeybindInput : IThreatOverlayInput
     {
-        public bool IsMiddleMouseHeld => Input.GetMouseButton(2);
+        private readonly IModContext _context;
+
+        public UnityKeybindInput(IModContext context)
+        {
+            _context = context;
+        }
+
+        public bool IsMiddleMouseHeld => _context != null && _context.IsKeybindHeld("threatDisplay");
     }
 
     internal sealed class UnityGameStateSource : IThreatOverlayGameStateSource

@@ -98,6 +98,24 @@ namespace Gambonanza.ModHost
         internal static bool TryDisable(string id, out string error) => _registry.TryDisable(id, out error);
         internal static int  Rescan() => _registry?.Rescan(_modsDirectory) ?? 0;
 
+        internal static System.Collections.Generic.IEnumerable<ModRegistry.KeybindInfo> AllKeybinds(string modId = null)
+            => _registry?.AllKeybinds(modId) ?? System.Linq.Enumerable.Empty<ModRegistry.KeybindInfo>();
+
+        internal static bool TrySetKeybind(string modId, string name, string key, out string error)
+        {
+            error = null;
+            return _registry != null && _registry.TrySetKeybind(modId, name, key, out error);
+        }
+
+        internal static string GetKeybind(string modId, string name)
+            => _registry?.GetKeybind(modId, name) ?? ModKeybinds.Unset;
+
+        internal static bool IsKeybindHeld(string modId, string name)
+            => ModKeybinds.IsHeld(GetKeybind(modId, name));
+
+        internal static bool WasKeybindPressed(string modId, string name)
+            => ModKeybinds.WasPressed(GetKeybind(modId, name));
+
         internal static void LogLine(string s)
         {
             try { UnityEngine.Debug.Log("[ModHost] " + s); } catch { }

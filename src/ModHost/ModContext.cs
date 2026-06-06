@@ -27,6 +27,12 @@ namespace Gambonanza.ModHost
             try { Debug.Log($"[{ModId}] {message}"); } catch { }
         }
 
+        public bool IsKeybindHeld(string name) => ModHost.IsKeybindHeld(ModId, name);
+
+        public bool WasKeybindPressed(string name) => ModHost.WasKeybindPressed(ModId, name);
+
+        public string GetKeybind(string name) => ModHost.GetKeybind(ModId, name);
+
         internal void RaiseSettingsOpened(MonoBehaviour settingsCanvas)
         {
             var handler = OnSettingsOpened;

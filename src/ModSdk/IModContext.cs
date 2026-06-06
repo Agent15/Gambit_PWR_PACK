@@ -25,6 +25,15 @@ namespace Gambonanza.ModSdk
         /// </summary>
         IConsoleApi Console { get; }
 
+        /// <summary>Returns true while the configured keybind is held down.</summary>
+        bool IsKeybindHeld(string name);
+
+        /// <summary>Returns true on the frame the configured keybind is pressed.</summary>
+        bool WasKeybindPressed(string name);
+
+        /// <summary>Returns the configured keybind text, or "unset".</summary>
+        string GetKeybind(string name);
+
         /// <summary>
         /// Fires every time SettingsCanvas.OnEnable runs. Argument is the SettingsCanvas instance.
         /// Subscribers should be idempotent — the modal may be opened many times in one session.

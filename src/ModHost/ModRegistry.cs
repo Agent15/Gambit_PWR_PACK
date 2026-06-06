@@ -17,6 +17,80 @@ namespace Gambonanza.ModHost
         public IReadOnlyList<LoadedMod> Mods => _mods;
         public int Count => _mods.Count;
 
+        // ----- Keybinds -----------------------------------------------------
+
+        public IEnumerable<KeybindInfo> AllKeybinds(string modId = null)
+        {
+            foreach (var mod in _mods)
+            {
+                if (!string.IsNullOrEmpty(modId) && !string.Equals(mod.Manifest.id, modId, StringComparison.OrdinalIgnoreCase)) continue;
+                foreach (var kb in EffectiveKeybinds(mod.Manifest))
+                    yield return new KeybindInfo { ModId = mod.Manifest.id, Name = kb.name, Description = kb.description, Key = NormalizeKey(kb.key) };
+            }
+        }
+
+        public bool TrySetKeybind(string modId, string name, string key, out string error)
+        {
+            error = null;
+            var mod = _mods.FirstOrDefault(m => string.Equals(m.Manifest.id, modId, StringComparison.OrdinalIgnoreCase));
+            if (mod == null) { error = "mod not loaded"; return false; }
+            if (string.IsNullOrWhiteSpace(name)) { error = "missing keybind name"; return false; }
+            EnsureKeybindArray(mod.Manifest);
+            var kb = mod.Manifest.keybinds.FirstOrDefault(k => string.Equals(k.name, name, StringComparison.OrdinalIgnoreCase));
+            if (kb == null) { error = $"'{mod.Manifest.id}' has no keybind named '{name}'"; return false; }
+            kb.key = NormalizeKey(key);
+            WriteManifest(mod);
+            return true;
+        }
+
+        public string GetKeybind(string modId, string name)
+        {
+            var mod = _mods.FirstOrDefault(m => string.Equals(m.Manifest.id, modId, StringComparison.OrdinalIgnoreCase));
+            if (mod == null || string.IsNullOrWhiteSpace(name)) return ModKeybinds.Unset;
+            var kb = EffectiveKeybinds(mod.Manifest).FirstOrDefault(k => string.Equals(k.name, name, StringComparison.OrdinalIgnoreCase));
+            return NormalizeKey(kb?.key);
+        }
+
+        private static IEnumerable<ModKeybindManifest> EffectiveKeybinds(ModManifest manifest)
+        {
+            EnsureKeybindArray(manifest);
+            return manifest.keybinds;
+        }
+
+        private static void EnsureKeybindArray(ModManifest manifest)
+        {
+            var existing = manifest.keybinds == null
+                ? new List<ModKeybindManifest>()
+                : manifest.keybinds.Where(k => k != null && !string.IsNullOrWhiteSpace(k.name)).ToList();
+
+            foreach (var known in KnownDefaultKeybinds(manifest.id))
+            {
+                if (!existing.Any(k => string.Equals(k.name, known.name, StringComparison.OrdinalIgnoreCase)))
+                    existing.Add(known);
+            }
+
+            if (!existing.Any(k => string.Equals(k.name, "toggle", StringComparison.OrdinalIgnoreCase)))
+                existing.Insert(0, new ModKeybindManifest { name = "toggle", description = "default toggle", key = ModKeybinds.Unset });
+
+            manifest.keybinds = existing.ToArray();
+        }
+
+        private static IEnumerable<ModKeybindManifest> KnownDefaultKeybinds(string modId)
+        {
+            if (string.Equals(modId, "EnemyThreatOverlay", StringComparison.OrdinalIgnoreCase))
+                yield return new ModKeybindManifest { name = "threatDisplay", description = "hold to show enemy threat overlay", key = "Space" };
+        }
+
+        private static string NormalizeKey(string key) => ModKeybinds.IsUnset(key) ? ModKeybinds.Unset : key.Trim();
+
+        public sealed class KeybindInfo
+        {
+            public string ModId;
+            public string Name;
+            public string Description;
+            public string Key;
+        }
+
         // ----- Initial load -------------------------------------------------
 
         public void LoadMod(string modDirectory, ModManifest manifest)

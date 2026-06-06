@@ -26,6 +26,11 @@ namespace Gambonanza.ModHost
         /// dependencies log a warning but do not block load (the mod is loaded last).
         /// </summary>
         public string[] dependencies;
+        /// <summary>
+        /// Optional keybind metadata. If omitted, ModHost exposes a default
+        /// "toggle" bind in the console with key "unset".
+        /// </summary>
+        public ModKeybindManifest[] keybinds;
 
         public bool IsValid(out string error)
         {
@@ -50,5 +55,13 @@ namespace Gambonanza.ModHost
                 return null;
             }
         }
+    }
+
+    [Serializable]
+    public class ModKeybindManifest
+    {
+        public string name;
+        public string description;
+        public string key;
     }
 }

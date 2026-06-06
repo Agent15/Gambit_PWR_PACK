@@ -6,5 +6,12 @@
   "entry": "Gambonanza.EnemyThreatOverlay.EnemyThreatOverlayMod",
   "enabled": true,
   "gameVersion": ">=1.0",
-  "dependencies": []
+  "dependencies": [],
+  "keybinds": [
+    {
+      "name": "threatDisplay",
+      "description": "hold to show enemy threat overlay",
+      "key": "Space"
+    }
+  ]
 }

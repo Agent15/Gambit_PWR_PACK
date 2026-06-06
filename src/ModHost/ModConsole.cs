@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Gambonanza.ModSdk;
@@ -9,6 +10,7 @@ using UnityEngine.UI;
 
 namespace Gambonanza.ModHost
 {
+    [DefaultExecutionOrder(-10000)]
     internal sealed class ModConsole : MonoBehaviour, IConsoleApi
     {
         private sealed class Command
@@ -19,9 +21,16 @@ namespace Gambonanza.ModHost
             public ConsoleArgumentCompleter Completer;
         }
 
+        private sealed class KeybindCapture
+        {
+            public string ModId;
+            public string Name;
+        }
+
         private readonly Dictionary<string, Command> _commands = new Dictionary<string, Command>();
         private readonly List<string> _lines = new List<string>();
         private readonly List<string> _suggestions = new List<string>();
+        private readonly List<string> _history = new List<string>();
 
         private Canvas _canvas;
         private RectTransform _root;
@@ -40,6 +49,9 @@ namespace Gambonanza.ModHost
         private string _completionBaseInput;
         private string _completionAppliedInput;
         private int _completionIndex;
+        private int _historyIndex = -1;
+        private KeybindCapture _keybindCapture;
+        private float _keybindCaptureReadyAt;
 
         private static readonly Color PanelColor = new Color(0.055f, 0.035f, 0.03f, 0.94f);
         private static readonly Color BorderColor = new Color(0.95f, 0.82f, 0.45f, 1f);
@@ -83,6 +95,9 @@ namespace Gambonanza.ModHost
             RegisterCommand("mods folder", "open the Mods folder", _ => ModHost.OpenModsFolderInFinder());
             RegisterCommand("mods enable", "enable a mod: mods enable <id>", args => SetModEnabled(args, true), CompleteModIds);
             RegisterCommand("mods disable", "disable a mod: mods disable <id>", args => SetModEnabled(args, false), CompleteModIds);
+            RegisterCommand("keybinds", "list keybinds: keybinds [mod]", PrintKeybinds, CompleteModIds);
+            RegisterCommand("keybind", "set keybind: keybind <mod> <name> then press a key/combo", BeginKeybindCapture, CompleteKeybindCommand);
+            RegisterCommand("keybind unset", "unset keybind: keybind unset <mod> <name>", UnsetKeybind, CompleteKeybindCommandUnset);
             ModCheats.Register(this);
             PrintInfo("console ready. Press ` or F10 to toggle. Type 'help' for commands.");
         }
@@ -97,6 +112,12 @@ namespace Gambonanza.ModHost
 
         private void Update()
         {
+            if (_keybindCapture != null)
+            {
+                PollKeybindCapture();
+                return;
+            }
+
             if (Input.GetKeyDown(KeyCode.BackQuote) || Input.GetKeyDown(KeyCode.F10))
             {
                 Toggle();
@@ -107,7 +128,20 @@ namespace Gambonanza.ModHost
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                SuppressPauseButtonForEscapeFrame();
                 SetOpen(false);
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                RecallHistory(-1);
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                RecallHistory(1);
                 return;
             }
 
@@ -393,9 +427,47 @@ namespace Gambonanza.ModHost
             _lastSubmitted = line;
             _lastSubmitAt = Time.realtimeSinceStartup;
 
+            if (_history.Count == 0 || !string.Equals(_history[_history.Count - 1], line, StringComparison.Ordinal))
+            {
+                _history.Add(line);
+                while (_history.Count > 100) _history.RemoveAt(0);
+            }
+            _historyIndex = _history.Count;
+
             _input.text = "";
             RefreshInputPreview();
             Execute(line);
+            RefreshSuggestions();
+            FocusInput();
+        }
+
+        private void RecallHistory(int direction)
+        {
+            if (_input == null || _history.Count == 0) return;
+
+            if (direction < 0)
+            {
+                if (_historyIndex < 0 || _historyIndex > _history.Count) _historyIndex = _history.Count;
+                _historyIndex = Math.Max(0, _historyIndex - 1);
+            }
+            else
+            {
+                if (_historyIndex < 0) return;
+                _historyIndex++;
+                if (_historyIndex >= _history.Count)
+                {
+                    _historyIndex = _history.Count;
+                    _input.text = "";
+                    RefreshInputPreview();
+                    RefreshSuggestions();
+                    FocusInput();
+                    return;
+                }
+            }
+
+            _input.text = _history[_historyIndex];
+            _input.caretPosition = _input.text.Length;
+            RefreshInputPreview();
             RefreshSuggestions();
             FocusInput();
         }
@@ -554,6 +626,131 @@ namespace Gambonanza.ModHost
             else PrintWarn(error ?? "failed");
         }
 
+        private void PrintKeybinds(string[] args)
+        {
+            var modFilter = args != null && args.Length > 0 ? args[0] : null;
+            var keybinds = ModHost.AllKeybinds(modFilter).OrderBy(k => k.ModId).ThenBy(k => k.Name).ToArray();
+            if (keybinds.Length == 0)
+            {
+                PrintWarn(string.IsNullOrEmpty(modFilter) ? "no keybinds found." : $"no keybinds found for '{modFilter}'.");
+                return;
+            }
+            string currentMod = null;
+            foreach (var kb in keybinds)
+            {
+                if (!string.Equals(currentMod, kb.ModId, StringComparison.OrdinalIgnoreCase))
+                {
+                    currentMod = kb.ModId;
+                    AddLine(ColorizeCommand(currentMod));
+                }
+                var key = string.IsNullOrEmpty(kb.Key) ? ModKeybinds.Unset : kb.Key;
+                AddLine($"  <color={Blue}>" + Escape(kb.Name) + $"</color><pos=360><color={Lime}>" + Escape(key) + "</color>");
+            }
+        }
+
+        private void BeginKeybindCapture(string[] args)
+        {
+            if (args == null || args.Length < 2)
+            {
+                PrintWarn("usage: keybind <mod> <name>");
+                return;
+            }
+            if (!FindKeybind(args[0], args[1], out var modId, out var name))
+            {
+                PrintWarn($"unknown keybind '{args[1]}' for mod '{args[0]}'. Try: keybinds {args[0]}");
+                return;
+            }
+            SetOpen(true);
+            _keybindCapture = new KeybindCapture { ModId = modId, Name = name };
+            _keybindCaptureReadyAt = Time.realtimeSinceStartup + 0.25f;
+            if (_input != null) _input.text = "";
+            PrintInfo($"press a key for {modId}.{name}; hold Shift/Ctrl/Alt/Cmd first for combos. Esc cancels, Backspace unsets.");
+            FocusInput();
+        }
+
+        private void UnsetKeybind(string[] args)
+        {
+            if (args == null || args.Length < 2)
+            {
+                PrintWarn("usage: keybind unset <mod> <name>");
+                return;
+            }
+            if (!FindKeybind(args[0], args[1], out var modId, out var name))
+            {
+                PrintWarn($"unknown keybind '{args[1]}' for mod '{args[0]}'. Try: keybinds {args[0]}");
+                return;
+            }
+            string error;
+            if (ModHost.TrySetKeybind(modId, name, ModKeybinds.Unset, out error)) PrintInfo($"{modId}.{name} = unset");
+            else PrintWarn(error ?? "failed to unset keybind");
+        }
+
+        private void PollKeybindCapture()
+        {
+            if (_keybindCapture == null) return;
+            if (Time.realtimeSinceStartup < _keybindCaptureReadyAt) return;
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                PrintInfo("keybind capture cancelled.");
+                _keybindCapture = null;
+                FocusInput();
+                return;
+            }
+            if (Input.GetKeyDown(KeyCode.Backspace) || Input.GetKeyDown(KeyCode.Delete))
+            {
+                string unsetError;
+                if (ModHost.TrySetKeybind(_keybindCapture.ModId, _keybindCapture.Name, ModKeybinds.Unset, out unsetError))
+                    PrintInfo($"{_keybindCapture.ModId}.{_keybindCapture.Name} = unset");
+                else PrintWarn(unsetError ?? "failed to unset keybind");
+                _keybindCapture = null;
+                FocusInput();
+                return;
+            }
+
+            var key = ModKeybinds.FirstNonModifierKeyDown();
+            if (key == KeyCode.None) return;
+            var spec = ModKeybinds.CaptureSpec(key);
+            string error;
+            if (ModHost.TrySetKeybind(_keybindCapture.ModId, _keybindCapture.Name, spec, out error))
+                PrintInfo($"{_keybindCapture.ModId}.{_keybindCapture.Name} = {spec}");
+            else PrintWarn(error ?? "failed to set keybind");
+            _keybindCapture = null;
+            if (_input != null) _input.text = "";
+            RefreshSuggestions();
+            FocusInput();
+        }
+
+        private bool FindKeybind(string modQuery, string keyQuery, out string modId, out string name)
+        {
+            modId = null;
+            name = null;
+            var keybind = ModHost.AllKeybinds(modQuery).FirstOrDefault(k => string.Equals(k.Name, keyQuery, StringComparison.OrdinalIgnoreCase));
+            if (keybind == null) return false;
+            modId = keybind.ModId;
+            name = keybind.Name;
+            return true;
+        }
+
+        private IEnumerable<string> CompleteKeybindCommand(string[] args, int argIndex)
+        {
+            if (args == null || args.Length <= 1) return CompleteModIds(args, argIndex);
+            return CompleteKeybindNamesAfterMod(args[0]);
+        }
+
+        private IEnumerable<string> CompleteKeybindCommandUnset(string[] args, int argIndex)
+        {
+            if (args == null || args.Length <= 1) return CompleteModIds(args, argIndex);
+            return CompleteKeybindNamesAfterMod(args[0]);
+        }
+
+        private IEnumerable<string> CompleteKeybindNamesAfterMod(string modId)
+        {
+            return ModHost.AllKeybinds(modId)
+                .Select(k => modId + " " + k.Name)
+                .Distinct()
+                .OrderBy(s => s);
+        }
+
         private void AddLine(string line)
         {
             _lines.Add(line ?? "");
@@ -593,6 +790,36 @@ namespace Gambonanza.ModHost
             _input.Select();
             if (EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(_input.gameObject);
+        }
+
+        private void SuppressPauseButtonForEscapeFrame()
+        {
+            try
+            {
+                var type = Type.GetType("Blukulele.CHE.PauseButton, Assembly-CSharp");
+                if (type == null) return;
+                var field = type.GetField("m_CanPause", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (field == null) return;
+                foreach (var pb in Resources.FindObjectsOfTypeAll(type))
+                {
+                    if (pb == null) continue;
+                    var was = false;
+                    try { was = (bool)field.GetValue(pb); field.SetValue(pb, false); }
+                    catch { continue; }
+                    if (was) StartCoroutine(RestorePauseButtonNextFrame(field, pb));
+                }
+            }
+            catch { }
+        }
+
+        private IEnumerator RestorePauseButtonNextFrame(System.Reflection.FieldInfo field, UnityEngine.Object pauseButton)
+        {
+            yield return null;
+            try
+            {
+                if (pauseButton != null) field.SetValue(pauseButton, true);
+            }
+            catch { }
         }
 
         private static void EnsureEventSystem()
