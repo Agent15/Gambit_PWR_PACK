@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 
@@ -14,19 +15,16 @@ namespace Gambonanza.ModHost
         private static bool _loaded;
         private static ModRegistry _registry;
         private static string _modsDirectory;
+        private static ModConsole _console;
+        private static ConsoleMenuInjector _consoleMenuInjector;
 
         public static void LoadAll()
         {
             if (_loaded) return;
             _loaded = true;
+            _console = ModConsole.Ensure();
             _registry = new ModRegistry();
-
-            // Create the console BEFORE iterating mods so each mod's OnLoad
-            // receives a valid IConsoleApi via ModContext.Console. The UI itself
-            // is spawned later — printing into the buffer before the UI exists is
-            // fine; the UI reads the buffer state on first open.
-            var console = ModConsole.CreateOnce();
-            BuiltinCommands.Register(console);
+            _consoleMenuInjector = new ConsoleMenuInjector();
 
             try
             {
@@ -51,14 +49,8 @@ namespace Gambonanza.ModHost
                 LogLine("LoadAll failed: " + ex);
             }
 
-            // UI is created on a fresh GameObject; it survives scene loads via
-            // DontDestroyOnLoad. From here on, F1 / backtick toggles it.
-            ModConsoleUI.SpawnOnce(console);
-
-            // Boot summary into the console itself (not just Debug.Log) so the
-            // user sees it immediately on first open.
             int n = _registry.Count;
-            console.PrintInfo($"ModHost online — {n} mod{(n == 1 ? "" : "s")} loaded. Press F1 or ` to toggle. Type 'help' for commands.");
+            _console?.PrintInfo($"ModHost online — {n} mod{(n == 1 ? "" : "s")} loaded. Press F10 or ` to toggle. Type 'help' for commands.");
         }
 
         public static void OnSettingsOpenedInvoke(MonoBehaviour settingsCanvas)
@@ -68,8 +60,36 @@ namespace Gambonanza.ModHost
             catch (Exception ex) { LogLine("OnSettingsOpenedInvoke failed: " + ex); }
         }
 
-        // Exposed to BuiltinCommands so the `mods` / `mod <id>` console commands
-        // can introspect the registry.
+        public static void OnHomeMenuOpenedInvoke(MonoBehaviour canvasMenu)
+        {
+            if (!_loaded) LoadAll();
+            try { _consoleMenuInjector?.InjectButton(canvasMenu); }
+            catch (Exception ex) { LogLine("console button injection failed: " + ex); }
+        }
+
+        internal static void OpenConsole()
+        {
+            if (!_loaded) LoadAll();
+            (_console ?? ModConsole.Ensure()).Open();
+        }
+
+        internal static void OpenModsFolderInFinder()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(_modsDirectory)) return;
+                if (!Directory.Exists(_modsDirectory)) Directory.CreateDirectory(_modsDirectory);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "open",
+                    Arguments = $"\"{_modsDirectory}\"",
+                    UseShellExecute = false,
+                });
+            }
+            catch (Exception ex) { LogLine("OpenModsFolder failed: " + ex.Message); }
+        }
+
+        // Exposed to console commands so they can introspect the registry.
         internal static System.Collections.Generic.IReadOnlyList<ModRegistry.LoadedMod> AllMods()
             => _registry?.Mods ?? (System.Collections.Generic.IReadOnlyList<ModRegistry.LoadedMod>)
                    System.Array.Empty<ModRegistry.LoadedMod>();

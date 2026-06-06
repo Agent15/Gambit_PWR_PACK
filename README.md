@@ -65,9 +65,11 @@ The patcher injects exactly three calls into vanilla Gambonanza:
 
 | Where in `Assembly-CSharp.dll`              | Hook                                  |
 | ------------------------------------------- | ------------------------------------- |
-| `Blukulele.Core.GameManager.Start`          | `ModHost.LoadAll()` — boot.           |
-| `Blukulele.CHE.CanvasMenu.OnEnable`         | `ModHost.OnHomeMenuOpenedInvoke(this)` — adds the MODS button. |
+| `Blukulele.Core.GameManager.Start`          | `ModHost.LoadAll()` — boot, mod loading, and console setup. |
+| `Blukulele.CHE.CanvasMenu.OnEnable`         | `ModHost.OnHomeMenuOpenedInvoke(this)` — adds the CONSOLE home-screen button. |
 | `Blukulele.CHE.SettingsCanvas.OnEnable`     | `ModHost.OnSettingsOpenedInvoke(this)` — fans out to mods that subscribed via `IModContext.OnSettingsOpened`. |
+
+The in-game console opens with `F10`, `F1`, backtick, or the home-screen CONSOLE button. Type `help` to list commands.
 
 Everything else lives in plain managed DLLs that get loaded via
 `Assembly.LoadFrom`. There is no Harmony, no MonoMod runtime detour, no IL

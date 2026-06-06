@@ -239,5 +239,5 @@ done
 
 echo
 echo "All done. Sample mods installed in $MODS_DIR/."
-echo "Launch the game from Steam — press F1 (or backtick) to open the"
-echo "in-game console. Type 'help' to list commands."
+echo "Launch the game from Steam — press F10, F1, or backtick to open"
+echo "the in-game console. Type 'help' to list commands."

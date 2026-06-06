@@ -2,361 +2,714 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gambonanza.ModSdk;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Gambonanza.ModHost
 {
-    /// <summary>
-    /// Console state + command registry + parser. Pure logic — no Unity UI here.
-    /// The UI ({<see cref="ModConsoleUI"/>}) reads/writes this and signals visibility.
-    ///
-    /// Created exactly once during ModHost.LoadAll, before any mod's OnLoad. The
-    /// singleton is exposed to mods through <see cref="IModContext.Console"/>;
-    /// ModHost itself uses it directly via <see cref="Instance"/> for built-in
-    /// commands and the "N mods loaded" boot summary.
-    /// </summary>
-    internal sealed class ModConsole : IConsoleApi
+    internal sealed class ModConsole : MonoBehaviour, IConsoleApi
     {
-        public static ModConsole Instance { get; private set; }
-
-        public static ModConsole CreateOnce()
-        {
-            if (Instance == null) Instance = new ModConsole();
-            return Instance;
-        }
-
-        // ----- buffer ------------------------------------------------------
-
-        public sealed class Line
-        {
-            public string Text;
-            public ConsoleLineColor Color;
-        }
-
-        private const int MaxLines = 500;
-        private readonly LinkedList<Line> _lines = new LinkedList<Line>();
-        public IEnumerable<Line> Lines => _lines;
-
-        /// <summary>Bumped every time the buffer changes; UI re-renders on change.</summary>
-        public int Revision { get; private set; }
-
-        public void Print(string message, ConsoleLineColor color = ConsoleLineColor.Default)
-        {
-            // Split on newlines so each rendered row is a single line — keeps
-            // wrapping predictable and the scrollback responsive.
-            if (string.IsNullOrEmpty(message))
-            {
-                Append("", color);
-                return;
-            }
-            foreach (var part in message.Split('\n'))
-                Append(part.TrimEnd('\r'), color);
-        }
-
-        public void PrintInfo(string message)  => Print(message, ConsoleLineColor.Info);
-        public void PrintWarn(string message)  => Print(message, ConsoleLineColor.Warn);
-        public void PrintError(string message) => Print(message, ConsoleLineColor.Error);
-
-        private void Append(string text, ConsoleLineColor color)
-        {
-            _lines.AddLast(new Line { Text = text ?? "", Color = color });
-            while (_lines.Count > MaxLines) _lines.RemoveFirst();
-            Revision++;
-        }
-
-        public void Clear()
-        {
-            _lines.Clear();
-            Revision++;
-        }
-
-        // ----- command registry --------------------------------------------
-
         private sealed class Command
         {
-            public string Name;            // canonical, lowercased, single-spaced
-            public string[] NameTokens;    // pre-split tokens
-            public string Help;
+            public string Name;
+            public string Description;
             public Action<string[]> Handler;
             public ConsoleArgumentCompleter Completer;
         }
 
-        // Keyed by canonical name; Values stored sorted by descending token count
-        // for greedy longest-match parsing (mods can register both "gambit" and
-        // "gambit give" — the latter wins when input is "gambit give …").
-        private readonly Dictionary<string, Command> _commands =
-            new Dictionary<string, Command>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Command> _commands = new Dictionary<string, Command>();
+        private readonly List<string> _lines = new List<string>();
+        private readonly List<string> _suggestions = new List<string>();
 
-        public IEnumerable<(string Name, string Help)> AllCommands()
-            => _commands.Values
-                        .OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
-                        .Select(c => (c.Name, c.Help));
+        private Canvas _canvas;
+        private RectTransform _root;
+        private ScrollRect _outputScroll;
+        private RectTransform _outputContent;
+        private TextMeshProUGUI _output;
+        private TMP_InputField _input;
+        private TextMeshProUGUI _inputPreview;
+        private TextMeshProUGUI _inputText;
+        private TextMeshProUGUI _suggestionsText;
+        private bool _open;
+        private bool _submitQueued;
+        private bool _welcomed;
+        private string _lastSubmitted;
+        private float _lastSubmitAt;
+        private string _completionBaseInput;
+        private string _completionAppliedInput;
+        private int _completionIndex;
 
-        public void RegisterCommand(
-            string name, string help, Action<string[]> handler,
-            ConsoleArgumentCompleter completer = null)
+        private static readonly Color PanelColor = new Color(0.055f, 0.035f, 0.03f, 0.94f);
+        private static readonly Color BorderColor = new Color(0.95f, 0.82f, 0.45f, 1f);
+        private static readonly Color TextColor = new Color(1f, 0.94f, 0.72f, 1f);
+        private static readonly Color MutedColor = new Color(1f, 0.80f, 0.55f, 0.78f);
+        private static readonly Color WarnColor = new Color(1f, 0.55f, 0.35f, 1f);
+        private const string Gold = "#ffd36b";
+        private const string Blue = "#78c7ff";
+        private const string Lime = "#b8ff5f";
+        private const string Response = "#aaa39a";
+
+        public static ModConsole Instance { get; private set; }
+
+        public static ModConsole Ensure()
         {
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("name is required", nameof(name));
-            if (handler == null) throw new ArgumentNullException(nameof(handler));
-            var canonical = string.Join(" ", Tokenize(name));
-            if (canonical.Length == 0) throw new ArgumentException("name has no tokens", nameof(name));
-            _commands[canonical] = new Command
+            var existing = Resources.FindObjectsOfTypeAll<ModConsole>().FirstOrDefault();
+            if (existing != null)
             {
-                Name       = canonical,
-                NameTokens = canonical.Split(' '),
-                Help       = help ?? "",
-                Handler    = handler,
-                Completer  = completer,
+                Instance = existing;
+                return existing;
+            }
+
+            var go = new GameObject("__GambonanzaModConsole");
+            DontDestroyOnLoad(go);
+            go.hideFlags = HideFlags.HideAndDontSave;
+            Instance = go.AddComponent<ModConsole>();
+            return Instance;
+        }
+
+        private void Awake()
+        {
+            Instance = this;
+            RegisterCommand("help", "list console commands", _ => PrintHelp());
+            RegisterCommand("clear", "clear console output", _ => { _lines.Clear(); RefreshOutput(); });
+            RegisterCommand("mods", "list loaded mods", _ => PrintMods());
+            RegisterCommand("mods rescan", "rescan the Mods folder", _ =>
+            {
+                var count = ModHost.Rescan();
+                PrintInfo(count > 0 ? $"loaded {count} new mod(s)." : "no new mods found.");
+            });
+            RegisterCommand("mods folder", "open the Mods folder", _ => ModHost.OpenModsFolderInFinder());
+            RegisterCommand("mods enable", "enable a mod: mods enable <id>", args => SetModEnabled(args, true), CompleteModIds);
+            RegisterCommand("mods disable", "disable a mod: mods disable <id>", args => SetModEnabled(args, false), CompleteModIds);
+            ModCheats.Register(this);
+            PrintInfo("console ready. Press ` or F10 to toggle. Type 'help' for commands.");
+        }
+
+        public bool IsOpen => _open;
+
+        public void Open() => SetOpen(true);
+
+        public void Close() => SetOpen(false);
+
+        public void Toggle() => SetOpen(!_open);
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.BackQuote) || Input.GetKeyDown(KeyCode.F10))
+            {
+                Toggle();
+                return;
+            }
+
+            if (!_open) return;
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SetOpen(false);
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                AcceptSuggestion();
+                return;
+            }
+
+            // TMP_InputField.onSubmit is the normal path. This fallback covers
+            // Unity/EventSystem focus weirdness in the game menus.
+            if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                _submitQueued = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (!_open) return;
+
+            if (_submitQueued)
+            {
+                _submitQueued = false;
+                SubmitCurrentInput();
+            }
+        }
+
+        public void RegisterCommand(string name, string description, Action<string[]> handler, ConsoleArgumentCompleter completer = null)
+        {
+            if (string.IsNullOrEmpty(name) || handler == null) return;
+            var key = Normalize(name);
+            _commands[key] = new Command
+            {
+                Name = key,
+                Description = description ?? "",
+                Handler = handler,
+                Completer = completer,
             };
+            RefreshSuggestions();
+            ModHost.LogLine($"console command registered: {key}");
         }
 
         public void UnregisterCommand(string name)
         {
-            if (string.IsNullOrWhiteSpace(name)) return;
-            var canonical = string.Join(" ", Tokenize(name));
-            _commands.Remove(canonical);
+            if (string.IsNullOrEmpty(name)) return;
+            _commands.Remove(Normalize(name));
+            RefreshSuggestions();
         }
 
-        // ----- visibility (UI sets these) ----------------------------------
-
-        public bool IsOpen { get; internal set; }
-
-        // The UI subscribes; ModConsole signals via these. Decoupled so the UI
-        // can reload (e.g. for testing) without breaking handlers.
-        internal event Action OnOpenRequested;
-        internal event Action OnCloseRequested;
-
-        public void Open()   { OnOpenRequested?.Invoke();  }
-        public void Close()  { OnCloseRequested?.Invoke(); }
-        public void Toggle() { if (IsOpen) Close(); else Open(); }
-
-        // ----- input handling ----------------------------------------------
-
-        /// <summary>
-        /// Parse and run an input line. Echoes the input, dispatches the command,
-        /// catches handler exceptions, prints "unknown command" if no match.
-        /// </summary>
-        public void Submit(string input)
+        public void Print(string message, ConsoleLineColor color = ConsoleLineColor.Default)
         {
-            if (string.IsNullOrWhiteSpace(input)) return;
-            Print("> " + input, ConsoleLineColor.Echo);
-
-            var tokens = Tokenize(input);
-            if (tokens.Count == 0) return;
-
-            // Greedy longest-match: try the full token list as a command, drop
-            // the tail and try again, until we hit an empty prefix or find one.
-            for (int take = Math.Min(tokens.Count, MaxCommandTokens); take >= 1; take--)
+            switch (color)
             {
-                var name = string.Join(" ", tokens.Take(take));
-                if (!_commands.TryGetValue(name, out var cmd)) continue;
-                var args = tokens.Skip(take).ToArray();
-                try { cmd.Handler(args); }
-                catch (Exception ex) { PrintError($"command '{name}' threw: {ex.Message}"); }
+                case ConsoleLineColor.Warn:
+                    PrintWarn(message);
+                    break;
+                case ConsoleLineColor.Error:
+                    PrintError(message);
+                    break;
+                case ConsoleLineColor.Echo:
+                    AddLine($"<color={Gold}>></color> " + ColorizeCommand((message ?? "").TrimStart('>', ' ')));
+                    break;
+                default:
+                    PrintInfo(message);
+                    break;
+            }
+        }
+
+        public void PrintInfo(string message)
+        {
+            AddLine($"<color={Response}>" + Escape(message) + "</color>");
+            try { Debug.Log("[ModConsole] " + message); } catch { }
+        }
+
+        public void PrintWarn(string message)
+        {
+            AddLine("<color=#ff8c59>[warn]</color> " + Escape(message));
+            try { Debug.LogWarning("[ModConsole] " + message); } catch { }
+        }
+
+        public void PrintError(string message)
+        {
+            AddLine("<color=#ff5f5f>[error]</color> " + Escape(message));
+            try { Debug.LogError("[ModConsole] " + message); } catch { }
+        }
+
+        private void SetOpen(bool open)
+        {
+            _open = open;
+            EnsureUi();
+            _canvas.gameObject.SetActive(open);
+            if (open)
+            {
+                PrintWelcomeIfNeeded();
+                RefreshOutput();
+                RefreshSuggestions();
+                FocusInput();
+            }
+        }
+
+        private void PrintWelcomeIfNeeded()
+        {
+            if (_welcomed) return;
+            _welcomed = true;
+            PrintInfo("Welcome to the Gambonanza console.");
+            PrintInfo("Open/close it anytime with F10 or `.");
+            PrintInfo("Examples: give money 100 | give piece queen 2 | give gambit thunder | win round");
+            PrintInfo("Tip: press Tab to autocomplete; keep pressing Tab to cycle suggestions.");
+        }
+
+        private void EnsureUi()
+        {
+            if (_canvas != null) return;
+            EnsureEventSystem();
+
+            var canvasGo = new GameObject("__GambonanzaModConsoleCanvas");
+            DontDestroyOnLoad(canvasGo);
+            canvasGo.hideFlags = HideFlags.HideAndDontSave;
+            _canvas = canvasGo.AddComponent<Canvas>();
+            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _canvas.sortingOrder = short.MaxValue;
+            canvasGo.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasGo.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920, 1080);
+            canvasGo.GetComponent<CanvasScaler>().matchWidthOrHeight = 0.5f;
+            canvasGo.AddComponent<GraphicRaycaster>();
+
+            _root = CreateRect("Panel", canvasGo.transform);
+            _root.anchorMin = new Vector2(0.035f, 0.06f);
+            _root.anchorMax = new Vector2(0.965f, 0.94f);
+            _root.offsetMin = Vector2.zero;
+            _root.offsetMax = Vector2.zero;
+            AddImage(_root.gameObject, PanelColor);
+            AddOutline(_root.gameObject, BorderColor, 4f);
+
+            var header = CreateText("Header", _root, "GAMBONANZA CONSOLE", 34, TextAlignmentOptions.Left, BorderColor);
+            header.rectTransform.anchorMin = new Vector2(0.03f, 0.91f);
+            header.rectTransform.anchorMax = new Vector2(0.86f, 0.985f);
+            header.rectTransform.offsetMin = Vector2.zero;
+            header.rectTransform.offsetMax = Vector2.zero;
+            header.fontStyle = FontStyles.Bold;
+
+            var hint = CreateText("Hint", _root, "Enter: run   Tab: autocomplete   Esc: close   ` / F10: toggle", 20, TextAlignmentOptions.Right, MutedColor);
+            hint.rectTransform.anchorMin = new Vector2(0.36f, 0.91f);
+            hint.rectTransform.anchorMax = new Vector2(0.94f, 0.982f);
+            hint.rectTransform.offsetMin = Vector2.zero;
+            hint.rectTransform.offsetMax = Vector2.zero;
+
+            var close = CreateButton("Close", _root, "X", 28, () => SetOpen(false));
+            close.anchorMin = new Vector2(0.945f, 0.92f);
+            close.anchorMax = new Vector2(0.985f, 0.98f);
+            close.offsetMin = Vector2.zero;
+            close.offsetMax = Vector2.zero;
+
+            var outputBg = CreateRect("OutputBg", _root);
+            outputBg.anchorMin = new Vector2(0.03f, 0.23f);
+            outputBg.anchorMax = new Vector2(0.97f, 0.895f);
+            outputBg.offsetMin = Vector2.zero;
+            outputBg.offsetMax = Vector2.zero;
+            AddImage(outputBg.gameObject, new Color(0.02f, 0.014f, 0.012f, 0.72f));
+
+            _outputScroll = outputBg.gameObject.AddComponent<ScrollRect>();
+            _outputScroll.horizontal = false;
+            _outputScroll.vertical = true;
+            _outputScroll.movementType = ScrollRect.MovementType.Clamped;
+            _outputScroll.scrollSensitivity = 34f;
+
+            var outputViewport = CreateRect("Viewport", outputBg);
+            outputViewport.anchorMin = new Vector2(0.018f, 0.035f);
+            outputViewport.anchorMax = new Vector2(0.982f, 0.965f);
+            outputViewport.offsetMin = Vector2.zero;
+            outputViewport.offsetMax = Vector2.zero;
+            outputViewport.gameObject.AddComponent<RectMask2D>();
+            _outputScroll.viewport = outputViewport;
+
+            _outputContent = CreateRect("Content", outputViewport);
+            _outputContent.anchorMin = new Vector2(0f, 1f);
+            _outputContent.anchorMax = new Vector2(1f, 1f);
+            _outputContent.pivot = new Vector2(0f, 1f);
+            _outputContent.offsetMin = Vector2.zero;
+            _outputContent.offsetMax = Vector2.zero;
+            _outputScroll.content = _outputContent;
+
+            _output = CreateText("Output", _outputContent, "", 24, TextAlignmentOptions.TopLeft, TextColor);
+            _output.rectTransform.anchorMin = new Vector2(0f, 1f);
+            _output.rectTransform.anchorMax = new Vector2(1f, 1f);
+            _output.rectTransform.pivot = new Vector2(0f, 1f);
+            _output.rectTransform.offsetMin = new Vector2(0f, 0f);
+            _output.rectTransform.offsetMax = new Vector2(0f, 0f);
+            _output.textWrappingMode = TextWrappingModes.Normal;
+            _output.overflowMode = TextOverflowModes.Overflow;
+            _output.lineSpacing = 8f;
+
+            var suggestBg = CreateRect("SuggestionsBg", _root);
+            suggestBg.anchorMin = new Vector2(0.03f, 0.125f);
+            suggestBg.anchorMax = new Vector2(0.97f, 0.215f);
+            suggestBg.offsetMin = Vector2.zero;
+            suggestBg.offsetMax = Vector2.zero;
+            AddImage(suggestBg.gameObject, new Color(0.10f, 0.055f, 0.035f, 0.90f));
+            _suggestionsText = CreateText("Suggestions", suggestBg, "", 20, TextAlignmentOptions.Left, MutedColor);
+            _suggestionsText.rectTransform.anchorMin = new Vector2(0.018f, 0.08f);
+            _suggestionsText.rectTransform.anchorMax = new Vector2(0.982f, 0.92f);
+            _suggestionsText.rectTransform.offsetMin = Vector2.zero;
+            _suggestionsText.rectTransform.offsetMax = Vector2.zero;
+            _suggestionsText.textWrappingMode = TextWrappingModes.NoWrap;
+            _suggestionsText.overflowMode = TextOverflowModes.Ellipsis;
+
+            CreateInput(_root);
+            _canvas.gameObject.SetActive(false);
+        }
+
+        private void CreateInput(RectTransform parent)
+        {
+            var inputRoot = CreateRect("Input", parent);
+            inputRoot.anchorMin = new Vector2(0.03f, 0.035f);
+            inputRoot.anchorMax = new Vector2(0.97f, 0.115f);
+            inputRoot.offsetMin = Vector2.zero;
+            inputRoot.offsetMax = Vector2.zero;
+            AddImage(inputRoot.gameObject, new Color(0.035f, 0.022f, 0.018f, 0.96f));
+            AddOutline(inputRoot.gameObject, BorderColor, 3f);
+
+            _input = inputRoot.gameObject.AddComponent<TMP_InputField>();
+            _input.lineType = TMP_InputField.LineType.SingleLine;
+            _input.characterValidation = TMP_InputField.CharacterValidation.None;
+            _input.shouldHideMobileInput = false;
+            _input.customCaretColor = true;
+            _input.caretColor = new Color(1f, 0.83f, 0.42f, 0.9f);
+            _input.caretWidth = 11;
+            _input.onSubmit.AddListener(_ => SubmitCurrentInput());
+            _input.onValueChanged.AddListener(_ => { RefreshInputPreview(); RefreshSuggestions(); });
+
+            var viewport = CreateRect("TextViewport", inputRoot);
+            viewport.anchorMin = new Vector2(0.02f, 0f);
+            viewport.anchorMax = new Vector2(0.98f, 1f);
+            viewport.offsetMin = Vector2.zero;
+            viewport.offsetMax = Vector2.zero;
+            var mask = viewport.gameObject.AddComponent<RectMask2D>();
+            mask.padding = Vector4.zero;
+
+            _inputPreview = CreateText("Preview", viewport, "", 28, TextAlignmentOptions.MidlineLeft, TextColor);
+            _inputPreview.rectTransform.anchorMin = Vector2.zero;
+            _inputPreview.rectTransform.anchorMax = Vector2.one;
+            _inputPreview.rectTransform.offsetMin = Vector2.zero;
+            _inputPreview.rectTransform.offsetMax = Vector2.zero;
+            _inputPreview.textWrappingMode = TextWrappingModes.NoWrap;
+            _inputPreview.richText = true;
+
+            _inputText = CreateText("Text", viewport, "", 28, TextAlignmentOptions.MidlineLeft, new Color(1f, 0.94f, 0.72f, 0.02f));
+            _inputText.rectTransform.anchorMin = Vector2.zero;
+            _inputText.rectTransform.anchorMax = Vector2.one;
+            _inputText.rectTransform.offsetMin = Vector2.zero;
+            _inputText.rectTransform.offsetMax = Vector2.zero;
+            _inputText.textWrappingMode = TextWrappingModes.NoWrap;
+
+            // Use TMP_InputField's own caret as the block cursor. A separate
+            // overlay cursor can accidentally measure the placeholder text and
+            // jump to the end of "type a command…" when the input is empty.
+
+            var placeholder = CreateText("Placeholder", viewport, "type a command…", 28, TextAlignmentOptions.MidlineLeft, new Color(1f, 0.94f, 0.72f, 0.45f));
+            placeholder.rectTransform.anchorMin = Vector2.zero;
+            placeholder.rectTransform.anchorMax = Vector2.one;
+            placeholder.rectTransform.offsetMin = Vector2.zero;
+            placeholder.rectTransform.offsetMax = Vector2.zero;
+            placeholder.fontStyle = FontStyles.Italic;
+
+            _input.textViewport = viewport;
+            _input.textComponent = _inputText;
+            _input.placeholder = placeholder;
+            _input.targetGraphic = inputRoot.GetComponent<Image>();
+        }
+
+        private void SubmitCurrentInput()
+        {
+            if (_input == null) return;
+            var line = (_input.text ?? "").Trim();
+            if (line.Length == 0) { FocusInput(); return; }
+
+            // Guard against receiving both onSubmit and the Update fallback for the
+            // same Enter press.
+            if (line == _lastSubmitted && Time.realtimeSinceStartup - _lastSubmitAt < 0.15f)
+            {
+                FocusInput();
                 return;
             }
-            PrintError($"unknown command '{tokens[0]}'. Type 'help'.");
+            _lastSubmitted = line;
+            _lastSubmitAt = Time.realtimeSinceStartup;
+
+            _input.text = "";
+            RefreshInputPreview();
+            Execute(line);
+            RefreshSuggestions();
+            FocusInput();
         }
 
-        // Cap on multi-word command name length — keeps the lookup loop O(k) on
-        // input length rather than O(k²) on a million-token paste.
-        private const int MaxCommandTokens = 4;
-
-        /// <summary>
-        /// Compute autocomplete candidates for the current cursor position.
-        /// </summary>
-        /// <param name="input">Full input text.</param>
-        /// <param name="cursor">Cursor position (we complete the token under it; if cursor is past the end, we complete the trailing token / suggest a new one).</param>
-        public IReadOnlyList<string> Complete(string input, int cursor)
+        private void Execute(string line)
         {
-            input ??= "";
-            cursor = Math.Clamp(cursor, 0, input.Length);
+            AddLine($"<color={Gold}>></color> " + ColorizeCommand(line));
 
-            // Tokenize while tracking which token (and which char in it) the
-            // cursor sits in. We treat trailing whitespace as "starting a fresh
-            // token" so "gambit " + Tab suggests gambit-give's first arg.
-            var (tokens, currentTokenIdx, currentTokenPrefix) = TokenizeWithCursor(input, cursor);
-
-            // No tokens yet → suggest top-level command first words.
-            if (tokens.Count == 0 || currentTokenIdx == 0)
+            var command = FindCommand(line, out var argText);
+            if (command == null)
             {
-                var prefix = currentTokenPrefix ?? "";
-                var candidates = _commands.Keys
-                    .Where(n => n.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    .Select(n => n.Split(' ')[0])
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-                return candidates;
+                PrintWarn("unknown command. Type 'help'.");
+                return;
             }
 
-            // The cursor is past the first token. Find every command whose token
-            // path is a prefix of the input up to currentTokenIdx − 1, then ask
-            // either (a) the command's completer for arg completions, or (b) the
-            // registry for additional sibling subcommands.
-            //
-            // Strategy: find longest matching command prefix; if the matched
-            // command has more tokens than we've consumed at currentTokenIdx,
-            // suggest the next subword. Otherwise call the completer.
-            string longestMatch = null;
-            int longestMatchTokens = 0;
-            foreach (var c in _commands.Values)
-            {
-                if (c.NameTokens.Length > currentTokenIdx + 1) continue;
-                bool match = true;
-                for (int i = 0; i < c.NameTokens.Length; i++)
-                {
-                    if (!string.Equals(c.NameTokens[i], tokens[i], StringComparison.OrdinalIgnoreCase))
-                    { match = false; break; }
-                }
-                if (!match) continue;
-                if (c.NameTokens.Length > longestMatchTokens)
-                {
-                    longestMatchTokens = c.NameTokens.Length;
-                    longestMatch = c.Name;
-                }
-            }
-
-            // Always offer subcommand siblings whose first N tokens match the
-            // entered prefix and whose token at currentTokenIdx starts with the
-            // current partial.
-            var prefixTokens = tokens.Take(currentTokenIdx).ToList();
-            var subwords = new List<string>();
-            foreach (var c in _commands.Values)
-            {
-                if (c.NameTokens.Length <= currentTokenIdx) continue;
-                bool match = true;
-                for (int i = 0; i < currentTokenIdx; i++)
-                {
-                    if (!string.Equals(c.NameTokens[i], prefixTokens[i], StringComparison.OrdinalIgnoreCase))
-                    { match = false; break; }
-                }
-                if (!match) continue;
-                var word = c.NameTokens[currentTokenIdx];
-                if (word.StartsWith(currentTokenPrefix ?? "", StringComparison.OrdinalIgnoreCase))
-                    subwords.Add(word);
-            }
-
-            // If we resolved a full command match, ask its completer too.
-            var completerSuggestions = new List<string>();
-            if (longestMatch != null && _commands.TryGetValue(longestMatch, out var cmd) && cmd.Completer != null)
-            {
-                int argIndex = currentTokenIdx - longestMatchTokens;
-                if (argIndex >= 0)
-                {
-                    // Build the args array as the completer expects: everything
-                    // after the command name, with the current partial token in
-                    // its slot.
-                    var argsList = tokens.Skip(longestMatchTokens).ToList();
-                    while (argsList.Count <= argIndex) argsList.Add("");
-                    argsList[argIndex] = currentTokenPrefix ?? "";
-                    var args = argsList.ToArray();
-                    IEnumerable<string> raw = null;
-                    try { raw = cmd.Completer(args, argIndex); }
-                    catch (Exception ex) { PrintError($"completer for '{longestMatch}' threw: {ex.Message}"); }
-                    if (raw != null)
-                    {
-                        var partial = currentTokenPrefix ?? "";
-                        foreach (var s in raw)
-                        {
-                            if (string.IsNullOrEmpty(s)) continue;
-                            if (s.StartsWith(partial, StringComparison.OrdinalIgnoreCase))
-                                completerSuggestions.Add(s);
-                        }
-                    }
-                }
-            }
-
-            return subwords
-                .Concat(completerSuggestions)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(s => s, StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            try { command.Handler(SplitArgs(argText).ToArray()); }
+            catch (Exception ex) { PrintWarn($"command failed: {ex.Message}"); }
         }
 
-        // ----- tokenization ------------------------------------------------
+        private Command FindCommand(string line, out string argText)
+        {
+            var normalized = Normalize(line);
+            foreach (var pair in _commands.OrderByDescending(p => p.Key.Length))
+            {
+                var key = pair.Key;
+                if (normalized == key)
+                {
+                    argText = "";
+                    return pair.Value;
+                }
+                if (normalized.StartsWith(key + " ", StringComparison.Ordinal))
+                {
+                    argText = line.Substring(key.Length).TrimStart();
+                    return pair.Value;
+                }
+            }
+            argText = "";
+            return null;
+        }
 
-        // Splits on runs of whitespace. No quoting / escapes in v1 — gambit IDs
-        // and most cheats don't contain spaces.
-        private static List<string> Tokenize(string s)
+        private void RefreshSuggestions()
+        {
+            if (_suggestionsText == null) return;
+            _suggestions.Clear();
+            _suggestions.AddRange(BuildSuggestionsFor(_input != null ? _input.text ?? "" : ""));
+
+            _suggestionsText.text = _suggestions.Count == 0
+                ? ""
+                : $"<color={Response}>suggestions:</color> " + string.Join("    ", _suggestions.Take(8).Select(ColorizeCommand).ToArray());
+        }
+
+        private List<string> BuildSuggestionsFor(string rawLine)
         {
             var result = new List<string>();
-            if (string.IsNullOrEmpty(s)) return result;
-            int i = 0;
-            while (i < s.Length)
+            var line = (rawLine ?? "").TrimStart();
+            var normalized = Normalize(line);
+
+            Command exact = null;
+            string argText = "";
+            if (line.Length > 0) exact = FindCommand(line, out argText);
+            if (exact != null && exact.Completer != null)
             {
-                while (i < s.Length && char.IsWhiteSpace(s[i])) i++;
-                int start = i;
-                while (i < s.Length && !char.IsWhiteSpace(s[i])) i++;
-                if (i > start) result.Add(s.Substring(start, i - start));
+                try
+                {
+                    var args = SplitArgsForCompletion(argText).ToArray();
+                    var argIndex = Math.Max(0, args.Length - 1);
+                    foreach (var s in exact.Completer(args, argIndex) ?? Enumerable.Empty<string>())
+                        if (!string.IsNullOrEmpty(s)) result.Add(exact.Name + " " + s);
+                }
+                catch { }
             }
-            return result;
+
+            if (result.Count == 0)
+            {
+                foreach (var cmd in _commands.Values.OrderBy(c => c.Name))
+                {
+                    if (normalized.Length == 0 || cmd.Name.StartsWith(normalized, StringComparison.Ordinal) || cmd.Name.Contains(normalized))
+                        result.Add(cmd.Name);
+                    if (result.Count >= 8) break;
+                }
+            }
+
+            return result.Distinct().Take(16).ToList();
         }
 
-        private static (List<string> tokens, int currentIdx, string currentPrefix)
-            TokenizeWithCursor(string s, int cursor)
+        private void RefreshInputPreview()
         {
-            var tokens = new List<string>();
-            int currentIdx = 0;
-            string currentPrefix = "";
-            int i = 0;
-            int tokenStart = -1;
-            int caretToken = -1;
-            int caretCharInToken = 0;
-            while (i <= s.Length)
+            if (_inputPreview == null || _input == null) return;
+            _inputPreview.text = string.IsNullOrEmpty(_input.text) ? "" : ColorizeCommand(_input.text);
+        }
+
+        private void AcceptSuggestion()
+        {
+            if (_input == null) return;
+            var current = _input.text ?? "";
+            List<string> candidates;
+            if (current == _completionAppliedInput && !string.IsNullOrEmpty(_completionBaseInput))
             {
-                bool atEnd = i == s.Length;
-                bool ws = !atEnd && char.IsWhiteSpace(s[i]);
-                if (!ws && tokenStart < 0) tokenStart = i;
-                if (i == cursor)
-                {
-                    caretToken = tokenStart >= 0 ? tokens.Count : tokens.Count;
-                    caretCharInToken = tokenStart >= 0 ? cursor - tokenStart : 0;
-                }
-                if (atEnd || ws)
-                {
-                    if (tokenStart >= 0)
-                    {
-                        tokens.Add(s.Substring(tokenStart, i - tokenStart));
-                        tokenStart = -1;
-                    }
-                }
-                if (atEnd) break;
-                i++;
+                candidates = BuildSuggestionsFor(_completionBaseInput);
+                if (candidates.Count == 0) return;
+                _completionIndex = (_completionIndex + 1) % candidates.Count;
             }
-
-            if (caretToken < 0) caretToken = tokens.Count;
-            currentIdx = caretToken;
-
-            // The caret-token computation above gives us the index of the token
-            // the cursor is INSIDE OR AT THE END OF. Compute the partial as the
-            // substring of that token before the cursor.
-            if (caretToken < tokens.Count)
-                currentPrefix = tokens[caretToken].Substring(0, Math.Min(caretCharInToken, tokens[caretToken].Length));
             else
-                currentPrefix = "";
-            return (tokens, currentIdx, currentPrefix);
+            {
+                _completionBaseInput = current;
+                candidates = BuildSuggestionsFor(current);
+                if (candidates.Count == 0) return;
+                _completionIndex = 0;
+            }
+
+            _input.text = candidates[_completionIndex];
+            _completionAppliedInput = _input.text;
+            _input.caretPosition = _input.text.Length;
+            RefreshSuggestions();
+            FocusInput();
         }
 
-        /// <summary>
-        /// Replace the token under the cursor with <paramref name="completion"/>
-        /// and return (newText, newCursor). Used by the UI when accepting Tab.
-        /// </summary>
-        public static (string text, int cursor) ApplyCompletion(string input, int cursor, string completion)
+        private IEnumerable<string> CompleteModIds(string[] args, int argIndex)
         {
-            input ??= "";
-            cursor = Math.Clamp(cursor, 0, input.Length);
+            var prefix = args != null && args.Length > 0 ? Normalize(args[0]) : "";
+            return ModHost.AllMods()
+                .Select(m => m.Manifest.id)
+                .Where(id => string.IsNullOrEmpty(prefix) || Normalize(id).StartsWith(prefix))
+                .OrderBy(id => id)
+                .Take(8);
+        }
 
-            // Find token boundaries for the token under the cursor (or the empty
-            // slot after trailing whitespace).
-            int start = cursor;
-            while (start > 0 && !char.IsWhiteSpace(input[start - 1])) start--;
-            int end = cursor;
-            while (end < input.Length && !char.IsWhiteSpace(input[end])) end++;
+        private void PrintHelp()
+        {
+            foreach (var cmd in _commands.Values.OrderBy(c => c.Name))
+                AddLine(ColorizeCommand(cmd.Name) + $"<pos=360><color={Response}>" + Escape(cmd.Description) + "</color>");
+        }
 
-            var newText = input.Substring(0, start) + completion + input.Substring(end);
-            int newCursor = start + completion.Length;
-            return (newText, newCursor);
+        private void PrintMods()
+        {
+            var mods = ModHost.AllMods();
+            if (mods.Count == 0)
+            {
+                PrintInfo("no mods loaded.");
+                return;
+            }
+            foreach (var mod in mods)
+                PrintInfo($"{mod.Manifest.id} v{mod.Manifest.version} [{(mod.IsActive ? "enabled" : "disabled")}]");
+        }
+
+        private void SetModEnabled(string[] args, bool enabled)
+        {
+            if (args == null || args.Length == 0)
+            {
+                PrintWarn(enabled ? "usage: mods enable <id>" : "usage: mods disable <id>");
+                return;
+            }
+            string error;
+            var ok = enabled ? ModHost.TryEnable(args[0], out error) : ModHost.TryDisable(args[0], out error);
+            if (ok && string.IsNullOrEmpty(error)) PrintInfo($"{args[0]} {(enabled ? "enabled" : "disabled")}");
+            else PrintWarn(error ?? "failed");
+        }
+
+        private void AddLine(string line)
+        {
+            _lines.Add(line ?? "");
+            while (_lines.Count > 500) _lines.RemoveAt(0);
+            RefreshOutput();
+        }
+
+        private void RefreshOutput()
+        {
+            if (_output == null) return;
+
+            _output.text = string.Join("\n", _lines.ToArray());
+            _output.ForceMeshUpdate();
+
+            if (_outputContent != null && _outputScroll != null && _outputScroll.viewport != null)
+            {
+                var viewportHeight = _outputScroll.viewport.rect.height;
+                var preferredHeight = Mathf.Max(viewportHeight, _output.preferredHeight + 18f);
+                _outputContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, preferredHeight);
+                _output.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, preferredHeight);
+                ScrollOutputToBottom();
+            }
+        }
+
+        private void ScrollOutputToBottom()
+        {
+            if (_outputScroll == null) return;
+            Canvas.ForceUpdateCanvases();
+            _outputScroll.verticalNormalizedPosition = 0f;
+            Canvas.ForceUpdateCanvases();
+        }
+
+        private void FocusInput()
+        {
+            if (_input == null) return;
+            _input.ActivateInputField();
+            _input.Select();
+            if (EventSystem.current != null)
+                EventSystem.current.SetSelectedGameObject(_input.gameObject);
+        }
+
+        private static void EnsureEventSystem()
+        {
+            if (EventSystem.current != null) return;
+            var go = new GameObject("__GambonanzaModConsoleEventSystem");
+            DontDestroyOnLoad(go);
+            go.hideFlags = HideFlags.HideAndDontSave;
+            go.AddComponent<EventSystem>();
+            go.AddComponent<StandaloneInputModule>();
+        }
+
+        private static RectTransform CreateRect(string name, Transform parent)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            return (RectTransform)go.transform;
+        }
+
+        private static Image AddImage(GameObject go, Color color)
+        {
+            var img = go.AddComponent<Image>();
+            img.color = color;
+            return img;
+        }
+
+        private static void AddOutline(GameObject go, Color color, float size)
+        {
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = color;
+            outline.effectDistance = new Vector2(size, -size);
+        }
+
+        private static TextMeshProUGUI CreateText(string name, Transform parent, string text, float size, TextAlignmentOptions align, Color color)
+        {
+            var rt = CreateRect(name, parent);
+            var tmp = rt.gameObject.AddComponent<TextMeshProUGUI>();
+            tmp.text = text ?? "";
+            tmp.fontSize = size;
+            tmp.alignment = align;
+            tmp.color = color;
+            tmp.raycastTarget = false;
+            return tmp;
+        }
+
+        private static RectTransform CreateButton(string name, Transform parent, string label, float fontSize, Action onClick)
+        {
+            var rt = CreateRect(name, parent);
+            AddImage(rt.gameObject, new Color(0.72f, 0.18f, 0.14f, 1f));
+            AddOutline(rt.gameObject, BorderColor, 2f);
+            var btn = rt.gameObject.AddComponent<Button>();
+            btn.onClick.AddListener(() => onClick?.Invoke());
+            var txt = CreateText("Text", rt, label, fontSize, TextAlignmentOptions.Center, TextColor);
+            txt.rectTransform.anchorMin = Vector2.zero;
+            txt.rectTransform.anchorMax = Vector2.one;
+            txt.rectTransform.offsetMin = Vector2.zero;
+            txt.rectTransform.offsetMax = Vector2.zero;
+            txt.fontStyle = FontStyles.Bold;
+            return rt;
+        }
+
+        private static string Normalize(string s) => (s ?? "").Trim().ToLowerInvariant();
+
+        private static string Escape(string s)
+        {
+            // TextMeshPro rich text does not decode HTML entities like &lt;.
+            // Avoid accidental tag parsing by converting angle brackets to
+            // readable placeholder brackets instead.
+            return (s ?? "").Replace("<", "[").Replace(">", "]");
+        }
+
+        private static string ColorizeCommand(string line)
+        {
+            var parts = SplitArgs(line).ToArray();
+            if (parts.Length == 0) return "";
+            var colors = new List<string>();
+            var command = Normalize(parts[0]);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var color = Gold;
+                if (i == 0) color = Gold;
+                else if (command == "win") color = Lime;
+                else if (i == 1) color = Blue;
+                else color = Lime;
+                colors.Add($"<color={color}>" + Escape(parts[i]) + "</color>");
+            }
+            return string.Join(" ", colors.ToArray());
+        }
+
+        private static IEnumerable<string> SplitArgsForCompletion(string text)
+        {
+            var parsed = SplitArgs(text).ToList();
+            if (!string.IsNullOrEmpty(text) && char.IsWhiteSpace(text[text.Length - 1])) parsed.Add("");
+            return parsed;
+        }
+
+        private static IEnumerable<string> SplitArgs(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) yield break;
+            var current = new System.Text.StringBuilder();
+            bool quoted = false;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var ch = text[i];
+                if (ch == '"') { quoted = !quoted; continue; }
+                if (char.IsWhiteSpace(ch) && !quoted)
+                {
+                    if (current.Length > 0)
+                    {
+                        yield return current.ToString();
+                        current.Length = 0;
+                    }
+                    continue;
+                }
+                current.Append(ch);
+            }
+            if (current.Length > 0) yield return current.ToString();
         }
     }
 }

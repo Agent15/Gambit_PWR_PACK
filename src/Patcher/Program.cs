@@ -8,9 +8,10 @@ using Mono.Cecil.Cil;
 namespace Gambonanza.Patcher;
 
 /// <summary>
-/// Generic Cecil patcher. Injects two calls into Assembly-CSharp.dll:
+/// Generic Cecil patcher. Injects three calls into Assembly-CSharp.dll:
 ///   1. Gambonanza.ModHost.ModHost.LoadAll()                       at GameManager.Start
 ///   2. Gambonanza.ModHost.ModHost.OnSettingsOpenedInvoke(this)    at SettingsCanvas.OnEnable
+///   3. Gambonanza.ModHost.ModHost.OnHomeMenuOpenedInvoke(this)    at CanvasMenu.OnEnable
 ///
 /// All mod-specific logic lives in mods loaded by ModHost at runtime — this patcher
 /// has no knowledge of any individual mod (including SpeedMod).
@@ -149,6 +150,10 @@ internal static class Program
             "OnSettingsOpenedInvoke", module.TypeSystem.Void, modHostTypeRef) { HasThis = false };
         onSettingsOpenedRef.Parameters.Add(new ParameterDefinition(monoBehaviourRef));
 
+        var onHomeMenuOpenedRef = new MethodReference(
+            "OnHomeMenuOpenedInvoke", module.TypeSystem.Void, modHostTypeRef) { HasThis = false };
+        onHomeMenuOpenedRef.Parameters.Add(new ParameterDefinition(monoBehaviourRef));
+
         // 5. Patch GameManager.Start — prepend ModHost.LoadAll().
         var gameManager = module.GetType("Blukulele.Core.GameManager");
         var startMethod = gameManager?.Methods.FirstOrDefault(m => m.Name == "Start" && !m.IsStatic);
@@ -181,10 +186,29 @@ internal static class Program
             Console.WriteLine("  patched -> Blukulele.CHE.SettingsCanvas.OnEnable (appended ModHost.OnSettingsOpenedInvoke)");
         }
 
-        // 7. Add idempotency marker.
+        // 7. Patch CanvasMenu.OnEnable — append console button injection before every ret.
+        var canvasMenu = module.GetType("Blukulele.CHE.CanvasMenu");
+        var menuOnEnable = canvasMenu?.Methods.FirstOrDefault(m => m.Name == "OnEnable" && !m.IsStatic);
+        if (canvasMenu == null || menuOnEnable == null)
+        {
+            Console.WriteLine("  warn: CanvasMenu.OnEnable not found; console button injection disabled.");
+        }
+        else
+        {
+            var ilMenu = menuOnEnable.Body.GetILProcessor();
+            var rets = menuOnEnable.Body.Instructions.Where(i => i.OpCode == OpCodes.Ret).ToList();
+            foreach (var ret in rets)
+            {
+                ilMenu.InsertBefore(ret, ilMenu.Create(OpCodes.Ldarg_0));
+                ilMenu.InsertBefore(ret, ilMenu.Create(OpCodes.Call, onHomeMenuOpenedRef));
+            }
+            Console.WriteLine("  patched -> Blukulele.CHE.CanvasMenu.OnEnable (appended ModHost.OnHomeMenuOpenedInvoke)");
+        }
+
+        // 8. Add idempotency marker.
         AddMarker(asm);
 
-        // 8. Write patched assembly out, then stamp it. The stamp lets the next run The stamp lets the next run
+        // 9. Write patched assembly out, then stamp it.
         //    detect "this dll is no longer ours" without re-reading the assembly.
         asm.Write(asmCsharp);
         WriteStamp(stamp, asmCsharp);

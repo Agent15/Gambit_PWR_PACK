@@ -58,9 +58,9 @@ the target). The samples here show several variations of this pattern.
 
 | Field         | Meaning                                                                                    |
 | ------------- | ------------------------------------------------------------------------------------------ |
-| `id`          | Unique identifier. Used by the in-game mod manager and as the dictionary key in ModRegistry. |
+| `id`          | Unique identifier. Used by the in-game console and as the dictionary key in ModRegistry.     |
 | `entry`       | Fully qualified class name that implements `IMod`. The loader scans every DLL in your mod folder for this type. |
-| `enabled`     | If `false`, the mod is skipped at startup. Toggleable from the in-game MODS button.         |
+| `enabled`     | If `false`, the mod is skipped at startup. Toggleable from the in-game console.             |
 | `gameVersion` | Currently informational. Use `>=1.0`.                                                       |
 
 ---
@@ -83,6 +83,7 @@ public sealed class MyModEntry : IMod
 
 - `ModId` / `ModDirectory` — useful for finding bundled assets next to the DLL.
 - `LogLine(string)` — writes to `[ModHost] [<ModId>] <message>` in the Unity log.
+- `Console` — shared in-game console for commands and messages.
 - `OnSettingsOpened` — event fired with the `SettingsCanvas` MonoBehaviour every
   time the player opens the in-game settings panel. Subscribe here to inject
   custom rows (see `SpeedMod`).

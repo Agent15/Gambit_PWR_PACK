@@ -142,7 +142,10 @@ namespace Gambonanza.SpeedMod
             float target = t * Speed.Current;
             Time.timeScale = target;
             _lastWrittenByUs = target;
-            DOTween.timeScale = Speed.Current;
+            Time.fixedDeltaTime = _baseFixedDelta * Mathf.Max(0.01f, target);
+            // DOTween already consumes scaled Time.deltaTime by default; scaling
+            // DOTween too would double-apply the multiplier to many tweens.
+            DOTween.timeScale = 1f;
         }
 
         private void ApplyImmediate()
@@ -152,7 +155,7 @@ namespace Gambonanza.SpeedMod
                 Time.timeScale = Speed.Current;
                 _lastWrittenByUs = Speed.Current;
             }
-            DOTween.timeScale = Speed.Current;
+            DOTween.timeScale = 1f;
             // Rescale physics step so it ticks at the original real-time frequency.
             Time.fixedDeltaTime = _baseFixedDelta * Speed.Current;
         }
