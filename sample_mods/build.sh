@@ -56,6 +56,7 @@ MODS=(
     "GambitApi:Gambonanza.GambitApi:"
     "KamikazeGambit:Gambonanza.KamikazeGambit:kamikaze.png"
     "EnemyThreatOverlay:Gambonanza.EnemyThreatOverlay:"
+    "MightyKasparovEveryStage:Gambonanza.MightyKasparovEveryStage:"
 )
 
 mkdir -p "$DIST_DIR"
