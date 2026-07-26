@@ -73,6 +73,9 @@ code, no patching of game logic, fully reversible.
 cd tools/GambonanzaAssets && ./gambonanza-assets.sh
 ```
 
+To browse the art without installing anything, the same catalogue is online at
+**[bentrd.github.io/GambonanzaAssets](https://bentrd.github.io/GambonanzaAssets/)**.
+
 Background on how the game stores its art is in [docs/ASSET_MODDING.md](docs/ASSET_MODDING.md).
 
 ## How the framework works
