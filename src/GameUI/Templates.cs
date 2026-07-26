@@ -64,7 +64,7 @@ namespace Gambonanza.GameUI
             clone.SetActive(false);
 
             int stripped = Strip.Interactives(clone);
-            // Do NOT reset Image colors — the cloned cell has the designer's
+            // Do NOT reset Image colors - the cloned cell has the designer's
             // cream tint baked in. A white tint would wash it out (the cell
             // sprite is white pixels tinted cream by Image.color).
 
@@ -110,29 +110,16 @@ namespace Gambonanza.GameUI
                 return;
             }
 
-            // Optional landmarks (other tab containers + tab buttons). Each can be null.
-            var graphicsCont = (t.GetField("m_GraphicsContainer", F)?.GetValue(settings)) as GameObject;
-            var audioCont    = (t.GetField("m_AudioContainer",    F)?.GetValue(settings)) as GameObject;
-            var twitchCont   = (t.GetField("m_TwitchContainer",   F)?.GetValue(settings)) as GameObject;
-            var gameplayBtn  = (t.GetField("m_GameplayButton",    F)?.GetValue(settings)) as MonoBehaviour;
-            var graphicsBtn  = (t.GetField("m_GraphicsButton",    F)?.GetValue(settings)) as MonoBehaviour;
-            var audioBtn     = (t.GetField("m_AudioButton",       F)?.GetValue(settings)) as MonoBehaviour;
-            var twitchBtn    = (t.GetField("m_TwitchButton",      F)?.GetValue(settings)) as MonoBehaviour;
-
             var rootT       = settings.transform;
             var titlePath   = Hierarchy.PathFromAncestor(rootT, header.transform);
             var contentPath = Hierarchy.PathFromAncestor(rootT, gameplayCont.transform);
 
             // Resolve every "destroy this in the clone" landmark to a path BEFORE cloning.
+            // The set is discovered by shape (see SettingsTabs) so a tab the game adds
+            // later - e.g. the 2026-05 "Customize" tab - is stripped without a code change.
             var destroyPaths = new List<List<int>>();
             void AddPath(Transform tr) { if (tr != null) destroyPaths.Add(Hierarchy.PathFromAncestor(rootT, tr)); }
-            if (graphicsCont != null) AddPath(graphicsCont.transform);
-            if (audioCont    != null) AddPath(audioCont.transform);
-            if (twitchCont   != null) AddPath(twitchCont.transform);
-            if (gameplayBtn  != null) AddPath(gameplayBtn.transform);
-            if (graphicsBtn  != null) AddPath(graphicsBtn.transform);
-            if (audioBtn     != null) AddPath(audioBtn.transform);
-            if (twitchBtn    != null) AddPath(twitchBtn.transform);
+            foreach (var tr in SettingsTabs.DiscardableTargets(settings)) AddPath(tr);
 
             // Clone the entire SettingsCanvas root under our bucket.
             var clone = Object.Instantiate(rootT.gameObject, Bucket.Root().transform);
@@ -264,7 +251,7 @@ namespace Gambonanza.GameUI
         /// box with the dark checkmark child). <paramref name="checkPath"/> walks
         /// the clone tree to the checkmark GameObject; toggle it active to show
         /// "checked", inactive to show "unchecked". <paramref name="boxSize"/> is
-        /// the captured pixel size — callers MUST pin this via a LayoutElement
+        /// the captured pixel size - callers MUST pin this via a LayoutElement
         /// so outer layout groups don't stretch the box (which makes the
         /// checkmark fill the cell as a giant dark rectangle).
         /// </summary>
@@ -298,7 +285,7 @@ namespace Gambonanza.GameUI
             if (settings == null) { Log.Line("checkbox: SettingsCanvas missing."); return; }
 
             // Any UnityEngine.UI.Toggle inside Settings will do. Include inactive
-            // results — Graphics-tab toggles are inactive when the panel first
+            // results - Graphics-tab toggles are inactive when the panel first
             // opens.
             var toggles = settings.GetComponentsInChildren<UnityEngine.UI.Toggle>(true);
             if (toggles == null || toggles.Length == 0) { Log.Line("checkbox: no Toggle in SettingsCanvas."); return; }

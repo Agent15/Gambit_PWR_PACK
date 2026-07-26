@@ -51,7 +51,7 @@ namespace Gambonanza.GameUI
             if (lbl == null) lbl = clone.GetComponentInChildren<TMP_Text>(true);
             if (lbl != null) lbl.text = label ?? "";
 
-            // Wire a fresh Button. Preserve the original Image colour — the cell
+            // Wire a fresh Button. Preserve the original Image colour - the cell
             // sprite is white pixels tinted cream by Image.color; resetting to
             // white would wash it out and make the button look pure white instead
             // of the game's signature cream.
@@ -102,14 +102,14 @@ namespace Gambonanza.GameUI
         // ============================================================
 
         /// <summary>
-        /// Create a small square game-styled checkbox widget — cream box with a
+        /// Create a small square game-styled checkbox widget - cream box with a
         /// centered dark checkmark glyph that hides when off. The box sprite
         /// and the checkmark sprite are scraped from a live Settings Toggle
         /// when possible (so the visual matches the rest of the menu); both
         /// fall back to flat-colour rectangles otherwise.
         ///
         /// The widget pins itself to a fixed 40x40 LayoutElement and centers
-        /// the checkmark glyph at 26x26 with preserveAspect — independent of
+        /// the checkmark glyph at 26x26 with preserveAspect - independent of
         /// any outer layout group so the row can't stretch the visual.
         /// PixelCheckbox.Label is always null; callers supply their own label
         /// in the surrounding row.
@@ -218,7 +218,7 @@ namespace Gambonanza.GameUI
         /// possible. Returns a <see cref="Modal"/> handle exposing Title, Content,
         /// Toolbar, Status, Show, Hide, AddToolbarButton.
         ///
-        /// The modal starts hidden — call <see cref="Modal.Show"/> when ready.
+        /// The modal starts hidden - call <see cref="Modal.Show"/> when ready.
         /// </summary>
         public static Modal CreateModal(string name, string title)
         {
@@ -226,7 +226,7 @@ namespace Gambonanza.GameUI
             var settings = Hierarchy.FindByTypeFullName("Blukulele.CHE.SettingsCanvas");
             if (settings == null)
             {
-                Log.Line("CreateModal: no live SettingsCanvas — programmatic fallback");
+                Log.Line("CreateModal: no live SettingsCanvas - programmatic fallback");
                 return CreateModalProgrammatic(name, title);
             }
             try
@@ -254,7 +254,7 @@ namespace Gambonanza.GameUI
                 return CreateModalProgrammatic(name, title);
             }
 
-            // The visible cream chrome is "Settings Window" — the parent of the
+            // The visible cream chrome is "Settings Window" - the parent of the
             // gameplay container. Clone JUST that piece (not the whole CNV_Settings
             // root with its Witch / TwitchBackground / animation anchors).
             var panel = gameplayCont.transform.parent;
@@ -270,40 +270,17 @@ namespace Gambonanza.GameUI
             var headerPath       = Hierarchy.PathFromAncestor(panel, header.transform);
             var gameplayContPath = Hierarchy.PathFromAncestor(panel, gameplayCont.transform);
 
-            // Discover every "tab" container and tab button by reflection. Hard-coding
-            // the names (Graphics / Audio / Twitch) breaks whenever the game ships a
-            // new tab — the post-2026-05 update added a "Customize" tab whose
-            // container + button + label leaked through the Mods modal. We now destroy
-            // ANY m_*Container GameObject that isn't m_GameplayContainer, and any
-            // m_*Button MonoBehaviour that isn't m_GameplayButton.
+            // Tab containers + tab buttons are discovered by shape, not by name - see
+            // SettingsTabs. Anything the game adds later gets stripped automatically.
             var destroyPaths = new List<List<int>>();
             void AddP(Transform tr) { if (tr != null) destroyPaths.Add(Hierarchy.PathFromAncestor(panel, tr)); }
 
-            int reflectedDestroys = 0;
-            foreach (var f in t.GetFields(F))
-            {
-                bool isContainer = f.Name.EndsWith("Container", StringComparison.Ordinal)
-                                && f.Name != "m_GameplayContainer";
-                bool isTabButton = f.Name.EndsWith("Button", StringComparison.Ordinal)
-                                && f.Name != "m_GameplayButton";
-                if (!isContainer && !isTabButton) continue;
-                object val;
-                try { val = f.GetValue(settings); } catch { continue; }
-                if (val == null) continue;
-
-                Transform target = null;
-                if (val is GameObject go) target = go.transform;
-                else if (val is MonoBehaviour mb) target = mb.transform;
-                else if (val is Component co) target = co.transform;
-                if (target == null) continue;
-
-                AddP(target);
-                reflectedDestroys++;
-            }
-            Log.Line($"CreateModalLive: queued {reflectedDestroys} reflected tab/container destroy(s)");
+            var discardable = SettingsTabs.DiscardableTargets(settings);
+            foreach (var tr in discardable) AddP(tr);
+            Log.Line($"CreateModalLive: queued {discardable.Count} reflected tab/container destroy(s)");
 
             // Holder GameObject + a fresh Overlay canvas of our own. The cloned
-            // panel becomes a child of this canvas — no SettingsCanvas state to
+            // panel becomes a child of this canvas - no SettingsCanvas state to
             // inherit, no sub-canvas confusion, no CanvasGroup ghosts.
             var holder = new GameObject(name ?? "Pixel_Modal");
             UnityEngine.Object.DontDestroyOnLoad(holder);
@@ -431,12 +408,12 @@ namespace Gambonanza.GameUI
             var clonedHeader = Hierarchy.NavigatePath(clonedPanel.transform, headerPath)?.GetComponent<TMP_Text>();
             if (clonedHeader != null) clonedHeader.text = title ?? "";
 
-            // Use the cloned gameplay container as the content area — clear it and
+            // Use the cloned gameplay container as the content area - clear it and
             // give it a vertical layout for callers to populate.
             var contentT = Hierarchy.NavigatePath(clonedPanel.transform, gameplayContPath);
             if (contentT == null)
             {
-                Log.Line("CreateModalLive: cloned gameplay container missing — fallback");
+                Log.Line("CreateModalLive: cloned gameplay container missing - fallback");
                 UnityEngine.Object.Destroy(holder);
                 return CreateModalProgrammatic(name, title);
             }
@@ -449,7 +426,7 @@ namespace Gambonanza.GameUI
             var toolbar = BuildToolbar(clonedPanel.transform);
 
             // Wire the Close_Button (the X in the top-right) to Hide if it survived.
-            // Preserve its original Image colour — the close button has its own
+            // Preserve its original Image colour - the close button has its own
             // baked-in cream sprite tint.
             var closeT = Hierarchy.FindChildByName(clonedPanel.transform, "Close_Button");
             if (closeT != null)
@@ -510,7 +487,7 @@ namespace Gambonanza.GameUI
             var canvas = canvases.Length > 0 ? canvases[0] : null;
             if (canvas == null)
             {
-                Log.Line("modal clone has NO Canvas — promoting clone root.");
+                Log.Line("modal clone has NO Canvas - promoting clone root.");
                 canvas = clone.AddComponent<Canvas>();
                 canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
                 canvas.sortingOrder = 32760;
@@ -583,7 +560,7 @@ namespace Gambonanza.GameUI
             var backdrop = NewChild(canvasGo.transform, "Backdrop", typeof(Image), typeof(Button));
             StretchFull((RectTransform)backdrop.transform);
             backdrop.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.65f);
-            // backdrop click closes the modal — escape hatch so users never get trapped
+            // backdrop click closes the modal - escape hatch so users never get trapped
             // in a half-built or input-blocked state.
             var backdropBtn = backdrop.GetComponent<Button>();
             ButtonStyle.ApplyDefaultColors(backdropBtn);
@@ -647,7 +624,7 @@ namespace Gambonanza.GameUI
             if (template == null) { Log.Line("AddSettingsArrowRow: no arrow-row template; aborting."); return null; }
 
             // Find the wrapper sibling we need to slot next to. We do this by re-deriving
-            // the live wrapper of m_ControlsTitle in the open SettingsCanvas — that's the
+            // the live wrapper of m_ControlsTitle in the open SettingsCanvas - that's the
             // sibling whose layout the new row should mirror.
             const BindingFlags F = BindingFlags.NonPublic | BindingFlags.Instance;
             var t = settingsCanvas.GetType();

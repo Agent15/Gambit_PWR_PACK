@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GambonanzaAssets - Gambonanza</title>
+<style>
+  :root{
+    --bg:#16130f; --bg2:#1e1a15; --panel:#241f19; --line:#3a3128;
+    --cream:#f0e2c0; --text:#efe4cc; --muted:#9c8d73;
+    --gold:#e8b45c; --gold-dim:#8a6a33; --red:#d4674a; --green:#7fb069;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    overflow:hidden;
+  }
+  button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+  input{font:inherit}
+  a{color:var(--gold)}
+
+  /* ---------- layout ---------- */
+  .app{display:flex;flex-direction:column;height:100vh}
+  header{
+    display:flex;align-items:center;gap:16px;padding:10px 18px;
+    background:var(--bg2);border-bottom:1px solid var(--line);flex-shrink:0;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px;font-weight:700;letter-spacing:.3px}
+  .brand b{color:var(--gold);font-size:16px}
+  .brand span{color:var(--muted);font-size:12px;font-weight:400}
+  .spacer{flex:1}
+  .pill{
+    display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;
+    background:#2c251c;border:1px solid var(--line);font-size:12.5px;color:var(--muted);
+  }
+  .pill.warn{color:var(--gold);border-color:var(--gold-dim)}
+  .pill.on{color:var(--green);border-color:#3f5a34}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+  .btn{
+    padding:8px 15px;border-radius:8px;border:1px solid var(--line);
+    background:#2c251c;font-weight:600;font-size:13px;transition:.12s;
+  }
+  .btn:hover{background:#382f24;border-color:#4a3f31}
+  .btn.primary{background:var(--gold);color:#2a1f0c;border-color:var(--gold)}
+  .btn.primary:hover{background:#f3c574}
+  .btn.ghost{background:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  .body{display:flex;flex:1;min-height:0}
+
+  /* ---------- sidebar ---------- */
+  aside{
+    width:238px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .search{padding:12px}
+  .search input{
+    width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line);
+    background:#141110;color:var(--text);outline:none;
+  }
+  .search input:focus{border-color:var(--gold-dim)}
+  .cats{overflow-y:auto;flex:1;padding:0 8px 12px}
+  .cat{
+    display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+    padding:7px 10px;border-radius:7px;color:var(--muted);font-size:13px;
+  }
+  .cat:hover{background:#2a231b;color:var(--text)}
+  .cat.active{background:var(--gold);color:#2a1f0c;font-weight:600}
+  .cat .n{margin-left:auto;font-size:11.5px;opacity:.75;font-variant-numeric:tabular-nums}
+  .cat.tech{opacity:.65}
+  .sect{padding:14px 18px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:#6f6350}
+  .toggles{padding:8px 12px 14px;border-top:1px solid var(--line);display:grid;gap:8px}
+  label.chk{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);cursor:pointer}
+  label.chk:hover{color:var(--text)}
+  label.chk input{accent-color:var(--gold);width:14px;height:14px}
+
+  /* ---------- grid ---------- */
+  main{flex:1;overflow-y:auto;padding:18px 20px 60px;min-width:0}
+  .crumbs{display:flex;align-items:center;gap:10px;margin-bottom:14px;color:var(--muted);font-size:13px}
+  .crumbs b{color:var(--text);font-size:16px}
+  .grid{
+    display:grid;gap:12px;
+    grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;text-align:left;transition:.12s;position:relative;
+  }
+  .card:hover{border-color:var(--gold-dim);transform:translateY(-2px)}
+  .card.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+  .card.drop{border-color:var(--green);background:#1f2a1c}
+  .thumb{
+    height:104px;display:flex;align-items:center;justify-content:center;padding:8px;
+    background-color:#1a1714;
+    background-image:
+      linear-gradient(45deg,#221e19 25%,transparent 25%,transparent 75%,#221e19 75%),
+      linear-gradient(45deg,#221e19 25%,transparent 25%,transparent 75%,#221e19 75%);
+    background-size:14px 14px;background-position:0 0,7px 7px;
+  }
+  /* object-fit:contain scales tiny 21x27 sprites up to fill the tile; pixelated
+     keeps them crisp instead of blurring them into mush. */
+  .thumb img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;display:block}
+  .meta{padding:7px 9px 9px;border-top:1px solid var(--line)}
+  .meta .nm{
+    font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .meta .sz{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .badge{
+    position:absolute;top:6px;right:6px;background:var(--green);color:#10200c;
+    font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:.4px;
+  }
+  .badge.lock{background:#4a4034;color:var(--muted)}
+
+  .empty{padding:60px 20px;text-align:center;color:var(--muted)}
+
+  /* ---------- detail drawer ---------- */
+  .drawer{
+    width:340px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--line);
+    display:flex;flex-direction:column;overflow-y:auto;
+  }
+  .drawer.hide{display:none}
+  .dhead{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+  .dhead h2{margin:0 0 4px;font-size:16px;word-break:break-word}
+  .dhead p{margin:0;color:var(--muted);font-size:12px}
+  .preview{
+    margin:16px 18px;height:190px;border-radius:var(--radius);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;padding:12px;
+    background-color:#141110;
+    background-image:
+      linear-gradient(45deg,#1e1a16 25%,transparent 25%,transparent 75%,#1e1a16 75%),
+      linear-gradient(45deg,#1e1a16 25%,transparent 25%,transparent 75%,#1e1a16 75%);
+    background-size:18px 18px;background-position:0 0,9px 9px;
+  }
+  .preview img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+  .facts{margin:0 18px;display:grid;gap:6px;font-size:12.5px}
+  .fact{display:flex;gap:10px;color:var(--muted)}
+  .fact b{color:var(--text);font-weight:600;margin-left:auto;text-align:right;word-break:break-all}
+  .steps{margin:16px 18px 0;display:grid;gap:8px}
+  .dropzone{
+    border:1.5px dashed var(--line);border-radius:var(--radius);padding:18px 14px;
+    text-align:center;color:var(--muted);font-size:12.5px;transition:.12s;
+  }
+  .dropzone:hover,.dropzone.over{border-color:var(--gold);color:var(--gold);background:#241d13}
+  .drawer .actions{padding:16px 18px;display:grid;gap:8px}
+
+  /* ---------- misc ---------- */
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:11px 18px;font-size:13px;box-shadow:0 8px 32px #0009;z-index:50;
+    max-width:min(560px,90vw);
+  }
+  .toast.err{border-color:var(--red);color:#ffbcaa}
+  .toast.ok{border-color:#3f5a34;color:#c8e6b8}
+  .overlay{
+    position:fixed;inset:0;background:#0d0b09e6;display:flex;align-items:center;
+    justify-content:center;z-index:60;
+  }
+  .overlay .box{max-width:460px;text-align:center;padding:30px}
+  .overlay h3{margin:0 0 10px;color:var(--gold)}
+  .overlay p{color:var(--muted);margin:0 0 6px}
+  .bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:18px}
+  .bar i{display:block;height:100%;width:35%;background:var(--gold);animation:slide 1.1s infinite}
+  @keyframes slide{0%{margin-left:-35%}100%{margin-left:100%}}
+
+  .hint{
+    margin:0 0 14px;padding:11px 14px;border-radius:9px;background:#231d15;
+    border:1px solid var(--line);color:var(--muted);font-size:12.5px;display:flex;gap:10px;
+  }
+  .hint b{color:var(--gold)}
+  .hint button{margin-left:auto;color:var(--muted);font-size:16px;line-height:1;padding:0 4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><b>GambonanzaAssets</b><span>Gambonanza visual mods</span></div>
+    <div class="spacer"></div>
+    <div class="pill" id="gamePill"><i class="dot"></i><span id="gameTxt">…</span></div>
+    <div class="pill" id="statePill"><i class="dot"></i><span id="stateTxt">…</span></div>
+    <button class="btn" id="restoreBtn">Restore original</button>
+    <button class="btn primary" id="applyBtn" disabled>Apply to game</button>
+  </header>
+
+  <div class="body">
+    <aside>
+      <div class="search"><input id="q" type="search" placeholder="Search  (queen, warlock, tile…)" autocomplete="off"></div>
+      <div class="sect">Categories</div>
+      <div class="cats" id="cats"></div>
+      <div class="toggles">
+        <label class="chk"><input type="checkbox" id="fSprites" checked> Sprites (in-game art)</label>
+        <label class="chk"><input type="checkbox" id="fTextures" checked> Whole textures / atlases</label>
+        <label class="chk"><input type="checkbox" id="fEdited"> Only my changes</label>
+        <label class="chk"><input type="checkbox" id="fAutofit" checked> Auto-fit images I drop in</label>
+      </div>
+    </aside>
+
+    <main id="main">
+      <div class="hint" id="hint">
+        <div><b>How this works:</b> pick an image, download it, edit it in any paint program,
+        drag it back onto the same card, then hit <b>Apply to game</b>. Nothing is permanent:
+        <b>Restore original</b> always brings the vanilla art back.</div>
+        <button onclick="document.getElementById('hint').remove()">×</button>
+      </div>
+      <div class="crumbs"><b id="crumbTitle">All assets</b><span id="crumbCount"></span></div>
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" style="display:none">Nothing matches that search.</div>
+    </main>
+
+    <div class="drawer hide" id="drawer">
+      <div class="dhead">
+        <h2 id="dName"></h2>
+        <p id="dSub"></p>
+      </div>
+      <div class="preview"><img id="dImg" alt=""></div>
+      <div class="facts" id="dFacts"></div>
+      <div class="steps">
+        <button class="btn" id="dlBtn">1 · Download PNG</button>
+        <div class="dropzone" id="dz">2 · Drop your edited PNG here<br><span style="opacity:.7">or click to browse</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" id="undoBtn" style="display:none">Undo this change</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="filePicker" accept="image/*" hidden>
+
+<div class="overlay" id="overlay">
+  <div class="box">
+    <h3 id="ovTitle">Reading the game's assets…</h3>
+    <p id="ovMsg">This takes a few seconds the first time.</p>
+    <div class="bar"><i></i></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let ENTRIES = [], CATS = [], STATE = {}, PACK = {}, activeCat = null, selected = null;
+
+const api = async (path, opts) => {
+  const r = await fetch(path, opts);
+  const j = await r.json().catch(() => ({ error: 'Server returned an unreadable response.' }));
+  if (!r.ok || j.error) throw new Error(j.error || `Request failed (${r.status})`);
+  return j;
+};
+
+function toast(msg, kind = '', ms = 3600) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const el = document.createElement('div');
+  el.className = 'toast ' + kind;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  if (ms) setTimeout(() => el.remove(), ms);
+  return el;
+}
+
+// ---------- status ----------
+
+async function refreshStatus() {
+  STATE = await api('/api/status');
+  PACK = STATE.pack || {};
+  $('#gameTxt').textContent = STATE.gameDir.split(/[\\/]/).slice(-1)[0] + ' · build ' + STATE.steamBuildId;
+
+  const pill = $('#statePill'), n = Object.keys(PACK).length;
+  pill.className = 'pill' + (n ? ' warn' : (STATE.patched ? ' on' : ''));
+  $('#stateTxt').textContent = n
+    ? `${n} change${n > 1 ? 's' : ''} not applied yet`
+    : (STATE.patched ? 'Modded assets installed' : 'Vanilla');
+
+  $('#applyBtn').disabled = n === 0;
+  $('#restoreBtn').style.display = STATE.patched ? '' : 'none';
+}
+
+// ---------- index ----------
+
+async function load() {
+  let data = await api('/api/index');
+  while (!data.ready) {
+    $('#ovMsg').textContent = (data.log || []).slice(-1)[0] || 'Working…';
+    await new Promise(r => setTimeout(r, 500));
+    data = await api('/api/index');
+  }
+  ENTRIES = data.entries;
+  CATS = data.categories;
+  await refreshStatus();
+  renderCats();
+  render();
+  $('#overlay').style.display = 'none';
+}
+
+function renderCats() {
+  const showTech = true;
+  const wrap = $('#cats');
+  wrap.innerHTML = '';
+  const mk = (label, count, key, tech) => {
+    const b = document.createElement('button');
+    b.className = 'cat' + (activeCat === key ? ' active' : '') + (tech ? ' tech' : '');
+    b.innerHTML = `<span>${label}</span><span class="n">${count}</span>`;
+    b.onclick = () => { activeCat = key; renderCats(); render(); };
+    wrap.appendChild(b);
+  };
+  mk('All assets', ENTRIES.length, null, false);
+  CATS.forEach(c => mk(c.name, c.count, c.name, c.technical));
+}
+
+// ---------- grid ----------
+
+const io = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if (!e.isIntersecting) return;
+    const img = e.target.querySelector('img');
+    if (img && !img.src) img.src = img.dataset.src;
+    io.unobserve(e.target);
+  });
+}, { rootMargin: '400px' });
+
+function filtered() {
+  const q = $('#q').value.trim().toLowerCase();
+  const wantSprites = $('#fSprites').checked;
+  const wantTextures = $('#fTextures').checked;
+  const onlyEdited = $('#fEdited').checked;
+  return ENTRIES.filter(e => {
+    if (activeCat && e.category !== activeCat) return false;
+    if (e.kind === 'sprite' && !wantSprites) return false;
+    if (e.kind === 'texture' && !wantTextures) return false;
+    if (onlyEdited && !PACK[e.id]) return false;
+    if (!q) return true;
+    return e.name.toLowerCase().includes(q)
+        || e.label.toLowerCase().includes(q)
+        || (e.atlas || '').toLowerCase().includes(q);
+  });
+}
+
+function render() {
+  const list = filtered();
+  $('#crumbTitle').textContent = activeCat || 'All assets';
+  $('#crumbCount').textContent = `${list.length} item${list.length === 1 ? '' : 's'}`;
+  const grid = $('#grid');
+  grid.innerHTML = '';
+  $('#empty').style.display = list.length ? 'none' : '';
+
+  // Cap the DOM; searching is how you reach the long tail.
+  const slice = list.slice(0, 900);
+  const frag = document.createDocumentFragment();
+  for (const e of slice) frag.appendChild(card(e));
+  grid.appendChild(frag);
+  grid.querySelectorAll('.card').forEach(c => io.observe(c));
+  if (list.length > slice.length) {
+    const more = document.createElement('div');
+    more.className = 'empty';
+    more.textContent = `+ ${list.length - slice.length} more - narrow it down with search or a category.`;
+    grid.parentElement.insertBefore(more, $('#empty'));
+    setTimeout(() => more.remove(), 8000);
+  }
+}
+
+function card(e) {
+  const el = document.createElement('div');
+  el.className = 'card' + (selected === e.id ? ' sel' : '');
+  el.dataset.id = e.id;
+  el.innerHTML = `
+    <div class="thumb"><img data-src="/api/thumb/${encodeURIComponent(e.id)}" alt="" loading="lazy"></div>
+    <div class="meta">
+      <div class="nm" title="${e.name}">${e.label}</div>
+      <div class="sz">${e.width}×${e.height}${e.kind === 'sprite' ? '' : ' · atlas'}</div>
+    </div>
+    ${PACK[e.id] ? '<span class="badge">EDITED</span>' : ''}
+    ${e.editable ? '' : '<span class="badge lock">N/A</span>'}`;
+  el.onclick = () => select(e.id);
+
+  if (e.editable) {
+    el.addEventListener('dragover', ev => { ev.preventDefault(); el.classList.add('drop'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drop'));
+    el.addEventListener('drop', ev => {
+      ev.preventDefault();
+      el.classList.remove('drop');
+      const f = ev.dataTransfer.files[0];
+      if (f) upload(e.id, f);
+    });
+  }
+  return el;
+}
+
+// ---------- detail ----------
+
+function select(id) {
+  selected = id;
+  const e = ENTRIES.find(x => x.id === id);
+  if (!e) return;
+  document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', c.dataset.id === id));
+
+  $('#drawer').classList.remove('hide');
+  $('#dName').textContent = e.label;
+  $('#dSub').textContent = e.kind === 'sprite'
+    ? `Sprite · lives inside the “${e.atlas}” atlas`
+    : 'Texture · a whole image file';
+  bumpPreview(e);
+
+  const facts = [
+    ['Size', `${e.width} × ${e.height} px`],
+    ['Internal name', e.name],
+    ['Category', e.category],
+    ['Format', e.format],
+  ];
+  if (PACK[e.id]) facts.push(['Your change', PACK[e.id].stagedAt + (PACK[e.id].resized ? ' (auto-fitted)' : '')]);
+  $('#dFacts').innerHTML = facts.map(([k, v]) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`).join('');
+
+  $('#dlBtn').onclick = () => { location.href = `/api/full/${encodeURIComponent(e.id)}`; };
+  $('#dlBtn').disabled = !e.editable;
+  $('#dz').style.display = e.editable ? '' : 'none';
+  $('#undoBtn').style.display = PACK[e.id] ? '' : 'none';
+  $('#undoBtn').onclick = async () => {
+    await api(`/api/unstage/${encodeURIComponent(e.id)}`, { method: 'POST' });
+    await refreshStatus();
+    render(); select(e.id);
+    toast('Change removed.', 'ok');
+  };
+}
+
+function bumpPreview(e) {
+  const src = PACK[e.id]
+    ? `/api/staged/${encodeURIComponent(e.id)}?t=${Date.now()}`
+    : `/api/thumb/${encodeURIComponent(e.id)}`;
+  $('#dImg').src = src;
+}
+
+// ---------- upload ----------
+
+async function upload(id, file) {
+  if (!file.type.startsWith('image/')) return toast('That is not an image file.', 'err');
+  const t = toast('Loading your image…', '', 0);
+  try {
+    const buf = await file.arrayBuffer();
+    const res = await api(`/api/replace/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/octet-stream', 'X-Autofit': $('#fAutofit').checked ? '1' : '0' },
+      body: buf,
+    });
+    await refreshStatus();
+    render();
+    if (selected === id) select(id);
+    t.remove();
+    toast(res.resized
+      ? `Staged - auto-fitted to ${res.width}×${res.height}.`
+      : 'Staged. Hit “Apply to game” when you are done.', 'ok');
+  } catch (err) {
+    t.remove();
+    toast(err.message, 'err', 7000);
+  }
+}
+
+$('#dz').onclick = () => $('#filePicker').click();
+$('#filePicker').onchange = ev => {
+  const f = ev.target.files[0];
+  if (f && selected) upload(selected, f);
+  ev.target.value = '';
+};
+['dragover', 'dragleave', 'drop'].forEach(t =>
+  $('#dz').addEventListener(t, ev => {
+    ev.preventDefault();
+    $('#dz').classList.toggle('over', t === 'dragover');
+    if (t === 'drop' && selected && ev.dataTransfer.files[0]) upload(selected, ev.dataTransfer.files[0]);
+  }));
+
+// ---------- apply / restore ----------
+
+async function busy(title, msg, fn) {
+  $('#ovTitle').textContent = title;
+  $('#ovMsg').textContent = msg;
+  $('#overlay').style.display = 'flex';
+  try { return await fn(); }
+  finally { $('#overlay').style.display = 'none'; }
+}
+
+$('#applyBtn').onclick = async () => {
+  const n = Object.keys(PACK).length;
+  if (!confirm(`Write ${n} change${n > 1 ? 's' : ''} into the game?\n\nThe original files are backed up first, so you can always undo this with “Restore original”.`)) return;
+  try {
+    const res = await busy('Patching the game…', 'Rewriting asset files. Do not close this window.',
+      () => api('/api/apply', { method: 'POST' }));
+    await refreshStatus();
+    toast(`Done - ${res.changed} image${res.changed > 1 ? 's' : ''} swapped in. Launch the game to see it.`, 'ok', 7000);
+  } catch (err) { toast(err.message, 'err', 9000); }
+};
+
+$('#restoreBtn').onclick = async () => {
+  if (!confirm('Put the original game art back?\n\nYour staged changes stay in the pack, so you can re-apply them later.')) return;
+  try {
+    const res = await busy('Restoring…', 'Copying the vanilla asset files back.',
+      () => api('/api/restore', { method: 'POST' }));
+    await refreshStatus();
+    toast(`Restored ${res.restored} file(s). The game is vanilla again.`, 'ok');
+  } catch (err) { toast(err.message, 'err', 9000); }
+};
+
+// ---------- wiring ----------
+
+let debounce;
+$('#q').oninput = () => { clearTimeout(debounce); debounce = setTimeout(render, 140); };
+['fSprites', 'fTextures', 'fEdited'].forEach(id => $('#' + id).onchange = render);
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); }
+  if (e.key === 'Escape') { $('#drawer').classList.add('hide'); selected = null; render(); }
+});
+
+load().catch(err => {
+  $('#ovTitle').textContent = 'Something went wrong';
+  $('#ovMsg').textContent = err.message;
+  document.querySelector('.bar').style.display = 'none';
+});
+</script>
+</body>
+</html>

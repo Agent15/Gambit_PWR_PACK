@@ -5,9 +5,9 @@ namespace Gambonanza.ModSdk
     /// mod manager without a game restart.
     ///
     /// Lifecycle:
-    ///   OnLoad(ctx)       — called once when the DLL is loaded. Wire up subscriptions only.
-    ///   OnEnable()        — called after OnLoad if the mod is enabled, AND on every toggle-on.
-    ///   OnDisable()       — called on every toggle-off. Mod must restore any game state it
+    ///   OnLoad(ctx)       - called once when the DLL is loaded. Wire up subscriptions only.
+    ///   OnEnable()        - called after OnLoad if the mod is enabled, AND on every toggle-on.
+    ///   OnDisable()       - called on every toggle-off. Mod must restore any game state it
     ///                       mutated (destroy GameObjects, unsubscribe, restore values).
     ///
     /// Mods that don't implement IModLifecycle are treated as load-once: toggling them off

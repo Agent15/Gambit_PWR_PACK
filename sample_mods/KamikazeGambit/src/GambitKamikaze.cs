@@ -96,7 +96,7 @@ namespace Gambonanza.KamikazeGambit
                     if (tile == null) continue;
                     var p = tile.Piece;
                     if (p == null || p.PieceColor != PieceColor.BLACK) continue;
-                    // Elite (BOSS) enemies are off-limits — the gambit is broken if you can
+                    // Elite (BOSS) enemies are off-limits - the gambit is broken if you can
                     // erase the must-be-captured-last piece on turn one. Leave vanilla's
                     // BlockedPlacement overlay intact so the player sees the elite tile is
                     // genuinely forbidden.
@@ -145,7 +145,7 @@ namespace Gambonanza.KamikazeGambit
 
             // Find the tile under the pointer. SelectionManager.PointerPosition is already in
             // world coordinates (vanilla's HandleMovementInInGame uses the same value for its
-            // raycasts). Don't use Input.mousePosition directly — those are screen pixels and
+            // raycasts). Don't use Input.mousePosition directly - those are screen pixels and
             // Physics2D.Raycast expects world units.
             var sm = SingletonMonoBehaviour<SelectionManager>.Instance;
             if (sm == null) return;
@@ -156,14 +156,14 @@ namespace Gambonanza.KamikazeGambit
             var tile = hit.transform.GetComponent<TileBehaviour>();
             if (tile == null) return;
 
-            // Need an enemy piece on the tile — that's the whole gambit.
+            // Need an enemy piece on the tile - that's the whole gambit.
             // (Don't gate on tile.CanBeLandedOn; vanilla returns false for any occupied tile,
             // which would block the kamikaze before we get a chance to clear the enemy.)
             var enemy = tile.Piece;
             if (enemy == null) return;
             if (enemy.PieceColor != PieceColor.BLACK) return;
 
-            // Elite (BOSS) pieces are immune — they're meant to be captured last, and bypassing
+            // Elite (BOSS) pieces are immune - they're meant to be captured last, and bypassing
             // that ordering trivially breaks every elite encounter.
             if (enemy.EnemyAbilityModifier != null && enemy.EnemyAbilityModifier.IsBoss) return;
 
@@ -190,14 +190,14 @@ namespace Gambonanza.KamikazeGambit
             //   tile.Piece null check → tile.CanBeLandedOn check → capacity check → place.
             // Both flags must be set before vanilla's release code runs (synchronously after this).
             // Capture the original CanBeLandedOn so we can restore it after the placement
-            // settles — otherwise an enemy-zone tile we kamikaze'd would stay landable forever
+            // settles - otherwise an enemy-zone tile we kamikaze'd would stay landable forever
             // and show as a normal stock-placement target later in the run.
             bool originalCanBeLandedOn = tile.CanBeLandedOn;
             tile.Piece = null;
             tile.CanBeLandedOn = true;
 
             // If a pawn lands on the last row, vanilla would call SelectionManager.Promotion()
-            // which spawns a promotion UI for our about-to-be-destroyed piece — softlocking the
+            // which spawns a promotion UI for our about-to-be-destroyed piece - softlocking the
             // game (the UI has no piece to promote, so nothing dismisses it).
             //
             // Vanilla's gate is: `if (tile.IsEnd && !tile.PromoteColor && piece.PieceHierarchy == PAWN)`.

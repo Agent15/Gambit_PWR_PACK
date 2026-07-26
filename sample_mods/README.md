@@ -7,7 +7,7 @@ can build on.
 ```
 sample_mods/
 ├── SpeedMod/                 Adds a settings row for game speed.
-├── GambitApi/                Library mod — builder for adding new gambits.
+├── GambitApi/                Library mod - builder for adding new gambits.
 ├── KamikazeGambit/           Custom gambit built on GambitApi.
 ├── SpikesGambit/             Custom gambit by TGM: trap tiles capture enemies.
 ├── EnemyThreatOverlay/       Keybind-driven enemy threat display overlay.
@@ -33,7 +33,7 @@ When the game starts, `Gambonanza.ModHost` (installed in `Managed/` by the
 patcher) walks every subfolder of `Mods/`, parses `mod.json`, calls
 `Assembly.LoadFrom()` on the DLL, instantiates the entry class, and calls
 `OnLoad`. From that moment your mod is a normal .NET object running inside
-Unity — you can spawn `MonoBehaviour`s, hook into game classes via reflection,
+Unity - you can spawn `MonoBehaviour`s, hook into game classes via reflection,
 swap `SpriteRenderer` materials, anything Unity allows.
 
 There is no Harmony. The framework deliberately stays small: the patcher only
@@ -84,10 +84,10 @@ public sealed class MyModEntry : IMod
 
 `IModContext` exposes:
 
-- `ModId` / `ModDirectory` — useful for finding bundled assets next to the DLL.
-- `LogLine(string)` — writes to `[ModHost] [<ModId>] <message>` in the Unity log.
-- `Console` — shared in-game console for commands and messages.
-- `OnSettingsOpened` — event fired with the `SettingsCanvas` MonoBehaviour every
+- `ModId` / `ModDirectory` - useful for finding bundled assets next to the DLL.
+- `LogLine(string)` - writes to `[ModHost] [<ModId>] <message>` in the Unity log.
+- `Console` - shared in-game console for commands and messages.
+- `OnSettingsOpened` - event fired with the `SettingsCanvas` MonoBehaviour every
   time the player opens the in-game settings panel. Subscribe here to inject
   custom rows (see `SpeedMod`).
 
@@ -98,7 +98,7 @@ game via reflection.
 
 ## The samples
 
-### SpeedMod — the smallest possible mod
+### SpeedMod - the smallest possible mod
 
 [`SpeedMod/SpeedModPlugin.cs`](SpeedMod/SpeedModPlugin.cs)
 
@@ -110,12 +110,12 @@ Adds a "Game Speed" arrow row to the settings canvas. Demonstrates:
   to clone real game UI components instead of recreating them by hand.
 - Setting `Time.timeScale` to mutate game speed.
 
-Read this first — it is roughly 60 lines and touches every part of the
+Read this first - it is roughly 60 lines and touches every part of the
 framework once.
 
-### GambitApi — a library other mods build on
+### GambitApi - a library other mods build on
 
-[`GambitApi/`](GambitApi/) — multi-file project.
+[`GambitApi/`](GambitApi/) - multi-file project.
 
 Reverse-engineers the game's gambit registry to expose a fluent
 `GambitBuilder` other mods can use to add new gambits:
@@ -139,10 +139,10 @@ gambits at runtime. Demonstrates the harder patterns:
 - Extending vanilla UI without touching `Assembly-CSharp.dll` (we do it from
   a `MonoBehaviour` attached at runtime; see `CollectionPaginationPatch.cs`).
 
-GambitApi is itself a mod — it has its own `mod.json` and is loaded by
-ModHost — but it is also a library: KamikazeGambit references it directly.
+GambitApi is itself a mod - it has its own `mod.json` and is loaded by
+ModHost - but it is also a library: KamikazeGambit references it directly.
 
-### KamikazeGambit — a real custom gambit
+### KamikazeGambit - a real custom gambit
 
 [`KamikazeGambit/`](KamikazeGambit/)
 
@@ -150,15 +150,15 @@ Adds a one-shot gambit: landing a piece on an enemy destroys both pieces.
 Builds on `GambitApi` by passing its `GambitKamikaze` MonoBehaviour to
 `.WithBaseGambit<T>()`. The interesting bits:
 
-- `GambitKamikaze.cs` — the gambit's runtime behaviour. Subscribes to vanilla
+- `GambitKamikaze.cs` - the gambit's runtime behaviour. Subscribes to vanilla
   events, reads private state via reflection, and undoes the side-effects
   (e.g. restoring `tile.CanBeLandedOn` and `tile.PromoteColor`) cleanly.
-- `KamikazeDebugHotkey.cs` — F8/F9 hotkeys for testing. Worth reading even if
+- `KamikazeDebugHotkey.cs` - F8/F9 hotkeys for testing. Worth reading even if
   you don't ship debug hotkeys, because it shows how to inject a live gambit
-  into a running game — useful pattern for any mod that wants to touch the
+  into a running game - useful pattern for any mod that wants to touch the
   active run.
 
-### SpikesGambit — a didactic custom gambit by TGM
+### SpikesGambit - a didactic custom gambit by TGM
 
 [`SpikesGambit/`](SpikesGambit/)
 
@@ -204,7 +204,7 @@ next launch.
 
 ## Writing your own mod, end to end
 
-1. Make a new folder under `sample_mods/` (or anywhere — these samples are
+1. Make a new folder under `sample_mods/` (or anywhere - these samples are
    just one possible layout).
 
 2. Add a `mod.json`:
@@ -214,7 +214,7 @@ next launch.
      "gameVersion": ">=1.0", "description": "Logs a friendly message." }
    ```
 
-3. Add a `.csproj` (copy `SpeedMod.csproj` as a starting point — it already
+3. Add a `.csproj` (copy `SpeedMod.csproj` as a starting point - it already
    has the right reference paths into `../../refs/` and project references
    into `../../src/ModSdk/`).
 
@@ -248,7 +248,7 @@ next launch.
   is the canonical reference for the latter.
 
 - **Singletons may not exist yet.** Anything that touches
-  `SingletonMonoBehaviour<T>.Instance` from `OnLoad` will throw — `OnLoad`
+  `SingletonMonoBehaviour<T>.Instance` from `OnLoad` will throw - `OnLoad`
   fires from `GameManager.Start`, before most other singletons are up. Defer
   with a coroutine, a `MonoBehaviour`, or `Application.onBeforeRender`.
 

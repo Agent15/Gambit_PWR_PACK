@@ -30,7 +30,7 @@ namespace Gambonanza.GameUI
 
         /// <summary>
         /// Walks <paramref name="path"/> from <paramref name="start"/>. Returns null if
-        /// any step is out of range — happens when sibling indices have shifted because
+        /// any step is out of range - happens when sibling indices have shifted because
         /// something was destroyed underneath.
         /// </summary>
         public static Transform NavigatePath(Transform start, List<int> path)

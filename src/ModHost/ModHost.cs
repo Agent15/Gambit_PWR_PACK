@@ -51,7 +51,7 @@ namespace Gambonanza.ModHost
             }
 
             int n = _registry.Count;
-            _console?.PrintInfo($"ModHost v{ModUpdater.FrameworkVersion} online — {n} mod{(n == 1 ? "" : "s")} loaded. Press F10 or ` to toggle. Type 'help' for commands.");
+            _console?.PrintInfo($"ModHost v{ModUpdater.FrameworkVersion} online - {n} mod{(n == 1 ? "" : "s")} loaded. Press F10 or ` to toggle. Type 'help' for commands.");
             if (_console != null) ModUpdater.SpawnOnce(_console);
         }
 
@@ -164,7 +164,7 @@ namespace Gambonanza.ModHost
             var dirById = new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var unparsed = new System.Collections.Generic.List<string>();
 
-            // Pass 1: parse every manifest. Anything that fails to parse goes to the tail —
+            // Pass 1: parse every manifest. Anything that fails to parse goes to the tail -
             // LoadOne will re-emit the same diagnostic and skip it.
             Array.Sort(modDirs, StringComparer.Ordinal);
             foreach (var dir in modDirs)

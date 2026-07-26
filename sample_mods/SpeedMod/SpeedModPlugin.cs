@@ -60,7 +60,7 @@ namespace Gambonanza.SpeedMod
 
         private void OnSettingsOpened(MonoBehaviour settingsCanvas)
         {
-            if (_runner == null) return; // disabled — nothing to do
+            if (_runner == null) return; // disabled - nothing to do
             try { _runner.InjectSettingsRow(settingsCanvas); }
             catch (Exception ex) { _ctx?.LogLine("OnSettingsOpened failed: " + ex); }
         }
@@ -167,7 +167,7 @@ namespace Gambonanza.SpeedMod
             if (settingsCanvas == null) return;
             var t = settingsCanvas.GetType();
 
-            // 1. Reflect title + value text references — the only landmarks we trust.
+            // 1. Reflect title + value text references - the only landmarks we trust.
             var titleField = t.GetField("m_ControlsTitle",   BindingFlags.NonPublic | BindingFlags.Instance);
             var valueField = t.GetField("m_CurrentControls", BindingFlags.NonPublic | BindingFlags.Instance);
             if (titleField == null || valueField == null)
@@ -263,7 +263,7 @@ namespace Gambonanza.SpeedMod
                 { UnityEngine.Object.DestroyImmediate(mb); stripped++; }
             }
 
-            // 8. Reset arrow images to full brightness — destroying the Selectable left
+            // 8. Reset arrow images to full brightness - destroying the Selectable left
             //    Image.color stuck on whatever tint was last applied (often a faded normal).
             foreach (var arrow in new[] { clonedLeft, clonedRight })
             {

@@ -5,7 +5,7 @@ namespace Gambonanza.ModHost
 {
     /// <summary>
     /// Wire format of mod.json. Flat by design so Unity's JsonUtility can deserialize it.
-    /// Public fields, not properties — JsonUtility ignores properties.
+    /// Public fields, not properties - JsonUtility ignores properties.
     /// </summary>
     [Serializable]
     public class ModManifest

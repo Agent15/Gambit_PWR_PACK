@@ -27,7 +27,7 @@ namespace Gambonanza.MightyKasparovEveryStage
             go.hideFlags = HideFlags.HideAndDontSave;
             _runner = go.AddComponent<KasparovBossOrderRunner>();
             _runner.Bind(_context);
-            _context?.LogLine("enabled — every boss-stage encounter will be Mighty Kasparov.");
+            _context?.LogLine("enabled - every boss-stage encounter will be Mighty Kasparov.");
         }
 
         public void OnDisable()
@@ -36,7 +36,7 @@ namespace Gambonanza.MightyKasparovEveryStage
             _runner.RestoreOriginalOrder();
             UnityEngine.Object.Destroy(_runner.gameObject);
             _runner = null;
-            _context?.LogLine("disabled — restored the boss order captured at enable time.");
+            _context?.LogLine("disabled - restored the boss order captured at enable time.");
         }
     }
 

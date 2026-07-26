@@ -17,7 +17,7 @@ namespace Gambonanza.GambitApi
         private static readonly List<string> _unlockQueue = new();
         private static readonly Dictionary<string, (string name, string description)> _localizationEntries = new();
         // Inactive container that holds prefab templates. Prefabs themselves stay activeSelf=true,
-        // so Instantiate(prefab) yields an active instance — but the template doesn't tick because
+        // so Instantiate(prefab) yields an active instance - but the template doesn't tick because
         // its parent is inactive (activeInHierarchy=false).
         private static GameObject _prefabRegistry;
 
@@ -104,7 +104,7 @@ namespace Gambonanza.GambitApi
             }
 
             // 1. Create ScriptableObject. Unity's Object.name defaults to the
-            // type name ("SO_Gambit") when CreateInstance returns — every modded
+            // type name ("SO_Gambit") when CreateInstance returns - every modded
             // SO would share that name, and vanilla's GambitLibrary.SelectGambits
             // dedup keys on it (the May-2026 patch tightened the check). Always
             // assign a unique value derived from def.Id.
@@ -140,7 +140,7 @@ namespace Gambonanza.GambitApi
             // setup. Vanilla's GambitLibrary.SelectGambits dedupes on one of
             // these fields (the May-2026 game patch added a new one we didn't
             // know about), and two modded gambits with the SAME empty value
-            // throws "Duplicate Gambit name detected: , index: N" — that
+            // throws "Duplicate Gambit name detected: , index: N" - that
             // exception bubbles into ShopCanvas.ComputeGambits and renders the
             // shop empty. Filling every name/id field with a unique-per-id
             // value sidesteps any future renames the same way.
@@ -211,7 +211,7 @@ namespace Gambonanza.GambitApi
         // addition to fields because Unity surfaces some name-ish fields only
         // through wrappers (e.g. Object.name is property-only, no settable
         // backing field). This is the second-line defence behind the explicit
-        // soGambit.name / .ID / .GambitName assignments earlier — if a future
+        // soGambit.name / .ID / .GambitName assignments earlier - if a future
         // patch adds yet another required name field we cover it automatically.
         private static bool _diagnosticsLogged;
         private static void BackfillEmptyNameFields(SO_Gambit so, string id)
@@ -270,7 +270,7 @@ namespace Gambonanza.GambitApi
                     string v = null, o = null;
                     try { v = (string)f.GetValue(vanilla); } catch { }
                     try { o = (string)f.GetValue(ours);    } catch { }
-                    if (string.IsNullOrEmpty(v) == string.IsNullOrEmpty(o)) continue; // both empty or both filled — uninteresting
+                    if (string.IsNullOrEmpty(v) == string.IsNullOrEmpty(o)) continue; // both empty or both filled - uninteresting
                     Debug.Log($"[GambitApi][diag]   field {f.Name}: vanilla='{v}', ours='{o}'");
                 }
                 foreach (var p in t.GetProperties(F))
@@ -289,7 +289,7 @@ namespace Gambonanza.GambitApi
         private static bool LooksNameOrIdField(string fieldName)
         {
             if (string.IsNullOrEmpty(fieldName)) return false;
-            // Match "name", "id", "key" (loc keys) — case-insensitive substring.
+            // Match "name", "id", "key" (loc keys) - case-insensitive substring.
             return fieldName.IndexOf("name", StringComparison.OrdinalIgnoreCase) >= 0
                 || fieldName.IndexOf("identifier", StringComparison.OrdinalIgnoreCase) >= 0
                 || fieldName.Equals("m_ID", StringComparison.Ordinal)
@@ -377,7 +377,7 @@ namespace Gambonanza.GambitApi
             // Override the cloned template's in-game sprite with the modded visual.
             // The collection UI reads SO_Gambit.GambitVisual (already set), but the
             // in-game piece reads GambitBehaviour.m_Sprite. Custom mod sprites can be any
-            // pixel size — we rebuild the sprite with a PPU computed from the template's
+            // pixel size - we rebuild the sprite with a PPU computed from the template's
             // world height so the modded gambit ends up at the same on-board size as vanilla,
             // and warn (below) if the aspect ratio differs enough to look squashed.
             if (def.Visual != null)
@@ -391,7 +391,7 @@ namespace Gambonanza.GambitApi
                     var tex = def.Visual.texture;
                     // Pixel-art sprites need point filtering (bilinear bleeds edge pixels into a
                     // visible halo) and clamp wrapping (repeat sampling pulls from the opposite
-                    // edge — that's where the green stripe was coming from).
+                    // edge - that's where the green stripe was coming from).
                     try { tex.filterMode = FilterMode.Point; } catch { /* read-only texture */ }
                     try { tex.wrapMode = TextureWrapMode.Clamp; } catch { /* read-only texture */ }
 
@@ -410,7 +410,7 @@ namespace Gambonanza.GambitApi
                             Debug.LogWarning(
                                 $"[GambitApi] Gambit '{def.Id}' visual is {tex.width}x{tex.height}; " +
                                 $"vanilla template is {(int)templateRect.width}x{(int)templateRect.height}. " +
-                                $"Aspect ratio differs by {aspectDelta:P0} — sprite will render but look squashed/stretched.");
+                                $"Aspect ratio differs by {aspectDelta:P0} - sprite will render but look squashed/stretched.");
                         }
                     }
 

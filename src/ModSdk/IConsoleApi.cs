@@ -19,10 +19,10 @@ namespace Gambonanza.ModSdk
     /// Provides candidate completions for a single argument of a command.
     /// Called by the console UI when the user presses Tab on that argument.
     ///
-    ///   args        — args parsed so far (everything after the command name).
+    ///   args        - args parsed so far (everything after the command name).
     ///                 Length is &gt;= argIndex + 1; the entry at argIndex is the
     ///                 partial token currently being completed (may be empty).
-    ///   argIndex    — which argument the cursor is on (0-based).
+    ///   argIndex    - which argument the cursor is on (0-based).
     ///
     /// Return ALL candidates (don't filter by prefix); the console filters and
     /// ranks. Return null or empty when there is nothing to suggest.
@@ -64,7 +64,7 @@ namespace Gambonanza.ModSdk
         /// argument; pass null if your command takes no args (or you're fine
         /// without per-arg completion).
         ///
-        /// <paramref name="help"/> shows up in the `help` listing — keep it short.
+        /// <paramref name="help"/> shows up in the `help` listing - keep it short.
         ///
         /// Re-registering an existing name overwrites the previous handler. Use
         /// <see cref="UnregisterCommand"/> when your mod is disabled.

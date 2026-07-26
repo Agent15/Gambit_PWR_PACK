@@ -8,7 +8,7 @@ namespace Gambonanza.GambitApi
 {
     /// <summary>
     /// Entry point for the GambitApi library mod. Other mods reference this DLL and use
-    /// <c>GambitBuilder</c> to register custom gambits — the actual registration is deferred
+    /// <c>GambitBuilder</c> to register custom gambits - the actual registration is deferred
     /// here until the vanilla <c>GambitLibrary</c> singleton has fully initialised, since
     /// custom gambits can only be inserted after the game has built its internal lookup tables.
     /// </summary>

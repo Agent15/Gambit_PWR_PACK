@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -54,7 +56,7 @@ namespace Gambonanza.GameUI
         /// <summary>
         /// Reset every Image's color to white (and enable raycastTarget). The
         /// ColorTint transition on the original Selectable left whatever tint was
-        /// last applied — usually a faded "normal" — so without this clones look
+        /// last applied - usually a faded "normal" - so without this clones look
         /// disabled even though they're interactive.
         /// </summary>
         public static void ResetImageColors(GameObject root)
@@ -84,6 +86,55 @@ namespace Gambonanza.GameUI
             c.colorMultiplier  = 1f;
             c.fadeDuration     = 0.08f;
             btn.colors = c;
+        }
+    }
+
+    /// <summary>
+    /// Discovers the tab containers and tab buttons on a live
+    /// <c>Blukulele.CHE.SettingsCanvas</c> by reflection rather than by name.
+    ///
+    /// Every mod modal is built by cloning the Settings panel and deleting the tabs
+    /// we don't want. Hard-coding that delete list (Graphics / Audio / Twitch) meant
+    /// each new vanilla tab leaked into every mod's modal: the 2026-05 update shipped
+    /// a "Customize" tab (m_Customize / m_CustomizeContainer) and its board-skin
+    /// picker showed up inside the Mods window. Matching on the m_*Container /
+    /// m_*Button shape instead means the next tab the game adds is handled for free.
+    /// </summary>
+    internal static class SettingsTabs
+    {
+        private const BindingFlags F = BindingFlags.NonPublic | BindingFlags.Instance;
+
+        /// <summary>The tab we keep - its container is the modal's content area.</summary>
+        public const string KeptContainerField = "m_GameplayContainer";
+        public const string KeptButtonField    = "m_GameplayButton";
+
+        /// <summary>
+        /// Every tab container / tab button transform on <paramref name="settings"/>
+        /// except the kept (Gameplay) pair. These are the nodes to delete from a clone.
+        /// </summary>
+        public static List<Transform> DiscardableTargets(MonoBehaviour settings)
+        {
+            var found = new List<Transform>();
+            if (settings == null) return found;
+
+            foreach (var f in settings.GetType().GetFields(F))
+            {
+                bool isContainer = f.Name.EndsWith("Container", StringComparison.Ordinal)
+                                && f.Name != KeptContainerField;
+                bool isTabButton = f.Name.EndsWith("Button", StringComparison.Ordinal)
+                                && f.Name != KeptButtonField;
+                if (!isContainer && !isTabButton) continue;
+
+                object val;
+                try { val = f.GetValue(settings); } catch { continue; }
+                if (val == null) continue;
+
+                Transform target = null;
+                if (val is GameObject go)     target = go.transform;
+                else if (val is Component co) target = co.transform;   // covers MonoBehaviour
+                if (target != null) found.Add(target);
+            }
+            return found;
         }
     }
 

@@ -2,6 +2,11 @@
 **/bin/
 **/obj/
 
+# GambonanzaAssets working state: staged PNG replacements and the preview cache.
+# Both are per-user and rebuildable; pack/ is what you zip up to share a skin.
+tools/GambonanzaAssets/pack/
+tools/GambonanzaAssets/.cache/
+
 # Vendor binaries the user must dump from their own game install.
 # These are copyrighted by Unity / Blukulele and must NOT be redistributed.
 refs/

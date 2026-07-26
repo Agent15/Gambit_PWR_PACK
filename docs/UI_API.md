@@ -1,4 +1,4 @@
-# Gambonanza.GameUI — UI API Reference
+# Gambonanza.GameUI - UI API Reference
 
 `Gambonanza.GameUI` is the runtime library every Gambonanza mod uses to build
 in-game UI that matches the game's pixel-art style. It ships in `Managed/`
@@ -48,7 +48,7 @@ public sealed class HelloMod : IMod
 
 Add a project reference (or just a DLL reference) to `Gambonanza.GameUI` in your
 mod's `.csproj`. Mark it `<Private>false</Private>` so you don't ship a duplicate
-— the patcher already installs the real one into `Managed/`.
+(the patcher already installs the real one into `Managed/`.)
 
 ```xml
 <ItemGroup>
@@ -60,7 +60,7 @@ mod's `.csproj`. Mark it `<Private>false</Private>` so you don't ship a duplicat
 
 ---
 
-## `Pixel` — the public factory
+## `Pixel` - the public factory
 
 Static class. Every method is safe to call from any thread the game uses for
 UI (main thread). All methods return either a Unity component, a wrapper class,
@@ -110,7 +110,7 @@ public static PixelCheckbox CreateCheckbox(
     Transform parent, string label, bool initialOn, Action<bool> onChange);
 ```
 
-A row that matches the in-game Settings menu checkboxes — cream rectangle, dark
+A row that matches the in-game Settings menu checkboxes - cream rectangle, dark
 title text, dark checkmark on the right. Cloned from a live `SettingsCanvas`
 Toggle and stripped, so the look is pixel-identical to the game.
 
@@ -157,7 +157,7 @@ Returns a `Modal` whose chrome matches the game's Settings panel: full-screen
 canvas, dim backdrop, cream-colored panel with the pixel header, and a content
 area + status line + toolbar. Cloned from `SettingsCanvas` when possible.
 
-The modal starts **hidden** — call `modal.Show()` when ready.
+The modal starts **hidden** - call `modal.Show()` when ready.
 
 ```csharp
 var modal = Pixel.CreateModal("MyMod_Settings", "MY MOD");
@@ -196,7 +196,7 @@ public static ArrowRow AddSettingsArrowRow(
 ```
 
 Clones the in-game "Controls" row (left arrow + title + value + right arrow) and
-slots it into the gameplay tab of the open `SettingsCanvas`. **Idempotent** —
+slots it into the gameplay tab of the open `SettingsCanvas`. **Idempotent** -
 calling twice with the same `injectedName` returns the existing row instead of
 stacking duplicates.
 
@@ -216,7 +216,7 @@ ctx.OnSettingsOpened += settingsCanvas =>
 ```
 
 `ArrowRow` exposes `SetTitle`, `SetValue`, `Title`, `Value`, `Root`, and
-`Remove()` — call `Remove()` from your mod's `IModLifecycle.OnDisable` if you
+`Remove()` - call `Remove()` from your mod's `IModLifecycle.OnDisable` if you
 need clean teardown when the mod is toggled off.
 
 ### Home-menu button (patches the live CanvasMenu)
@@ -230,13 +230,13 @@ public static Button AddHomeMenuButton(
 ```
 
 Clones the Settings cell, retexts it, and slots it as a sibling immediately after
-Settings on the bottom row. **Idempotent** — re-call is a no-op.
+Settings on the bottom row. **Idempotent** - re-call is a no-op.
 
 This is what `ModHost.HomeMenuInjector` uses internally to add the "MODS" entry.
 
 ---
 
-## `Hierarchy` — primitives for your own clone-and-patch code
+## `Hierarchy` - primitives for your own clone-and-patch code
 
 Public helpers that the rest of `Pixel` is built on. Exposed because you may want
 to write a clone-and-patch routine for game UI we don't yet wrap.
@@ -252,7 +252,7 @@ public static MonoBehaviour FindByTypeFullName(string fullName);
 
 ### The clone-and-strip recipe
 
-This is the pattern every helper in `Pixel` uses internally — recommended for any
+This is the pattern every helper in `Pixel` uses internally - recommended for any
 mod that wants to extend it:
 
 ```csharp
@@ -270,7 +270,7 @@ var titlePath = Hierarchy.PathFromAncestor(canvas.transform, title.transform);
 
 // 4. Clone, strip every interactive (Selectable, EventTrigger, Blukulele.* MBs).
 var clone = Object.Instantiate(canvas.gameObject, parent);
-// (Strip helpers are internal; mirror them — see GameUI/Internal.cs for reference.)
+// (Strip helpers are internal; mirror them - see GameUI/Internal.cs for reference.)
 
 // 5. Use NavigatePath on the CLONE to find your landmarks again, retext / rewire.
 var clonedTitle = Hierarchy.NavigatePath(clone.transform, titlePath)?.GetComponent<TMP_Text>();
@@ -310,11 +310,11 @@ should do the same.
 | Button         | `CanvasMenu` Settings cell                          | First `Pixel.CreateButton`    | Inactive GameObject under DontDestroyOnLoad |
 | Checkbox       | First `SettingsCanvas` Toggle (any tab, even inactive) | First `Pixel.CreateCheckbox`  | Inactive GameObject under DontDestroyOnLoad |
 | Arrow row      | `SettingsCanvas` "Controls" wrapper                 | First `AddSettingsArrowRow`   | Inactive GameObject under DontDestroyOnLoad |
-| Modal          | Built fresh each time by cloning the live `Settings Window` panel under a new Canvas | Each `Pixel.CreateModal`     | Not cached — see "Why no modal cache" below |
+| Modal          | Built fresh each time by cloning the live `Settings Window` panel under a new Canvas | Each `Pixel.CreateModal`     | Not cached - see "Why no modal cache" below |
 
 ### Why no modal cache
 
-Modals clone the live `Settings Window` (the cream chrome — header, content area,
+Modals clone the live `Settings Window` (the cream chrome - header, content area,
 close button) into a fresh `Canvas` whose render mode and sorting layer are
 **copied from the live `SettingsCanvas`**. This matters: the original Canvas
 draws its UI in a sorting layer that sits **above** the game's CRT post-process
@@ -325,7 +325,7 @@ the modal lands in the same render layer as the real Settings panel and looks
 identical.
 
 Caching the modal as a deactivated template would freeze its `Canvas` settings
-at capture-time, so we just rebuild fresh each time the user opens the modal —
+at capture-time, so we just rebuild fresh each time the user opens the modal -
 it's once per session in practice (the manager keeps its own instance) and the
 extra work is negligible.
 
@@ -373,8 +373,8 @@ hint to add it to `Pixel`. The recipe:
 ## Color preservation rule
 
 Cloned game UI (button cells, checkbox rows, the Settings Window panel) ships
-with its own `Image.color` baked in — usually a cream (`~#EDDCB2`) tint over a
-white sprite. **Don't reset `Image.color` to `white` on these clones** — that
+with its own `Image.color` baked in - usually a cream (`~#EDDCB2`) tint over a
+white sprite. **Don't reset `Image.color` to `white` on these clones** - that
 washes out the cream and your widget ends up looking pure white instead of
 matching the game.
 
@@ -393,7 +393,7 @@ btn.targetGraphic = img;
 ButtonStyle.ApplyDefaultColors(btn);   // ColorTint white/peach/brown
 ```
 
-The exception is **arrow buttons in `AddSettingsArrowRow`** — the original
+The exception is **arrow buttons in `AddSettingsArrowRow`** - the original
 Selectable left a faded "normal" tint on the arrow images, so the helper
 explicitly resets those to white before wiring. That's a one-off, not a general
 rule.
@@ -409,9 +409,9 @@ rule.
   are returned active.
 - **Forgetting `<Private>false</Private>` on the project reference.** Without
   it your mod's `bin/Release/` ends up containing `Gambonanza.GameUI.dll` and
-  Unity loads two copies — fields go null in mysterious ways.
+  Unity loads two copies - fields go null in mysterious ways.
 - **Re-injecting on every `OnSettingsOpened`.** Pass the same `injectedName`
-  every time — `AddSettingsArrowRow` is idempotent and will return the
+  every time - `AddSettingsArrowRow` is idempotent and will return the
   existing row instead of duplicating it.
 - **Holding a stale `ArrowRow`.** When the SettingsCanvas closes and reopens,
   the inner GameObject hierarchy is rebuilt; subscribe to `OnSettingsOpened`

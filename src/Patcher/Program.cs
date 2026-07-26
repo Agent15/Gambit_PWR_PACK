@@ -13,7 +13,7 @@ namespace Gambonanza.Patcher;
 ///   2. Gambonanza.ModHost.ModHost.OnSettingsOpenedInvoke(this)    at SettingsCanvas.OnEnable
 ///   3. Gambonanza.ModHost.ModHost.OnHomeMenuOpenedInvoke(this)    at CanvasMenu.OnEnable
 ///
-/// All mod-specific logic lives in mods loaded by ModHost at runtime — this patcher
+/// All mod-specific logic lives in mods loaded by ModHost at runtime - this patcher
 /// has no knowledge of any individual mod (including SpeedMod).
 ///
 /// Usage:
@@ -80,7 +80,7 @@ internal static class Program
         //
         //    Patching from a stale .orig is the failure mode that produced the
         //    "GambitExplanation: Read 92 bytes but expected 120 bytes" crash after a
-        //    game update — Unity's serialized assets reference vanilla types whose
+        //    game update - Unity's serialized assets reference vanilla types whose
         //    field layouts changed between game versions.
         bool dllHasMarker = HasMarker(asmCsharp);
         bool dllMatchesStamp = StampMatches(stamp, asmCsharp);
@@ -105,7 +105,7 @@ internal static class Program
             // .dll is patched but doesn't match our last-written stamp. Either the
             // user manually patched with an older patcher, or something else rewrote
             // the file. We can't tell whether .orig matches the current game version,
-            // so warn loudly. The patcher will proceed using the existing .orig — if
+            // so warn loudly. The patcher will proceed using the existing .orig - if
             // it turns out to be stale, the user will see the serialization-layout
             // crash and need to Steam-verify.
             Console.WriteLine($"  warn: on-disk dll does not match the post-patch stamp; .orig may be stale.");
@@ -154,12 +154,12 @@ internal static class Program
             "OnHomeMenuOpenedInvoke", module.TypeSystem.Void, modHostTypeRef) { HasThis = false };
         onHomeMenuOpenedRef.Parameters.Add(new ParameterDefinition(monoBehaviourRef));
 
-        // 5. Patch GameManager.Start — prepend ModHost.LoadAll().
+        // 5. Patch GameManager.Start - prepend ModHost.LoadAll().
         var gameManager = module.GetType("Blukulele.Core.GameManager");
         var startMethod = gameManager?.Methods.FirstOrDefault(m => m.Name == "Start" && !m.IsStatic);
         if (gameManager == null || startMethod == null)
         {
-            Console.Error.WriteLine("Could not find Blukulele.Core.GameManager.Start — aborting.");
+            Console.Error.WriteLine("Could not find Blukulele.Core.GameManager.Start - aborting.");
             return 3;
         }
         var ilStart = startMethod.Body.GetILProcessor();
@@ -167,7 +167,7 @@ internal static class Program
         ilStart.InsertBefore(firstInstr, ilStart.Create(OpCodes.Call, loadAllRef));
         Console.WriteLine("  patched -> Blukulele.Core.GameManager.Start (prepended ModHost.LoadAll)");
 
-        // 6. Patch SettingsCanvas.OnEnable — append ModHost.OnSettingsOpenedInvoke(this) before every ret.
+        // 6. Patch SettingsCanvas.OnEnable - append ModHost.OnSettingsOpenedInvoke(this) before every ret.
         var settingsCanvas = module.GetType("Blukulele.CHE.SettingsCanvas");
         var onEnable = settingsCanvas?.Methods.FirstOrDefault(m => m.Name == "OnEnable" && !m.IsStatic);
         if (settingsCanvas == null || onEnable == null)
@@ -186,7 +186,7 @@ internal static class Program
             Console.WriteLine("  patched -> Blukulele.CHE.SettingsCanvas.OnEnable (appended ModHost.OnSettingsOpenedInvoke)");
         }
 
-        // 7. Patch CanvasMenu.OnEnable — append console button injection before every ret.
+        // 7. Patch CanvasMenu.OnEnable - append console button injection before every ret.
         var canvasMenu = module.GetType("Blukulele.CHE.CanvasMenu");
         var menuOnEnable = canvasMenu?.Methods.FirstOrDefault(m => m.Name == "OnEnable" && !m.IsStatic);
         if (canvasMenu == null || menuOnEnable == null)

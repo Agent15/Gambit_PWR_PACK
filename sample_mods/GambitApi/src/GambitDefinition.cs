@@ -61,7 +61,7 @@ namespace Gambonanza.GambitApi
         /// On-board scale multiplier for the in-game sprite. 1.0 matches the cloned vanilla
         /// template's world height exactly. Use a value below 1 to shrink (handy when your
         /// art is more tightly cropped than vanilla and ends up looking visually larger),
-        /// or above 1 to grow. Only affects the in-world piece — collection art is untouched.
+        /// or above 1 to grow. Only affects the in-world piece - collection art is untouched.
         /// </summary>
         public float VisualScale = 1f;
     }
