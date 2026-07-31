@@ -1,0 +1,11 @@
+{
+  "id": "GrandMasCookiesGambit",
+  "name": "GrandMa's Cookies' Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.GrandMasCookiesGambit.GrandMasCookiesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "At the start of a game, grants one random piece.",
+  "dependencies": ["GambitApi"]
+}
