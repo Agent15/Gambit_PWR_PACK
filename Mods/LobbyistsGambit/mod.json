@@ -1,0 +1,11 @@
+{
+  "id": "LobbyistsGambit",
+  "name": "Lobbyist's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.LobbyistsGambit.LobbyistsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "This is the Json file",
+  "dependencies": ["GambitApi"]
+}
