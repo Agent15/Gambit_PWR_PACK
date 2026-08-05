@@ -4,25 +4,25 @@ using Gambonanza.GambitApi;
 using Gambonanza.ModSdk;
 using UnityEngine;
 
-namespace Gambonanza.LobbyistsGambit
+namespace Gambonanza.RecursionsGambit
 {
     /// <summary>
     /// Mod entry point. ModHost creates this class from mod.json and calls OnLoad.
     ///
     /// This file is only responsible for registering the card/gambit definition:
     /// name, tooltip, rarity, price, art, and which runtime behaviour to attach.
-    /// The actual gameplay logic is in GambitLobbyist.cs.
+    /// The actual gameplay logic is in GambitRecursion.cs.
     /// </summary>
-    public sealed class LobbyistsGambitBuild : IMod
+    public sealed class RecursionsGambitBuild : IMod
     {
         public Sprite mySprite;
 
         public void OnLoad(IModContext context)
         {
-            context.LogLine("[LobbyistsGambit] registering Lobbyist's Gambit.");
+            context.LogLine("[RecursionsGambit] registering Recursion's Gambit.");
 
-            // Custom art: put `Lobbyist.png` next to mod.json.
-            var spritePath = Path.Combine(context.ModDirectory, "Lobbyist.png");
+            // Custom art: put `Recursion.png` next to mod.json.
+            var spritePath = Path.Combine(context.ModDirectory, "Recursion.png");
             var sprite = ModGambitApi.LoadSprite(spritePath);
             mySprite = sprite;
 
@@ -30,25 +30,25 @@ namespace Gambonanza.LobbyistsGambit
             // gambit prefab, fills in metadata, and attaches our BaseGambit subclass
             // to handle runtime behaviour.
             // This ID is also what the console sees for commands like
-            // `give gambit lobbyist`, so keep it short and readable.
-            var def = GambitBuilder.Create("lobbyist")
-                .WithName("Lobbyist's Gambit")
+            // `give gambit recursion`, so keep it short and readable.
+            var def = GambitBuilder.Create("recursion")
+                .WithName("Recursion's Gambit")
                 //Select a random description for this render
-                .WithDescription("Selling a <sprite=9> <color=£>KING</color> captures a random enemy piece.")
+                .WithDescription("Moving the same piece, the same distance, in the same direction as your last move skips the enemy turn.")
                 .WithRarity(Rarity.EPIC)
-                .WithFocus(Gambit_Focus.PIECE_SELLER)
+                .WithFocus(Gambit_Focus.NONE)
                 .WithPrice(8)
                 .WithVisual(sprite)
                 .WithVisualScale(0.9f)
-                // This tells GambitApi to attach LobbyistsGambit to the in-run
+                // This tells GambitApi to attach RecursionsGambit to the in-run
                 // gambit object. Without this, the card would exist but do nothing.
-                .WithBaseGambit<GambitLobbyist>()
+                .WithBaseGambit<GambitRecursion>()
                 // AutoUnlock means the gambit can appear immediately without adding
                 // a separate unlock achievement.
                 .AutoUnlock(true)
                 .Register();
 
-            context.LogLine($"[LobbyistsGambit] registered '{def.Id}'.");
+            context.LogLine($"[RecursionsGambit] registered '{def.Id}'.");
         }        
     }
 }

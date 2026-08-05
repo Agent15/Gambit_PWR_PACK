@@ -10,7 +10,10 @@ using DG.Tweening;
 namespace Gambonanza.LobbyistsGambit
 {
     /// <summary>
-    /// WIP
+    /// Lobbyist's Gambit: Selling a KING captures a random enemy piece
+    /// 
+    /// This gambit combines the piece selling behavior of Equivalent Exchange's Gambit
+    /// With parts of Kamikaze's Gambit's capture behavior
     /// </summary>
     public sealed class GambitLobbyist : BaseGambit
     {

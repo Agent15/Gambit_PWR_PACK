@@ -7,12 +7,16 @@ using UnityEngine;
 namespace Gambonanza.GrandMasCookiesGambit
 {
     /// <summary>
+    /// GrandMa's Cookies' Gambit: At the start of a game, grants one random piece.
+    ///
     /// This Gambit is a splice of two existing gambits in vanilla, combining
     /// the declaration and behavior of GrandMa's Gift's Gambit with the
     /// Trigger() effect of Chrysalis' gambit.
     /// </summary>
     public sealed class GambitGrandMasCookies : BaseGambit
     {
+        //These are artifacts from GrandMa's Gift's Gambit.
+        //I don't know what exactly what they do, but I don't dare remove them.
         private readonly string m_OccurenceName = "GRAND_MA_COOKIE";
         private readonly string m_OccurenceName_3 = "WEIGHTED_RANDOM_GAMBIT_2";
         private bool m_SaveOccurrence;
@@ -68,6 +72,7 @@ namespace Gambonanza.GrandMasCookiesGambit
             m_SaveOccurrence_3 = false;
         }
 
+        //Executes on every state change and checks if it's currently the start of a game
         private void Behave(State state)
         {
             // Note: State values correspond to integer values in the State enum:
@@ -99,7 +104,7 @@ namespace Gambonanza.GrandMasCookiesGambit
             {
                 return;
             }
-            // Trigger visual feedback
+            // BOING!
             VisualEffect();
 
             // Determine piece type to add using randomized probability table
