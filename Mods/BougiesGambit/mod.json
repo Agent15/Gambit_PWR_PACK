@@ -1,0 +1,11 @@
+{
+  "id": "BougiesGambit",
+  "name": "Bougie's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.BougiesGambit.BougiesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "This is the Json file",
+  "dependencies": ["GambitApi"]
+}
