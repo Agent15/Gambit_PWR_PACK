@@ -30,7 +30,7 @@ The `.assets` files hold the metadata - name, width, height, pixel format - and
 usually point at a sibling `.resS` file for the actual bytes. That split is why you
 can't just open these in an image editor.
 
-**232 textures**, and carved out of them, **918 named sprites**.
+**236 textures**, and carved out of them, **925 named sprites** (as of game build 24613134 / v1.4.0).
 
 ---
 

@@ -65,7 +65,7 @@ GambonanzaMods/
 ## Just want to change how things look?
 
 You don't need any of this. [`tools/GambonanzaAssets`](tools/GambonanzaAssets/) is a standalone
-editor for the game's art - a searchable gallery of all 557 sprites and 232
+editor for the game's art - a searchable gallery of all 561 sprites and 236
 textures, click to download a PNG, drag one back to replace it, press Apply. No
 code, no patching of game logic, fully reversible.
 

@@ -205,6 +205,52 @@ namespace Gambonanza.GambitApi
             Debug.Log($"[GambitApi] Injected localization: '{nameKey}' = '{def.Name}', '{descKey}' = '{def.Description}'");
         }
 
+        /// <summary>
+        /// Re-checks that every registered gambit's display strings are still present in
+        /// the game's cached traduction JSON and re-writes any that are missing.
+        ///
+        /// GetTraduction() caches one parsed JSONNode per language and rebuilds it from
+        /// the vanilla text asset whenever SettingsData.CurrentLanguage changes - the
+        /// settings-screen language arrows and the Steam first-launch auto-detect both
+        /// trigger that rebuild, silently dropping everything InjectLocalization wrote
+        /// and leaving custom gambits with empty names/descriptions in the collection.
+        /// GambitApiHost calls this from LocalizationManager.OnChangeLanguage and from a
+        /// slow watchdog (the auto-detect path never fires the event).
+        /// </summary>
+        public static void EnsureLocalizationInjected()
+        {
+            if (_localizationEntries.Count == 0) return;
+            if (!SingletonMonoBehaviour<LocalizationManager>.IsCreated()) return;
+
+            JSONNode gambitNode;
+            try
+            {
+                var traduction = SingletonMonoBehaviour<LocalizationManager>.Instance?.GetTraduction();
+                gambitNode = traduction?["gambit"];
+            }
+            catch
+            {
+                // Boot-order race (DataManager/settings not loaded yet) - the watchdog
+                // will try again on its next tick.
+                return;
+            }
+            if (gambitNode == null) return;
+
+            int repaired = 0;
+            foreach (var entry in _localizationEntries)
+            {
+                string nameKey = entry.Key + "_name";
+                // A missing key yields a lazy/empty node, so test the string value
+                // rather than the node itself.
+                if (!string.IsNullOrEmpty(gambitNode[nameKey]?.Value)) continue;
+                gambitNode[nameKey] = entry.Value.name;
+                gambitNode[entry.Key + "_description"] = entry.Value.description;
+                repaired++;
+            }
+            if (repaired > 0)
+                Debug.Log($"[GambitApi] Traduction cache was rebuilt (language change?) - re-injected {repaired} gambit localization entr{(repaired == 1 ? "y" : "ies")}.");
+        }
+
         // Walk every public/non-public instance string field AND settable string
         // property on the SO, filling any blank value whose name looks
         // name/id-related with an id-suffixed token. Properties are scanned in

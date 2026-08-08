@@ -247,6 +247,14 @@ namespace Gambonanza.KamikazeGambit
             if (tile != null) tile.CanBeLandedOn = originalCanBeLandedOn;
         }
 
+        // Build 24613134 (v1.4.0) added a graveyard buy-back shop fed by
+        // PieceManager.AddPieceToGraveyard on every vanilla player-piece-loss path.
+        // Resolved by reflection so the prebuilt DLL still loads on older game builds
+        // that don't have the method (a compile-time call would throw
+        // MissingMethodException at JIT time there).
+        private static readonly MethodInfo _addPieceToGraveyard =
+            typeof(PieceManager).GetMethod("AddPieceToGraveyard", BindingFlags.Public | BindingFlags.Instance);
+
         private void DestroyPlayerPiece(BasePieceBehaviour piece, TileBehaviour tile)
         {
             if (piece == null) return;
@@ -255,7 +263,17 @@ namespace Gambonanza.KamikazeGambit
 
             var pieceManager = SingletonMonoBehaviour<PieceManager>.Instance;
             if (pieceManager != null)
+            {
+                // A kamikaze sacrifice is a lost player piece like any other - feed the
+                // graveyard pool so it can be bought back after a boss stage, matching
+                // the two vanilla loss paths (enemy capture, tile crumble).
+                if (_addPieceToGraveyard != null)
+                {
+                    try { _addPieceToGraveyard.Invoke(pieceManager, new object[] { piece }); }
+                    catch (Exception ex) { Debug.LogWarning($"[KamikazeGambit] graveyard bookkeeping skipped: {ex.Message}"); }
+                }
                 pieceManager.UnregisterPiece(piece);
+            }
 
             if (piece.VisualEffect != null)
                 piece.VisualEffect.Disappear(0.25f);

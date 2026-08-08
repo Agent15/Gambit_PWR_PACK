@@ -53,6 +53,60 @@ namespace Gambonanza.ModHost
             int n = _registry.Count;
             _console?.PrintInfo($"ModHost v{ModUpdater.FrameworkVersion} online - {n} mod{(n == 1 ? "" : "s")} loaded. Press F10 or ` to toggle. Type 'help' for commands.");
             if (_console != null) ModUpdater.SpawnOnce(_console);
+            WarnIfGameUpdatedSinceInstall();
+        }
+
+        /// <summary>
+        /// Compares the Steam build id recorded at patch time (install.json) with the
+        /// one in the live app manifest. When Steam ships an update that does NOT touch
+        /// Assembly-CSharp.dll the patch survives and mods keep running on a game build
+        /// the framework was never verified against - this is the only case we can warn
+        /// about from inside the game (an update that replaces the dll strips the patch,
+        /// and nothing of ours runs until build.sh is re-run).
+        /// </summary>
+        private static void WarnIfGameUpdatedSinceInstall()
+        {
+            try
+            {
+                var managed = Path.GetDirectoryName(typeof(ModHost).Assembly.Location);
+                if (string.IsNullOrEmpty(managed)) return;
+                var installPath = Path.Combine(managed, "Gambonanza.ModHost.install.json");
+                if (!File.Exists(installPath)) return;
+                var json = File.ReadAllText(installPath);
+                var installedBuild = ExtractJsonString(json, "steamBuildId");
+                if (string.IsNullOrEmpty(installedBuild) || installedBuild == "unknown") return;
+
+                var gameDir = ExtractJsonString(json, "gameDirNative");
+                if (string.IsNullOrEmpty(gameDir) || !Directory.Exists(gameDir))
+                    gameDir = ExtractJsonString(json, "gameDir");
+                if (string.IsNullOrEmpty(gameDir)) return;
+                gameDir = NormalizeRuntimePath(gameDir);
+
+                // steamapps/common/Gambonanza -> steamapps/appmanifest_<appId>.acf
+                var appId = ExtractJsonString(json, "appId");
+                if (string.IsNullOrEmpty(appId)) appId = "3509230";
+                var steamapps = Path.GetDirectoryName(Path.GetDirectoryName(gameDir));
+                if (string.IsNullOrEmpty(steamapps)) return;
+                var acf = Path.Combine(steamapps, $"appmanifest_{appId}.acf");
+                if (!File.Exists(acf)) return;
+
+                string liveBuild = null;
+                foreach (var line in File.ReadAllLines(acf))
+                {
+                    var t = line.Trim();
+                    if (!t.StartsWith("\"buildid\"", StringComparison.Ordinal)) continue;
+                    var parts = t.Split('"');
+                    if (parts.Length >= 4) liveBuild = parts[3];
+                    break;
+                }
+                if (string.IsNullOrEmpty(liveBuild) || liveBuild == installedBuild) return;
+
+                var msg = $"Gambonanza updated (Steam build {installedBuild} -> {liveBuild}) since the framework was installed. " +
+                          "Mods are still running, but on an unverified game build - if anything misbehaves, re-run ./build.sh from the GambonanzaMods repo.";
+                LogLine(msg);
+                _console?.PrintWarn(msg);
+            }
+            catch (Exception ex) { LogLine("game-update check failed: " + ex.Message); }
         }
 
         public static void OnSettingsOpenedInvoke(MonoBehaviour settingsCanvas)

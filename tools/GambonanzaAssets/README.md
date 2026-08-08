@@ -2,8 +2,8 @@
 
 Re-skin Gambonanza without writing any code.
 
-GambonanzaAssets opens a browser window with every image in the game - all 557 sprites and
-232 textures - in a searchable, categorised gallery. Click a piece of art, download
+GambonanzaAssets opens a browser window with every image in the game - all 561 sprites and
+236 textures - in a searchable, categorised gallery. Click a piece of art, download
 the PNG, paint over it, drag it back in, press **Apply to game**. Done.
 
 Nothing here touches game logic. It swaps pictures, and only pictures.

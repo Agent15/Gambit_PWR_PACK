@@ -121,7 +121,12 @@ namespace Gambonanza.GameUI
             {
                 bool isContainer = f.Name.EndsWith("Container", StringComparison.Ordinal)
                                 && f.Name != KeptContainerField;
-                bool isTabButton = f.Name.EndsWith("Button", StringComparison.Ordinal)
+                // Tab buttons are matched by TYPE, not name suffix: the game names some
+                // of them without the "Button" suffix (m_Customize since 2026-05,
+                // m_Accessibility since build 24613134) and every ButtonSettings field
+                // on SettingsCanvas is a tab button, so the type is the reliable shape.
+                bool isTabButton = (f.Name.EndsWith("Button", StringComparison.Ordinal)
+                                    || f.FieldType.Name == "ButtonSettings")
                                 && f.Name != KeptButtonField;
                 if (!isContainer && !isTabButton) continue;
 

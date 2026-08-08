@@ -79,5 +79,46 @@ namespace Gambonanza.GambitApi
         }
     }
 
-    public class GambitApiHost : MonoBehaviour { }
+    /// <summary>
+    /// Scene-persistent runner for GambitApi coroutines. Also keeps injected gambit
+    /// localization alive: the game rebuilds its traduction cache from the vanilla
+    /// text asset on every language change, dropping modded entries, so we re-inject
+    /// on <c>LocalizationManager.OnChangeLanguage</c> and from a 2-second watchdog
+    /// (the Steam first-launch language auto-detect never fires the event).
+    /// </summary>
+    public class GambitApiHost : MonoBehaviour
+    {
+        private bool _subscribed;
+        private float _nextWatchdogTick;
+
+        private void Update()
+        {
+            if (!_subscribed && SingletonMonoBehaviour<LocalizationManager>.IsCreated())
+            {
+                var loc = SingletonMonoBehaviour<LocalizationManager>.Instance;
+                if (loc != null)
+                {
+                    loc.OnChangeLanguage += OnLanguageChanged;
+                    _subscribed = true;
+                }
+            }
+
+            if (Time.unscaledTime >= _nextWatchdogTick)
+            {
+                _nextWatchdogTick = Time.unscaledTime + 2f;
+                GambitRegistry.EnsureLocalizationInjected();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_subscribed && SingletonMonoBehaviour<LocalizationManager>.IsCreated())
+            {
+                var loc = SingletonMonoBehaviour<LocalizationManager>.Instance;
+                if (loc != null) loc.OnChangeLanguage -= OnLanguageChanged;
+            }
+        }
+
+        private void OnLanguageChanged() => GambitRegistry.EnsureLocalizationInjected();
+    }
 }
