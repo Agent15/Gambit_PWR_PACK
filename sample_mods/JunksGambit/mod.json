@@ -1,0 +1,11 @@
+{
+  "id": "JunksGambit",
+  "name": "Junk's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.JunksGambit.JunksGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "It's useless ;)",
+  "dependencies": ["GambitApi"]
+}
