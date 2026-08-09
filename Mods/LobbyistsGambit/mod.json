@@ -6,6 +6,6 @@
   "entry": "Gambonanza.LobbyistsGambit.LobbyistsGambitBuild",
   "enabled": true,
   "gameVersion": ">=1.0",
-  "description": "This is the Json file",
+  "description": "Selling a KING captures a random enemy piece.",
   "dependencies": ["GambitApi"]
 }
