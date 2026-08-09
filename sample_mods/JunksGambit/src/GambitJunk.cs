@@ -8,36 +8,25 @@ using DG.Tweening;
 namespace Gambonanza.JunksGambit
 {
     /// <summary>
-    /// WIP
+    /// Junk's Gambit: It's useless, but in a funny way. Trust me ;)
+    /// 
+    /// There's nothing to see here. The bulk of this gambit's behavior comes from its ability to
+    /// update descriptions which is handled in the JunksGambitBuild class
     /// </summary>
     public sealed class GambitJunk : BaseGambit
     {
-        private System.Random pick = new();
-        private int listLength = JunksGambitBuild.descriptions.Length;
         private void Start()
-        {
-            // Find the GambitBehaviour counterpart of this gambit
-            this.m_Gambit = base.GetComponentInParent<GambitBehaviour>();
-
-            //DEBUG: Execute this function every time a piece in the stock is clicked
-            SelectionManager.Instance.OnSelectStockPiece += Boing;
-        }
-
-        private void OnDestroy()
         {}
 
-        //DEBUG: Updates the gambit's description and displays it
-        private void Boing(BasePieceBehaviour x)
+        private void OnDestroy()
         {
-            int p = pick.Next(listLength);
-            this.m_Gambit.Info.GambitDescription = $"junk{p}_description";
-            string feedback = m_Gambit.Info.GambitDescription;
-            this.m_FeedbackIncrementor.Spawn(feedback);
-			this.m_FeedbackIncrementor.IncrementSound(0f);
+            // Select a new description for the next appearance
+            JunksGambitBuild.UpdateJunkDescription();
         }
 
         public override void Trigger()
         {
+            // BOING!
             VisualEffect();
         }
     }

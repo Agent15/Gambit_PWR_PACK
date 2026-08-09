@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using Blukulele.CHE;
 using Blukulele.Core;
 using UnityEngine;
-using DG.Tweening;
-//using UnityEngine.UI;
 
 namespace Gambonanza.LobbyistsGambit
 {
