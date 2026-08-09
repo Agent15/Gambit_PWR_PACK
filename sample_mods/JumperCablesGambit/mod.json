@@ -1,0 +1,11 @@
+{
+  "id": "JumperCablesGambit",
+  "name": "Jumper Cables's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.JumperCablesGambit.JumperCablesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "After every move, a 1/5 chance to trigger another gambit unconditionally",
+  "dependencies": ["GambitApi"]
+}
