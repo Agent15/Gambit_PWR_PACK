@@ -1,134 +1,33 @@
-# GambonanzaMods
+# Gambit PWR_PACK
 
-A small, self-contained modding framework for the Steam game **Gambonanza**,
-plus sample mods. The framework patches the game's `Assembly-CSharp.dll`
-in-place to add three call sites, drops a runtime mod loader into the game's
-`Managed/` directory, and from then on any mod is a normal .NET DLL dropped
-into `Gambonanza/Mods/<ModName>/`.
+A set of mod files for the Steam game **Gambonanza**. This repo lists sever Gambits under the ``/Mods`` folder where each Gambit is listed as a separate mod, and all made by me (FRO_PWR).
+The contents of this repo are largely dependent on the resources found in Bentrd's **GambonanzaMods** repo. To install these mods, you can find them on the **Gambonanza mod manager** (https://bentrd.github.io//GambonanzaMods). For more technical information and a guide on building your own Gambonanza mod framework, I recommend going to https://github.com/bentrd/GambonanzaMods.git
 
-This repo contains everything: the SDK, the loader, the in-game mod manager
-UI, the patcher, and sample mods that double as documentation.
+## The Gambits
 
-## Quick start
+Here is a list of every modded gambit currently in this repo:
 
-```bash
-git clone https://github.com/bentrd/GambonanzaMods.git
-cd GambonanzaMods
-./build.sh
-```
+**GrandMa's Cookies' Gambit**
+At the start of a game, earn one random piece
 
-That's it. The script auto-detects your Gambonanza install, patches the
-game, builds and installs the sample mods, and leaves you ready to
-launch from Steam. Re-runnable any time - the patcher always works from a
-backup of the original `Assembly-CSharp.dll`.
+**Lobbyist's Gambit**
+Selling a king captures a random enemy piece
 
-If auto-detection fails (non-default Steam library, custom install path),
-pass the install path explicitly:
+**Recursion's Gambit**
+Moving the same piece, the same distance, in the same direction as your last move skips the enemy's turn
 
-```bash
-./build.sh "/some/path/to/Gambonanza"
-GAMBONANZA_DIR="/some/path/to/Gambonanza" ./build.sh
-```
+**Junk's Gambit**
+It's useless, but in a funny way, trust me ;)
 
-To install only the framework without the sample mods:
+**Bougie's Gambit**
+Every time you spend money, earn $1
 
-```bash
-./build.sh --skip-samples
-```
+**Jumper Cables' Gambit**
+After every move, 1/5 chance to trigger one of your gambits unconditionally
 
-**Requirements:** bash (Git Bash / WSL on Windows works), .NET SDK 8.0 or
-newer, and an installed copy of Gambonanza on Steam.
+**Crybaby's Gambit**
+If any of your pieces it threatened, it also counts as a capture
 
-## Layout
+**Fishing Net's Gambit**
+If an enemt piece is trapped, skip the enemy's turn
 
-```
-GambonanzaMods/
-├── src/
-│   ├── ModSdk/      Public API - IMod, IModContext, IModLifecycle.
-│   ├── ModHost/     Runtime loader - discovers Mods/, parses mod.json,
-│   │                Assembly.LoadFroms each DLL, dispatches lifecycle events.
-│   ├── GameUI/      Pixel.* helpers for cloning game UI into mods.
-│   └── Patcher/     Cecil-based one-shot patcher.
-├── sample_mods/     Source for SpeedMod, GambitApi, custom gambits, overlays.
-├── Mods/            Pre-built distributables - drop a subfolder into
-│                    Gambonanza/Mods/ if you'd rather skip building.
-├── tools/GambonanzaAssets/  No-code visual mod editor. Browse every sprite in the
-│                    game, swap the PNGs, apply. Needs none of the above.
-├── docs/            UI_API.md (Pixel.* reference), ASSET_MODDING.md.
-├── build.sh         Does everything end-to-end.
-├── GAME_BUILD       The Gambonanza build this checkout was verified against.
-└── refs/            Auto-populated by build.sh on first run from your
-                     own game's Managed/ folder. Not in version control -
-                     these DLLs are copyrighted by Unity / Blukulele.
-```
-
-## Just want to change how things look?
-
-You don't need any of this. [`tools/GambonanzaAssets`](tools/GambonanzaAssets/) is a standalone
-editor for the game's art - a searchable gallery of all 557 sprites and 232
-textures, click to download a PNG, drag one back to replace it, press Apply. No
-code, no patching of game logic, fully reversible.
-
-```bash
-cd tools/GambonanzaAssets && ./gambonanza-assets.sh
-```
-
-To browse the art without installing anything, the same catalogue is online at
-**[bentrd.github.io/GambonanzaAssets](https://bentrd.github.io/GambonanzaAssets/)**.
-
-Background on how the game stores its art is in [docs/ASSET_MODDING.md](docs/ASSET_MODDING.md).
-
-## How the framework works
-
-The patcher injects exactly three calls into vanilla Gambonanza:
-
-| Where in `Assembly-CSharp.dll`              | Hook                                  |
-| ------------------------------------------- | ------------------------------------- |
-| `Blukulele.Core.GameManager.Start`          | `ModHost.LoadAll()` - boot, mod loading, and console setup. |
-| `Blukulele.CHE.CanvasMenu.OnEnable`         | `ModHost.OnHomeMenuOpenedInvoke(this)` - adds the CONSOLE home-screen button. |
-| `Blukulele.CHE.SettingsCanvas.OnEnable`     | `ModHost.OnSettingsOpenedInvoke(this)` - fans out to mods that subscribed via `IModContext.OnSettingsOpened`. |
-
-The in-game console opens with `F10`, `F1`, backtick, or the home-screen CONSOLE button. Type `help` to list commands.
-
-## Keeping up with game updates
-
-The framework reaches into a lot of the game's private state by name, so a Steam
-update is always the first suspect when something breaks. [`GAME_BUILD`](GAME_BUILD)
-records the build this checkout was verified against and what changed in it;
-`./build.sh` hashes the installed `Assembly-CSharp.dll` on every run and prints a
-note when yours differs.
-
-Everything else lives in plain managed DLLs that get loaded via
-`Assembly.LoadFrom`. There is no Harmony, no MonoMod runtime detour, no IL
-weaving inside individual mods - only those three patches.
-
-A marker class `__GambonanzaModHostPatched` is added to the patched assembly
-so the patcher can detect a previous run and stay idempotent.
-
-## Writing a mod
-
-Read [sample_mods/README.md](sample_mods/README.md) and crib from `SpeedMod`
-(the smallest sample) or `KamikazeGambit` (a feature mod that registers a
-custom gambit via `GambitApi`).
-
-The minimum viable mod is:
-
-```csharp
-public sealed class HelloMod : Gambonanza.ModSdk.IMod
-{
-    public void OnLoad(Gambonanza.ModSdk.IModContext ctx)
-    {
-        UnityEngine.Debug.Log("Hello from a mod!");
-    }
-}
-```
-
-…plus a six-line `mod.json` next to the compiled DLL.
-
-While iterating on a mod, you don't need to re-run the full
-`./build.sh` - `sample_mods/build.sh` rebuilds samples only and copies the
-output into the game's `Mods/` with `--install`.
-
-## License
-
-MIT - see [LICENSE](LICENSE).
