@@ -7,27 +7,34 @@ The contents of this repo are largely dependent on the resources found in Bentrd
 
 Here is a list of every modded gambit currently in this repo:
 
-**GrandMa's Cookies' Gambit**
-At the start of a game, earn one random piece
+**- GrandMa's Cookies' Gambit**
 
-**Lobbyist's Gambit**
-Selling a king captures a random enemy piece
+  At the start of a game, earn one random piece
 
-**Recursion's Gambit**
-Moving the same piece, the same distance, in the same direction as your last move skips the enemy's turn
+**- Lobbyist's Gambit**
 
-**Junk's Gambit**
-It's useless, but in a funny way, trust me ;)
+  Selling a king captures a random enemy piece
 
-**Bougie's Gambit**
-Every time you spend money, earn $1
+**- Recursion's Gambit**
 
-**Jumper Cables' Gambit**
-After every move, 1/5 chance to trigger one of your gambits unconditionally
+  Moving the same piece, the same distance, in the same direction as your last move skips the enemy's turn
 
-**Crybaby's Gambit**
-If any of your pieces it threatened, it also counts as a capture
+**- Junk's Gambit**
 
-**Fishing Net's Gambit**
-If an enemt piece is trapped, skip the enemy's turn
+  It's useless, but in a funny way, trust me ;)
+
+**- Bougie's Gambit**
+
+  Every time you spend money, earn $1
+
+**- Jumper Cables' Gambit**
+
+  After every move, 1/5 chance to trigger one of your gambits unconditionally
+
+**- Crybaby's Gambit**
+
+  If any of your pieces it threatened, it also counts as a capture
+
+**- Fishing Net's Gambit**
+  If an enemt piece is trapped, skip the enemy's turn
 
