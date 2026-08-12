@@ -1,0 +1,11 @@
+{
+  "id": "CrybabysGambit",
+  "name": "Crybaby's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.CrybabysGambit.CrybabysGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "When any of your pieces is threatened, it is also counted as as a capture",
+  "dependencies": ["GambitApi"]
+}

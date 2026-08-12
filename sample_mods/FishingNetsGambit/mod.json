@@ -1,0 +1,11 @@
+{
+  "id": "FishingNetsGambit",
+  "name": "Fishing Net's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.FishingNetsGambit.FishingNetsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "When an enemy piece is trapped, skip the enemy's turn.",
+  "dependencies": ["GambitApi"]
+}
