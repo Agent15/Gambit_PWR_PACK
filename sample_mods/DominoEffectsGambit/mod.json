@@ -1,0 +1,11 @@
+{
+  "id": "DominoEffectsGambit",
+  "name": "Domino Effect's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.DominoEffectsGambit.DominoEffectsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "When an enemy piece is trapped, trap every enemy piece adjacent to it",
+  "dependencies": ["GambitApi"]
+}
