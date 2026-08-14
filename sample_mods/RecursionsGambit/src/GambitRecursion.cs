@@ -36,7 +36,7 @@ namespace Gambonanza.RecursionsGambit
         {
             //Unssign this classes Behave() and Cleanup() methods from the game's actions
             SelectionManager.Instance.OnMove -= Behave;
-            GameManager.Instance.onStateChanged += Cleanup;
+            GameManager.Instance.onStateChanged -= Cleanup;
             //Clean out the gambit's move history
             lastMoves.Clear();
             lastDeltaX = 0;
@@ -95,9 +95,9 @@ namespace Gambonanza.RecursionsGambit
                 lastDeltaY = 0;
 
                 //DEBUG: Indicate a reset
-                string feedback = "Reset";
-                this.m_FeedbackIncrementor.Spawn(feedback);
-			    this.m_FeedbackIncrementor.IncrementSound(0f);
+                // string feedback = "Reset";
+                // this.m_FeedbackIncrementor.Spawn(feedback);
+			    // this.m_FeedbackIncrementor.IncrementSound(0f);
             }
         }
     }
