@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>Gambonanza.RecursionsGambit</AssemblyName>
-    <RootNamespace>Gambonanza.RecursionsGambit</RootNamespace>
+    <AssemblyName>Gambonanza.PointAMngr</AssemblyName>
+    <RootNamespace>Gambonanza.PointAMngr</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -14,12 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ModSdk\ModSdk.csproj">
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\GambitApi\GambitApi.csproj">
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\PointAMngr\PointAMngr.csproj">
       <Private>false</Private>
     </ProjectReference>
   </ItemGroup>

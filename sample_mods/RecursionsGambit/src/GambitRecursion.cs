@@ -5,6 +5,7 @@ using Blukulele.CHE;
 using Blukulele.Core;
 using UnityEngine;
 using DG.Tweening;
+using Gambonanza.PointAMngr;
 
 namespace Gambonanza.RecursionsGambit
 {
@@ -15,90 +16,153 @@ namespace Gambonanza.RecursionsGambit
     /// This gambit combines the turn-skipping behavior of Mime's Gambit
     /// With some custom logic to determine the direction and distance of piece moves
 	///
-	/// WIP: This gambit tends to not trigger unexpectedly around crumbled tiles. Still looking for a solution
+	/// WIP: It was never cruble tiles! It's a rounding error due to a change in stages!
     /// </summary>
     public sealed class GambitRecursion : BaseGambit
     {
         // Declare a set of variables to remember the last player move
-        private int lastDeltaX = 0, lastDeltaY = 0;
-        private BasePieceBehaviour lastPiece;
-        // I also created a simple class to store a list of each of the player's pieces' last moves
-        private List<SimpleCoordinate> lastMoves = new();
-        
+        private (int x, int y) lastDelta = (0, 0);
+        private BasePieceBehaviour lastPiece = null;
+
         private void Start()
         {
             //Assign this classes Behave() and Cleanup() methods to the game's actions
-            SelectionManager.Instance.OnMove += Behave;
-            GameManager.Instance.onStateChanged += Cleanup;
+            SelectionManager.Instance.OnMove += CO_Behave;
+            GameManager.Instance.onStateChanged += Reset;
+            // Create an instance of PointAManager if one hasn't already been made
+            try
+            {
+                if (PointAManager.Instance == null)
+                {
+                    UpdateDescription("Still null");
+                }
+                else
+                {
+                    UpdateDescription(PointAManager.Instance.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                UpdateDescription(e.ToString().Substring(startIndex: 0, length: 200));
+            }
         }
 
         private void OnDestroy()
         {
             //Unssign this classes Behave() and Cleanup() methods from the game's actions
-            SelectionManager.Instance.OnMove -= Behave;
-            GameManager.Instance.onStateChanged -= Cleanup;
-            //Clean out the gambit's move history
-            lastMoves.Clear();
-            lastDeltaX = 0;
-            lastDeltaY = 0;
+            SelectionManager.Instance.OnMove -= CO_Behave;
+            GameManager.Instance.onStateChanged -= Reset;
+        }
+
+        // This method is an intermediary between the argument requirements of OnMove and Behave
+        private void CO_Behave(BasePieceBehaviour piece, TileBehaviour tile)
+        {
+            base.StartCoroutine(Behave(piece, tile, 0.1f));
         }
 
         //Trigger the gambit effect if this move is equal to last move, update the last move otherwise
-        private void Behave(BasePieceBehaviour movedPiece, TileBehaviour tile)
+        private IEnumerator Behave(BasePieceBehaviour movedPiece, TileBehaviour tile, float delay)
         {
-            //Convert the piece move into a set of x and y coordinate differences
+            // Wait for PointAManager to update its attributes first
+            yield return new WaitForSeconds(delay);
+            try
+            {
+                // Null safety for PlayerPointA
+                if (PointAManager.Instance.PlayerPointA is not null)
+                {
+                    (int x, int y) delta = PointAManager.GetDelta(PointAManager.Instance.PlayerPointA, tile);
 
-            //If this is the first move...
-            if(!lastMoves.Exists(p => p.piece == movedPiece))
-            {
-                //Add this piece to the list
-                lastMoves.Add(new SimpleCoordinate(movedPiece,
-                    (int)movedPiece.StartingTile.Position.x,
-                    (int)movedPiece.StartingTile.Position.y));
+                    if (movedPiece == lastPiece && delta.x == lastDelta.x && delta.y == lastDelta.y)
+                    {
+                        //This move was the same as the last move
+                        Trigger();
+                    }
+                    else
+                    {
+                        //This move was different. Update the last move
+                        lastPiece = movedPiece;
+                        lastDelta.x = delta.x;
+                        lastDelta.y = delta.y;
+                    }
+                    // DEBUG: Gimme the info
+                    Vector3 pointA = PointAManager.Instance.PlayerPointA.Position;
+                    Vector3 pointB = tile.Position;
+                    string s = $"A {movedPiece.GetPieceType(true)} moved from [{pointA.x},{pointA.y}] to [{pointB.x},{pointB.y}]<br> Delta: [{delta.x},{delta.y}]";
+                    UpdateDescription(s);
+                }
+                else
+                {
+                    UpdateDescription("Null Point A");
+                }
             }
-            //Load this piece's last move and calculate the change in coordinates
-            SimpleCoordinate lastMove = lastMoves.Find(p => p.piece == movedPiece);
-            int deltaX = (int)movedPiece.CurrentTile.Position.x - lastMove.x;
-            int deltaY = (int)movedPiece.CurrentTile.Position.y - lastMove.y;
-
-            if(movedPiece == lastPiece && deltaX == lastDeltaX && deltaY == lastDeltaY)
+            catch (Exception e)
             {
-                //This move was the same as the last move
-                Trigger();
-            } 
-            else
-            {
-                //This move was different. Update the last move
-                lastPiece = movedPiece;
-                lastDeltaX = deltaX;
-                lastDeltaY = deltaY;
+                UpdateDescription(e.ToString().Substring(startIndex: 0, length: 200));
             }
-            //Update this piece's last move
-            lastMove.x = (int)movedPiece.CurrentTile.Position.x;
-            lastMove.y = (int)movedPiece.CurrentTile.Position.y;
         }
 
         public override void Trigger()
         {
             //Skip the enemy turn
-			SingletonMonoBehaviour<EnemyManager>.Instance.SkipTurn();
+            SingletonMonoBehaviour<EnemyManager>.Instance.SkipTurn();
             //BOING!
             this.VisualEffect();
         }
 
-        public void Cleanup(State state)
+        // DEBUG: Make sure PointAManagers reset logic works
+        private void Reset(State state)
         {
-            if(GameManager.Instance.CurrentState == State.SHOP || GameManager.Instance.CurrentState == State.RESULT)
+            // Ignore any state resuming from a pause
+            if
+            (
+                SingletonMonoBehaviour<GameManager>.Instance.PreviousState == State.PAUSE ||
+                SingletonMonoBehaviour<GameManager>.Instance.PreviousState == State.RUN_INFO
+            )
             {
-                lastMoves.Clear();
-                lastDeltaX = 0;
-                lastDeltaY = 0;
-
-                //DEBUG: Indicate a reset
-                // string feedback = "Reset";
-                // this.m_FeedbackIncrementor.Spawn(feedback);
-			    // this.m_FeedbackIncrementor.IncrementSound(0f);
+                return;
             }
+
+            // At the start of a game, add every piece on the board to the pieceTracker
+            if (state == State.INGAME && SingletonMonoBehaviour<GameManager>.Instance.PreviousState == State.BOARD_PLACEMENT)
+            {
+                UpdateDescription("Game Start");
+            }
+
+            // At the end of a game, clearout the pieceTracker
+            if (state == State.WIN || state == State.RESULT)
+            {
+                UpdateDescription("Game End");
+            }
+        }
+
+        //DEBUG: Rewrite this gambit's description to some helpful information
+        private void UpdateDescription(string s)
+        {
+
+            var locManager = SingletonMonoBehaviour<LocalizationManager>.Instance;
+            if (locManager == null)
+            {
+                Debug.LogWarning("[GambitApi] LocalizationManager not found, tooltip text will be empty.");
+                return;
+            }
+
+            // Force load if not cached
+            var traduction = locManager.GetTraduction();
+            if (traduction == null)
+            {
+                Debug.LogWarning("[GambitApi] GetTraduction() returned null.");
+                return;
+            }
+
+            var gambitNode = traduction["gambit"];
+            if (gambitNode == null)
+            {
+                Debug.LogWarning("[GambitApi] traduction['gambit'] node not found.");
+                return;
+            }
+
+
+            gambitNode[$"recursion_description"] = s;
         }
     }
 }

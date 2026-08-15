@@ -34,7 +34,7 @@ namespace Gambonanza.RecursionsGambit
             var def = GambitBuilder.Create("recursion")
                 .WithName("Recursion's Gambit")
                 //Select a random description for this render
-                .WithDescription("Moving the same piece, the same distance, in the same direction as your last move skips the enemy turn.<br><wave><sprite=11>WIP: Inconsistent<sprite=11></wave>")
+                .WithDescription("Moving the same piece, the same distance, in the same direction as your last move skips the enemy turn.")
                 .WithRarity(Rarity.EPIC)
                 .WithFocus(Gambit_Focus.NONE)
                 .WithPrice(8)

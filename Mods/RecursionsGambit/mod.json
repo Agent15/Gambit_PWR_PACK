@@ -7,5 +7,5 @@
   "enabled": true,
   "gameVersion": ">=1.0",
   "description": "Moving the same piece, the same distance, in the same direction as your last move skips the enemy turn.",
-  "dependencies": ["GambitApi"]
+  "dependencies": ["GambitApi", "PointAMngr"]
 }
