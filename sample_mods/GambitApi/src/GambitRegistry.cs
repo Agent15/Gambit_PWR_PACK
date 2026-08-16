@@ -115,8 +115,11 @@ namespace Gambonanza.GambitApi
             soGambit.GambitDescription = $"{def.Id}_description";
             soGambit.GambitVisual = def.Visual;
             soGambit.PriceCost = def.PriceCost;
-            soGambit.Rarity = def.Rarity;
-            soGambit.Focus = def.Focus ?? new[] { Gambit_Focus.UTILITY };
+            // Validated here as well as in GambitBuilder: GambitDefinition's fields are public,
+            // so a mod can hand Register() a definition it assembled by hand and never touch
+            // the builder's guards.
+            soGambit.Rarity = GambitValidation.SanitizeRarity(def.Rarity, $"gambit '{def.Id}'");
+            soGambit.Focus = GambitValidation.SanitizeFocus(def.Focus, $"gambit '{def.Id}'");
             soGambit.UnlockInfos = def.UnlockInfo;
             soGambit.GambitToUnlockToHaveAHint = def.GambitToUnlockToHaveAHint;
 
@@ -155,8 +158,25 @@ namespace Gambonanza.GambitApi
             library.GambitsInfo.Add(soGambit);
             library.Gambits.Add(prefab);
 
-            // 4. Reinitialize sorted lists
-            ReinitializeLibrary(library);
+            // 4. Reinitialize sorted lists.
+            //
+            // Vanilla Initialize() walks the ENTIRE library and throws
+            // ArgumentOutOfRangeException on any Rarity/Gambit_Focus value its switch
+            // doesn't cover. Step 3 has already published this entry, so a throw here used
+            // to strand it in GambitsInfo permanently: steps 5-7 never ran, leaving a
+            // nameless, never-unlocked card that the collection still painted - a chained
+            // "Locked" tile - while every mod registering AFTER it hit the same throw as
+            // Initialize() walked past the bad entry. GambitValidation should stop the known
+            // offenders upstream; this rolls back whatever a future game patch invents.
+            try
+            {
+                ReinitializeLibrary(library);
+            }
+            catch (Exception ex)
+            {
+                RollBackFailedRegistration(library, soGambit, prefab, def.Id, ex);
+                throw;
+            }
 
             // 5. Inject localization
             InjectLocalization(def);
@@ -169,6 +189,41 @@ namespace Gambonanza.GambitApi
             InvalidateCollectionCache();
 
             Debug.Log($"[GambitApi] Registered '{def.Id}' at index {index}.");
+        }
+
+        /// <summary>
+        /// Undoes step 3 of <see cref="DoRegister"/> after Initialize() rejected the library:
+        /// pulls the entry back out of both lists, destroys the objects created for it, drops
+        /// its cached localization strings, and rebuilds the sorted lists - which the aborted
+        /// Initialize() left half-filled, since ReinitializeLibrary clears them all before
+        /// repopulating.
+        /// </summary>
+        private static void RollBackFailedRegistration(
+            GambitLibrary library, SO_Gambit soGambit, GambitBehaviour prefab, string id, Exception cause)
+        {
+            Debug.LogError(
+                $"[GambitApi] '{id}' was rejected by GambitLibrary.Initialize() - rolling it back so it " +
+                $"can't leave a locked ghost card or break the mods that register after it. " +
+                $"Cause: {cause.GetBaseException().Message}");
+
+            try
+            {
+                library.GambitsInfo.Remove(soGambit);
+                library.Gambits.Remove(prefab);
+                _localizationEntries.Remove(id);
+
+                if (prefab != null) UnityEngine.Object.Destroy(prefab.gameObject);
+                if (soGambit != null) UnityEngine.Object.Destroy(soGambit);
+
+                // Rebuild from the cleaned list - with the offender gone this should succeed.
+                ReinitializeLibrary(library);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(
+                    $"[GambitApi] Rollback of '{id}' failed. Something else in the library is also " +
+                    $"unsortable, so gambit lists stay inconsistent until the game restarts: {ex}");
+            }
         }
 
         private static void InjectLocalization(GambitDefinition def)
@@ -203,6 +258,52 @@ namespace Gambonanza.GambitApi
             gambitNode[descKey] = def.Description;
 
             Debug.Log($"[GambitApi] Injected localization: '{nameKey}' = '{def.Name}', '{descKey}' = '{def.Description}'");
+        }
+
+        /// <summary>
+        /// Re-checks that every registered gambit's display strings are still present in
+        /// the game's cached traduction JSON and re-writes any that are missing.
+        ///
+        /// GetTraduction() caches one parsed JSONNode per language and rebuilds it from
+        /// the vanilla text asset whenever SettingsData.CurrentLanguage changes - the
+        /// settings-screen language arrows and the Steam first-launch auto-detect both
+        /// trigger that rebuild, silently dropping everything InjectLocalization wrote
+        /// and leaving custom gambits with empty names/descriptions in the collection.
+        /// GambitApiHost calls this from LocalizationManager.OnChangeLanguage and from a
+        /// slow watchdog (the auto-detect path never fires the event).
+        /// </summary>
+        public static void EnsureLocalizationInjected()
+        {
+            if (_localizationEntries.Count == 0) return;
+            if (!SingletonMonoBehaviour<LocalizationManager>.IsCreated()) return;
+
+            JSONNode gambitNode;
+            try
+            {
+                var traduction = SingletonMonoBehaviour<LocalizationManager>.Instance?.GetTraduction();
+                gambitNode = traduction?["gambit"];
+            }
+            catch
+            {
+                // Boot-order race (DataManager/settings not loaded yet) - the watchdog
+                // will try again on its next tick.
+                return;
+            }
+            if (gambitNode == null) return;
+
+            int repaired = 0;
+            foreach (var entry in _localizationEntries)
+            {
+                string nameKey = entry.Key + "_name";
+                // A missing key yields a lazy/empty node, so test the string value
+                // rather than the node itself.
+                if (!string.IsNullOrEmpty(gambitNode[nameKey]?.Value)) continue;
+                gambitNode[nameKey] = entry.Value.name;
+                gambitNode[entry.Key + "_description"] = entry.Value.description;
+                repaired++;
+            }
+            if (repaired > 0)
+                Debug.Log($"[GambitApi] Traduction cache was rebuilt (language change?) - re-injected {repaired} gambit localization entr{(repaired == 1 ? "y" : "ies")}.");
         }
 
         // Walk every public/non-public instance string field AND settable string
@@ -589,6 +690,75 @@ namespace Gambonanza.GambitApi
                 }
                 yield return null;
                 elapsed += Time.deltaTime;
+            }
+        }
+
+        /// <summary>
+        /// Removes unlocked-gambit ids from the game's SAVE DATA that no longer
+        /// exist in the library. AutoUnlock writes custom ids (e.g. "kamikaze")
+        /// into DataManager.Data.GambitUnlocked, which the game persists - so
+        /// uninstalling or disabling a gambit mod used to leave its ghost behind:
+        /// the collection count read "201/200" and stale entries lingered forever.
+        ///
+        /// Called after ProcessPending, when every mod that will register this
+        /// session has registered. Vanilla ids all exist in GambitsInfo, so only
+        /// genuinely orphaned modded ids can match; the count guard makes sure we
+        /// never sweep against a half-initialised library.
+        /// </summary>
+        public static void PurgeStaleUnlockData()
+        {
+            try
+            {
+                var library = SingletonMonoBehaviour<GambitLibrary>.IsCreated()
+                    ? SingletonMonoBehaviour<GambitLibrary>.Instance : null;
+                if (library?.GambitsInfo == null || library.GambitsInfo.Count < 100)
+                {
+                    Debug.Log("[GambitApi] Stale-unlock sweep skipped: library not fully initialised.");
+                    return;
+                }
+
+                var unlocked = DataManager.Instance?.Data?.GambitUnlocked;
+                if (unlocked == null || unlocked.Count == 0) return;
+
+                var valid = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var so in library.GambitsInfo)
+                    if (so != null && !string.IsNullOrEmpty(so.ID)) valid.Add(so.ID);
+
+                var removed = new List<string>();
+                for (int i = unlocked.Count - 1; i >= 0; i--)
+                {
+                    var id = unlocked[i]?.ToString();
+                    if (string.IsNullOrEmpty(id) || valid.Contains(id)) continue;
+                    removed.Add(id);
+                    unlocked.RemoveAt(i);
+                }
+                if (removed.Count == 0) return;
+
+                Debug.Log($"[GambitApi] Removed {removed.Count} stale unlocked gambit id(s) from save data (mod removed/disabled): {string.Join(", ", removed)}");
+
+                // Persist right away if DataManager exposes a parameterless save;
+                // otherwise the game writes the cleaned list on its next own save.
+                try
+                {
+                    var dm = DataManager.Instance;
+                    var save = typeof(DataManager)
+                        .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                        .FirstOrDefault(m => m.Name.IndexOf("save", StringComparison.OrdinalIgnoreCase) >= 0
+                                          && m.GetParameters().Length == 0 && !m.IsGenericMethod);
+                    if (save != null)
+                    {
+                        save.Invoke(dm, null);
+                        Debug.Log($"[GambitApi] Save data persisted via DataManager.{save.Name}().");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[GambitApi] Could not persist the cleaned save immediately ({ex.Message}) - the game will save it itself.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[GambitApi] Stale-unlock sweep failed: {ex.Message}");
             }
         }
 

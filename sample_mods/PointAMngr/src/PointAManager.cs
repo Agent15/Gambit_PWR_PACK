@@ -115,8 +115,7 @@ namespace Gambonanza.PointAMngr
             }
         }
 
-        // Either initially fills the pieceTracker with every piece on the board,
-        // or cleans out the pieceTracker depending on the game state
+        // Clears out the pieceTracker list and populates it with every piece on the board at the start of a game
         private void Reset(State state)
         {
             // Ignore any state resuming from a pause
@@ -132,17 +131,13 @@ namespace Gambonanza.PointAMngr
             // At the start of a game, add every piece on the board to the pieceTracker
             if (state == State.INGAME && SingletonMonoBehaviour<GameManager>.Instance.PreviousState == State.BOARD_PLACEMENT)
             {
+                // Cleanout the list
+                pieceTracker.Clear();
+                // Populate it with every piece on the board
                 foreach (BasePieceBehaviour piece in MonoBehaviour.FindObjectsByType<BasePieceBehaviour>())
                 {
                     pieceTracker.Add(new PieceAndTile(piece, piece.CurrentTile));
                 }
-
-            }
-
-            // At the end of a game, clearout the pieceTracker
-            if (state == State.WIN || state == State.RESULT)
-            {
-                pieceTracker.Clear();
             }
         }
 

@@ -22,7 +22,6 @@ namespace Gambonanza.SnipersGambit
             SelectionManager.Instance.OnCapture += CO_Behave;
             // In case you got this gambit mid-game, Populate PointAManager's pieceTracker
             PointAManager.Instance.InstantFill();
-            Display();
         }
 
         private void OnDestroy()
@@ -67,35 +66,6 @@ namespace Gambonanza.SnipersGambit
             SingletonMonoBehaviour<EnemyManager>.Instance.SkipTurn();
             //BOING!
             this.VisualEffect();
-        }
-
-        public void Display()
-        {
-            
-            var locManager = SingletonMonoBehaviour<LocalizationManager>.Instance;
-            if (locManager == null)
-            {
-                Debug.LogWarning("[GambitApi] LocalizationManager not found, tooltip text will be empty.");
-                return;
-            }
-
-            // Force load if not cached
-            var traduction = locManager.GetTraduction();
-            if (traduction == null)
-            {
-                Debug.LogWarning("[GambitApi] GetTraduction() returned null.");
-                return;
-            }
-
-            var gambitNode = traduction["gambit"];
-            if (gambitNode == null)
-            {
-                Debug.LogWarning("[GambitApi] traduction['gambit'] node not found.");
-                return;
-            }
-
-            gambitNode[$"sniper_name"] = "Sniper's Gambit";
-            gambitNode[$"sniper_description"] = "Capturing with a <sprite=8> <color=∏>BISHOP</color> from 3 or more spaces away skips the enemy's turn.";
         }
     }
 }
