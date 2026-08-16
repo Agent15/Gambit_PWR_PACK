@@ -52,7 +52,7 @@ namespace Gambonanza.PointAMngr
                 }
                 return m_instance;
             }
-            set{}
+            set { }
         }
         private void Start()
         {
@@ -143,6 +143,17 @@ namespace Gambonanza.PointAMngr
             if (state == State.WIN || state == State.RESULT)
             {
                 pieceTracker.Clear();
+            }
+        }
+
+        // For edge cases that would start this class in the middle of a game, you can 
+        // use this method to unconditionally dump and refill the pieceTracker list
+        public void InstantFill()
+        {
+            pieceTracker.Clear();
+            foreach (BasePieceBehaviour piece in MonoBehaviour.FindObjectsByType<BasePieceBehaviour>())
+            {
+                pieceTracker.Add(new PieceAndTile(piece, piece.CurrentTile));
             }
         }
 

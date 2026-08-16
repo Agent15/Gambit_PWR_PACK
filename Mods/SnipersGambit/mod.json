@@ -1,0 +1,11 @@
+{
+  "id": "SnipersGambit",
+  "name": "Sniper's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.SnipersGambit.SnipersGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capturing with a Bishop from 3 or more spaces away skips the enemy's turn",
+  "dependencies": ["GambitApi", "PointAMngr"]
+}

@@ -41,7 +41,7 @@ namespace Gambonanza.CrybabysGambit
                 .ShowConsideredAs()
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.SACRIFICE)
-                .WithPrice(1)
+                .WithPrice(7)
                 .WithVisual(sprite)
                 .WithVisualScale(1f)
                 // This tells GambitApi to attach CrybabysGambit to the in-run
