@@ -1,0 +1,11 @@
+{
+  "id": "SchrodingersGambit",
+  "name": "Schrodinger's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.SchrodingersGambit.SchrodingersGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If any of your phantom pieces it threatened, it becomes default",
+  "dependencies": ["GambitApi"]
+}

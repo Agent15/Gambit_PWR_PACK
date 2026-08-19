@@ -3,7 +3,7 @@
   "name": "'Point A' Manager",
   "version": "1.0.0",
   "author": "FRO_PWR",
-  "entry": "Gambonanza.PointAManager.PointAManager",
+  "entry": "Gambonanza.PointAMngr.PointAManager",
   "enabled": true,
   "gameVersion": ">=1.0",
   "description": "A logical class to track the original tile of the last piece to move",

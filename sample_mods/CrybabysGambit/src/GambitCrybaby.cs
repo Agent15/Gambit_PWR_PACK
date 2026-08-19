@@ -12,9 +12,6 @@ namespace Gambonanza.CrybabysGambit
     /// This gambit combines the automatic threat response of Bait's gambit with the threatened-piece-scanning
     /// behavior of Impossible Choice's gambit. Instead of earning money, each piece will run a chance and
     /// invoke an OnCapture call.
-    ///
-    /// WIP: Playing a game with this gambit, then going to the main menu, then playing another game makes the
-    /// player's pieces impossible to touch. I'm still looking for the cause of the problem.
     /// </summary>
     public sealed class GambitCrybaby : BaseGambit
     {
@@ -59,7 +56,7 @@ namespace Gambonanza.CrybabysGambit
 					{
                         //This piece pretends to be captured by itself
                         EnemyManager.Instance.OnCapture.Invoke(target, target, target.CurrentTile);
-                        //BOING!
+                        // BOING!
 					    VisualEffect();
                         
 					}
