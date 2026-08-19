@@ -25,4 +25,6 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Domino Effect's Gambit**: If an enemy piece is trapped, trap every enemy piece adjacent to it.
 
-**Sniper's Gambit**: Capturing with a bishop from 3 or more spaces away skips the enemy's turn.
+**- Sniper's Gambit**: Capturing with a bishop from 3 or more spaces away skips the enemy's turn.
+
+**- Schrodinger's Gambit**: If any of your phantom pieces is threatened, it becomes default.
