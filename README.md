@@ -28,3 +28,5 @@ Here is a list of every modded gambit currently in this repo:
 **- Sniper's Gambit**: Capturing with a bishop from 3 or more spaces away skips the enemy's turn.
 
 **- Schrodinger's Gambit**: If any of your phantom pieces is threatened, it becomes default.
+
+**- Matryoshka's Gambit**: If any of your pieces is captured, earn a piece of the next highest value.
