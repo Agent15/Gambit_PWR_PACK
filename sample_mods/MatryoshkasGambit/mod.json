@@ -1,0 +1,11 @@
+{
+  "id": "MatryoshkasGambit",
+  "name": "Matryoshka's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.MatryoshkasGambit.MatryoshkasGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If any of your pieces is captured, earn a piece of the next highest value.",
+  "dependencies": ["GambitApi"]
+}
