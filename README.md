@@ -30,3 +30,5 @@ Here is a list of every modded gambit currently in this repo:
 **- Schrodinger's Gambit**: If any of your phantom pieces is threatened, it becomes default.
 
 **- Matryoshka's Gambit**: If any of your pieces is captured, earn a piece of the next highest value.
+
+**- En Passant's Gambit**: You can capture the last enemy piece to move by moving a piece over its original tile.
