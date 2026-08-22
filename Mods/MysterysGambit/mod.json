@@ -1,0 +1,11 @@
+{
+  "id": "MysterysGambit",
+  "name": "Mystery's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.MysterysGambit.MysterysGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Mimics the effects of three random gambits.",
+  "dependencies": ["GambitApi"]
+}
