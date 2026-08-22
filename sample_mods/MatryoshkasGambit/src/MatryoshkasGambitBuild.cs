@@ -41,7 +41,7 @@ namespace Gambonanza.MatryoshkasGambit
                 .WithFocus(Gambit_Focus.SACRIFICE)
                 .WithPrice(10)
                 .WithVisual(sprite)
-                .WithVisualScale(0.9f)
+                .WithVisualScale(1f)
                 // This tells GambitApi to attach MatryoshkasGambit to the in-run
                 // gambit object. Without this, the card would exist but do nothing.
                 .WithBaseGambit<GambitMatryoshka>()
