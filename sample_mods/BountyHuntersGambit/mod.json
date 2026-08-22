@@ -1,0 +1,11 @@
+{
+  "id": "BountyHuntersGambit",
+  "name": "Bounty Hunter's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.BountyHuntersGambit.BountyHuntersGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capruting a [target piece] earns 5. (Changes after every trigger)",
+  "dependencies": ["GambitApi"]
+}
