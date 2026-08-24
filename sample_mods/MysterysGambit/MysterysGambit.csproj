@@ -30,6 +30,10 @@
       <HintPath>..\..\refs\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\refs\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\refs\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
