@@ -1,0 +1,11 @@
+{
+  "id": "StarterPacksGambit",
+  "name": "Starter Pack's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.StarterPacksGambit.StarterPacksGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Buying a gambit in the shop also earns a piece of its respective type.",
+  "dependencies": ["GambitApi"]
+}

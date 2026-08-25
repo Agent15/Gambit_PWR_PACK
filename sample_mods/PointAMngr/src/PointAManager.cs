@@ -21,21 +21,24 @@ namespace Gambonanza.PointAMngr
     /// "If a piece moves off a trap tile..."
     /// "...crumble that pieces original tile"
     /// The possibilities are endless ;)
+    ///
+    /// UPDATE: This class now resets its pieceTracker list every move.
+    /// The previous version did not track the first move of pieces that
+    /// were generated mid-game (promotion, invoker, etc.)
     /// </summary>
     public class PointAManager
     {
         // Declare the attributes for the original tiles of the last player and enemy move.
         //
-        // *WARNING* These values are nullable. A null PointA implies the piece that moved
-        // was generated mid-game and hasnt's moved yet (Things like Landing, Lich's Gambit,
-        // or Invoker pieces). The only solution I can think of for this is to scan the
-        // entire board for new pieces after every move, and I don't feel like doing that ._.
+        // *WARNING* These values are nullable. A null PointA implies that this
+        // class wasn't initialized when that piece moved. I recommend calling
+        // PointAManager.Instance.InstantFill() on the start of your dependent class
         public TileBehaviour PlayerPointA = null;
         public TileBehaviour EnemyPointA = null;
 
         // Declare a private list of every piece on the board and the tile it's currently
-        // standing on. We'll use this as a lookup table for each piece after it moves
-        private List<PieceAndTile> pieceTracker = new();
+        // standing on. We'll use this as a lookup table for every piece after it moves
+        private List<(BasePieceBehaviour piece, TileBehaviour tile)> pieceTracker = new();
 
         // Declare a private singleton instance and a pbulic read-only substitute
         // This class technically works like a singleton, but probably isn't best-practice ._.
@@ -52,7 +55,6 @@ namespace Gambonanza.PointAMngr
                 }
                 return m_instance;
             }
-            set { }
         }
         private void Start()
         {
@@ -79,21 +81,19 @@ namespace Gambonanza.PointAMngr
         // slight IEnumerator delay to let this class update first. 0.1 secs should be fine.
         private void UpdatePlayerMove(BasePieceBehaviour argPiece, TileBehaviour argTile)
         {
-            // If the piece that moved is in the pieceTracker list...
-            if (pieceTracker.Exists(p => p.piece == argPiece))
+            try
             {
-                PieceAndTile target = pieceTracker.Find(p => p.piece == argPiece);
-                // Assign that piece's original tile to PlayerPointA
-                PlayerPointA = target.tile;
-                // Update this piece's current tile in pieceTracker
-                target.tile = argTile;
+                // Assign this piece's original tile to PlayerPointA
+                TileBehaviour target = pieceTracker.Find(p => p.piece == argPiece).tile;
+                PlayerPointA = target;
             }
-            else
-            {// This piece was created mid-game and hasn't moved yet
+            catch
+            {// This shouldn't happen
+                Debug.Log("PointAManager didn't see that piece");
                 PlayerPointA = null;
-                //Add this piece to the pieceTracker list
-                pieceTracker.Add(new PieceAndTile(argPiece, argTile));
             }
+            // In any case, refresh the pieceTracker list
+            InstantFill();
         }
 
         // Duplicates the behavior of UpdatePlayerMove, but for EnemyPointA
@@ -102,17 +102,19 @@ namespace Gambonanza.PointAMngr
         // slight IEnumerator delay to let this class update first. 0.1 secs should be fine.
         private void UpdateEnemyMove(BasePieceBehaviour argPiece, TileBehaviour argTile)
         {
-            if (pieceTracker.Exists(p => p.piece == argPiece))
+            try
             {
-                PieceAndTile target = pieceTracker.Find(p => p.piece == argPiece);
-                EnemyPointA = target.tile;
-                target.tile = argTile;
+                // Assign this piece's original tile to PlayerPointA
+                TileBehaviour target = pieceTracker.Find(p => p.piece == argPiece).tile;
+                EnemyPointA = target;
             }
-            else
-            {
+            catch
+            {// This shouldn't happen
+                Debug.Log("PointAManager didn't see that piece");
                 EnemyPointA = null;
-                pieceTracker.Add(new PieceAndTile(argPiece, argTile));
             }
+            // In any case, refresh the pieceTracker list
+            InstantFill();
         }
 
         // Clears out the pieceTracker list and populates it with every piece on the board at the start of a game
@@ -128,32 +130,28 @@ namespace Gambonanza.PointAMngr
                 return;
             }
 
-            // At the start of a game, add every piece on the board to the pieceTracker
+            // At the start of a game, reset the pieceTracker list
             if (state == State.INGAME && SingletonMonoBehaviour<GameManager>.Instance.PreviousState == State.BOARD_PLACEMENT)
             {
-                // Cleanout the list
-                pieceTracker.Clear();
-                // Populate it with every piece on the board
-                foreach (BasePieceBehaviour piece in MonoBehaviour.FindObjectsByType<BasePieceBehaviour>())
-                {
-                    pieceTracker.Add(new PieceAndTile(piece, piece.CurrentTile));
-                }
+                InstantFill();
             }
         }
 
-        // For edge cases that would start this class in the middle of a game, you can 
-        // use this method to unconditionally dump and refill the pieceTracker list
+        // This method was originally for edge cases, but now it's used to reset the pieceTracker 
+        // after every move. I found out after making this class that Blukulele does something very
+        // similar when calculating the enemy's next move. If I could do it all over, I'd rename this
+        // method to Refresh(), but I already made dependants that call InstantFill() :/
         public void InstantFill()
         {
             pieceTracker.Clear();
             foreach (BasePieceBehaviour piece in MonoBehaviour.FindObjectsByType<BasePieceBehaviour>())
             {
-                pieceTracker.Add(new PieceAndTile(piece, piece.CurrentTile));
+                pieceTracker.Add((piece, piece.CurrentTile));
             }
         }
 
-        // A static bit of logic to determine the distance between any two tiles. This can be used
-        // just by calling PointAManager.GetDelta(PointA, PointB)
+        // A static bit of logic to determine the distance between any two tiles.
+        // This can be used just by calling PointAManager.GetDelta(PointA, PointB)
         //
         // Returns: An integer tuple of the change in the two tiles' coordinates (horizontal and vertical)
         //
@@ -164,19 +162,6 @@ namespace Gambonanza.PointAMngr
             int resultX = Mathf.RoundToInt(pointB.Position.x - pointA.Position.x);
             int resultY = Mathf.RoundToInt(pointB.Position.y - pointA.Position.y);
             return (resultX, resultY);
-        }
-    }
-    /// For this class to work, I needed a mutable data type that pairs a BasePieceBehaviour to a TileBehaviour
-    /// without modifying either of them directly. Tuples can't be modified after being initially assigned
-    /// so I decided to make a small custom class instead.
-    public class PieceAndTile
-    {
-        public BasePieceBehaviour piece;
-        public TileBehaviour tile;
-        public PieceAndTile(BasePieceBehaviour p, TileBehaviour t)
-        {
-            piece = p;
-            tile = t;
         }
     }
 }
