@@ -34,6 +34,10 @@
       <HintPath>..\..\refs\UnityEngine.UI.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\refs\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\refs\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>

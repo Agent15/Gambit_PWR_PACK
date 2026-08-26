@@ -37,9 +37,9 @@ namespace Gambonanza.MysterysGambit
             var def = GambitBuilder.Create("mystery")
                 .WithName("Mystery's Gambit")
                 .WithDescription("Mimics the effects of 3 random gambits<br><i>(Including modded gambits)</i>")
-                .WithRarity(Rarity.EPIC)
+                .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.UTILITY)
-                .WithPrice(1)
+                .WithPrice(6)
                 .WithVisual(sprite)
                 .WithVisualScale(1f)
                 // This tells GambitApi to attach MysterysGambit to the in-run
