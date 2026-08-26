@@ -34,3 +34,5 @@ Here is a list of every modded gambit currently in this repo:
 **- En Passant's Gambit**: You can capture the last enemy piece to move by moving a piece over its original tile.
 
 **- Bounty Hunter's Gambit**: Capturing a [target piece] earns $5.
+
+**- Starter Pack's Gambit**: Buying a gambit in the shop also earns a piece of its respective synergy (if applicable).
