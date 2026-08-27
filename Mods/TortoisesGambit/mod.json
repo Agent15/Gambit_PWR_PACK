@@ -1,0 +1,11 @@
+{
+  "id": "TortoisesGambit",
+  "name": "Tortoise's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.TortoisesGambit.TortoisesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Every king move has a 1/2 chance to also count as waiting.",
+  "dependencies": ["GambitApi"]
+}
