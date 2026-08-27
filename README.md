@@ -36,3 +36,5 @@ Here is a list of every modded gambit currently in this repo:
 **- Bounty Hunter's Gambit**: Capturing a [target piece] earns $5.
 
 **- Starter Pack's Gambit**: Buying a gambit in the shop also earns a piece of its respective synergy (if applicable).
+
+**- Mystery's Gambit**: Mimics the effects of three random gambits.
