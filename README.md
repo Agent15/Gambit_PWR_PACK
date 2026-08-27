@@ -38,3 +38,5 @@ Here is a list of every modded gambit currently in this repo:
 **- Starter Pack's Gambit**: Buying a gambit in the shop also earns a piece of its respective synergy (if applicable).
 
 **- Mystery's Gambit**: Mimics the effects of three random gambits.
+
+**- Tortoise's Gambit**: Every king move has a 1/2 chance to also count as waiting.
