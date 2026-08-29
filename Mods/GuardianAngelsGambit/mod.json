@@ -1,0 +1,11 @@
+{
+  "id": "GuardianAngelsGambit",
+  "name": "Guardian Angel's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.GuardianAngelsGambit.GuardianAngelsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If any of your pieces is protected, bless it after the effect expires",
+  "dependencies": ["GambitApi"]
+}
