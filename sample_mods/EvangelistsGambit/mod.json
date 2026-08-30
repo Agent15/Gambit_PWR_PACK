@@ -1,0 +1,11 @@
+{
+  "id": "EvangelistsGambit",
+  "name": "Evangelist's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.EvangelistsGambit.EvangelistsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Moving a bishop adjacent to an enemy piece has a 1/4 chance to transform it into one of your pieces",
+  "dependencies": ["GambitApi"]
+}
