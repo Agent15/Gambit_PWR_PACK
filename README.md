@@ -42,3 +42,5 @@ Here is a list of every modded gambit currently in this repo:
 **- Tortoise's Gambit**: Every king move has a 1/2 chance to also count as waiting.
 
 **- Guardian Angel's Gambit**: If any of your pieces is protected, bless it when the effect expires.
+
+**- Evangelist's Gambit**: Moving a bishop adjacent to an enemy piece has a 1/4 change of transforming it into one of your pieces (If possible)
