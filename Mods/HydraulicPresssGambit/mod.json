@@ -1,0 +1,11 @@
+{
+  "id": "HydraulicPresssGambit",
+  "name": "Hydrauli cPress's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.HydraulicPresssGambit.HydraulicPresssGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capturing with a rook on an adjacent tile skips the enemy's turn",
+  "dependencies": ["GambitApi", "PointAMngr"]
+}
