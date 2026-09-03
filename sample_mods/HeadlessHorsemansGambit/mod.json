@@ -1,0 +1,11 @@
+{
+  "id": "HeadlessHorsemansGambit",
+  "name": "Headless Horseman's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.HeadlessHorsemansGambit.HeadlessHorsemansGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Moving a king adjacent to a knight (or vice versa) earns $5 (Once per game)",
+  "dependencies": ["GambitApi"]
+}
