@@ -35,7 +35,7 @@ namespace Gambonanza.HeadlessHorsemansGambit
             // This ID is also what the console sees for commands like
             // `give gambit headless-horseman`, so keep it short and readable.
             var def = GambitBuilder.Create("headless-horseman")
-                .WithName("HeadlessHorseman's Gambit")
+                .WithName("Headless Horseman's Gambit")
                 .WithDescription("Moving a <sprite=9> <color=£>KING</color> <bounce><color=≠>ADJACENT</color></bounce> to a <sprite=7> <color=|>KNIGHT</color> (or vice versa) earns <color=*>$5</color>.<br><i>(Once per game)</i>")
                 .WithRarity(Rarity.COMMON)
                 .WithFocus(Gambit_Focus.KING, Gambit_Focus.KNIGHT)
