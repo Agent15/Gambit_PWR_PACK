@@ -1,0 +1,11 @@
+{
+  "id": "VampiresGambit",
+  "name": "Vampire's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.VampiresGambit.VampiresGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Immediately turns golden pieces default and earns $2 for each of them",
+  "dependencies": ["GambitApi"]
+}

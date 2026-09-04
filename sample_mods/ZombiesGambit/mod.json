@@ -1,0 +1,11 @@
+{
+  "id": "ZombiesGambit",
+  "name": "Zombie's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.ZombiesGambit.ZombiesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capturing with a king earns a king.",
+  "dependencies": ["GambitApi"]
+}

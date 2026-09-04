@@ -46,3 +46,13 @@ Here is a list of every modded gambit currently in this repo:
 **- Evangelist's Gambit**: Moving a bishop adjacent to an enemy piece has a 1/4 change of transforming it into one of your pieces (If possible)
 
 **- Hydraulic Press's Gambit**: Capturing with a rook on an adjacent tile skips the enemy's turn.
+
+## Other Mods
+
+I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
+
+**- Headless Horseman's Gambit**: Moving a king adjacent to a knight earns $5 (Once per game).
+
+**- Vampire's Gambit**: Immediately turns golden pieces default and earns $2 for each of them.
+
+**- Zombie's Gambit**: Capturing with a king earns a king.

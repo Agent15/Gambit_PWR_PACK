@@ -10,7 +10,11 @@ namespace Gambonanza.HeadlessHorsemansGambit
     /// Headless Horseman's Gambit: Moving a king adjacent to a knight (or vice versa) earns
     /// $5 (once per game)
     /// 
-    /// 
+    /// This gambit has three primary components:
+    /// 1: A bit of logic to simplify the in-game definitions of "king" and "knight"
+    /// 2: A Behave() method to check a pieces's adjacent tiles after every move
+    ///     and give a reward it its conditions have been met
+    /// 3: A Reset() method to refresh its "once per game" condition
     /// </summary>
     public sealed class GambitHeadlessHorseman : BaseGambit
     {
