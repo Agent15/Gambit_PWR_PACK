@@ -36,13 +36,13 @@ namespace Gambonanza.VampiresGambit
             // `give gambit vampire`, so keep it short and readable.
             var def = GambitBuilder.Create("vampire")
                 .WithName("Vampire's Gambit")
-                // Select a random description for game startup
-                .WithDescription("Immediately turns <color=∞>GOLDEN</color> pieces DEFAULT and earns <color=∞>$2</color> for each of them")
+                .WithDescription("<color=∞>GOLDEN</color> pieces immediately reset and give <color=∞>$2</color>.")
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.GOLDEN)
                 .WithPrice(7)
                 .WithVisual(sprite)
                 .WithVisualScale(1f)
+                .ShowGolden()
                 // This tells GambitApi to attach VampiresGambit to the in-run
                 // gambit object. Without this, the card would exist but do nothing.
                 .WithBaseGambit<GambitVampire>()
