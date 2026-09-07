@@ -1,5 +1,6 @@
 using Blukulele.Core;
 using Blukulele.CHE;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -62,6 +63,8 @@ namespace Gambonanza.PointAMngr
             SelectionManager.Instance.OnMove += UpdatePlayerMove;
             // Execute UpdateEnemyMove on every enemy move
             EnemyManager.Instance.OnMove += UpdateEnemyMove;
+            // To cover a few edge cases, execute InstantFill() when waiting
+            WaitManager.Instance.OnWait += InstantFill;
             // Execute Reset on certain state changes
             GameManager.Instance.onStateChanged += Reset;
         }
@@ -71,6 +74,7 @@ namespace Gambonanza.PointAMngr
             // Unassign action calls
             SelectionManager.Instance.OnMove -= UpdatePlayerMove;
             EnemyManager.Instance.OnMove -= UpdateEnemyMove;
+            WaitManager.Instance.OnWait -= InstantFill;
             GameManager.Instance.onStateChanged -= Reset;
         }
 
@@ -104,7 +108,7 @@ namespace Gambonanza.PointAMngr
         {
             try
             {
-                // Assign this piece's original tile to PlayerPointA
+                // Assign this piece's original tile to EnemyPointA
                 TileBehaviour target = pieceTracker.Find(p => p.piece == argPiece).tile;
                 EnemyPointA = target;
             }

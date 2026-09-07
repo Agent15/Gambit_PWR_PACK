@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
@@ -24,7 +25,9 @@ namespace Gambonanza.MysterysGambit
     public sealed class GambitMystery : BaseGambit
     {
         // Define the three child gambits for this gambit to mimic.
+        // And an index to scan through each one with the Peek() method
         private BaseGambit[] children = new BaseGambit[3];
+        private int index = 0;
         // Define a list of every child class of BaseGambit and a randomizer to select from it
         private Type[] allGambits = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
@@ -41,7 +44,9 @@ namespace Gambonanza.MysterysGambit
             {
                 children[x] = CreateGambitInstance(allGambits[pick.Next(allGambits.Length)]);
             }
-            SelectionManager.Instance.OnSelectStockPiece += ShowcaseMode;//Shhhhh
+            // Setup some easter egg behaviors
+            SelectionManager.Instance.OnSelectStockPiece += ShowcaseMode;
+            GameManager.Instance.onStateChanged += CO_Peek;
         }
 
         private void OnDestroy()
@@ -72,7 +77,9 @@ namespace Gambonanza.MysterysGambit
                     Debug.Log($"Mystery's Gambit Failed\n{e.ToString()}");
                 }
             }
-            SelectionManager.Instance.OnSelectStockPiece -= ShowcaseMode;//Nothing to see here ;)
+            // Unassign action calls
+            SelectionManager.Instance.OnSelectStockPiece -= ShowcaseMode;
+            GameManager.Instance.onStateChanged -= CO_Peek;
         }
 
         // In case this gambit is triggered externally, trigger every child gambit underneath it
@@ -196,6 +203,37 @@ namespace Gambonanza.MysterysGambit
                 this.m_FeedbackIncrementor.IncrementSound(0f);
                 Debug.Log($"Mystery's Gambit Failed\n{e.ToString()}");
             }
+        }
+
+
+        private void CO_Peek(State state)
+        {
+            if(state == State.PAUSE && ChessDataManager.Instance.Coins < 3)
+                base.StartCoroutine(Peek());
+        }
+
+        private IEnumerator Peek()
+        {
+            if(index >= children.Length || index < 0)
+                index = 0;
+            string childName = children[index].GetType().ToString().Replace('_', ' ');
+            MysterysGambitBuild.UpdateMysteryDescription(childName);
+            index += 1;
+            this.m_FeedbackIncrementor.Spawn("Peek");
+            this.m_FeedbackIncrementor.IncrementSound(0f);
+            yield return new WaitForSeconds(3f);
+            this.m_FeedbackIncrementor.Spawn("3");
+            this.m_FeedbackIncrementor.IncrementSound(0f);
+            yield return new WaitForSeconds(1f);
+            this.m_FeedbackIncrementor.Spawn("2");
+            this.m_FeedbackIncrementor.IncrementSound(0f);
+            yield return new WaitForSeconds(1f);
+            this.m_FeedbackIncrementor.Spawn("1");
+            this.m_FeedbackIncrementor.IncrementSound(0f);
+            yield return new WaitForSeconds(1f);
+            this.m_FeedbackIncrementor.Spawn("Reset");
+            this.m_FeedbackIncrementor.IncrementSound(0f);
+            MysterysGambitBuild.UpdateMysteryDescription();
         }
     }
 }

@@ -20,6 +20,8 @@ namespace Gambonanza.MysterysGambit
     {
         public Sprite mySprite;
 
+        public static string defaultDescription = "Mimics the effects of 3 random gambits<br><i>(Including modded gambits)</i>";
+
         public void OnLoad(IModContext context)
         {
             context.LogLine("[MysterysGambit] registering Mystery's Gambit.");
@@ -36,7 +38,7 @@ namespace Gambonanza.MysterysGambit
             // `give gambit mystery`, so keep it short and readable.
             var def = GambitBuilder.Create("mystery")
                 .WithName("Mystery's Gambit")
-                .WithDescription("Mimics the effects of 3 random gambits<br><i>(Including modded gambits)</i>")
+                .WithDescription(defaultDescription)
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.UTILITY)
                 .WithPrice(6)
@@ -52,5 +54,26 @@ namespace Gambonanza.MysterysGambit
                 
             context.LogLine($"[MysterysGambit] registered '{def.Id}'.");
         } 
+        // The vanilla game stores its gambit titles and descriptions in the resources.assets file.
+        // This method overwrites that file at the index "mystery_description"
+        // Credit to Bentrd for laying the groundwork in GambitRegistry
+        public static void UpdateMysteryDescription(string s = null)
+        {
+            var locManager = SingletonMonoBehaviour<LocalizationManager>.Instance;
+            if (locManager == null)
+                return;
+
+            var traduction = locManager.GetTraduction();
+            if (traduction == null)
+                return;
+
+            var gambitNode = traduction["gambit"];
+            if (gambitNode == null)
+                return;
+
+            // Update the gambit's description with the passed string,
+            // or with the default description if no argument was passed.
+            gambitNode[$"mystery_description"] = s is not null? s : defaultDescription;
+        }  
     }
 }

@@ -28,11 +28,13 @@ namespace Gambonanza.EnPassantsGambit
         private TileBehaviour enPassantVoodoo = null;
         private void Start()
         {
-            // Every time a piece moves, create an afterimage
+            // Every time an enemy piece moves, create an afterimage
             EnemyManager.Instance.OnMove += CO_DisplayImage;
             // Every time the player moves, check for a trigger
             SelectionManager.Instance.OnMove += Behave;
             SelectionManager.Instance.OnPawnPromotionAsMoved += Behave;
+            // Every time a player waits, remove any afterimage on the board
+            WaitManager.Instance.OnWait += Vanish;
             // In case the game ends on the enemy's turn, cleanup the board of afterimages
             GameManager.Instance.onStateChanged += CO_Cleanup;
             // In case this gambit was earned mid-game. Reset PointAManager's pieceTracker
@@ -45,6 +47,7 @@ namespace Gambonanza.EnPassantsGambit
             EnemyManager.Instance.OnMove -= CO_DisplayImage;
             SelectionManager.Instance.OnMove -= Behave;
             SelectionManager.Instance.OnPawnPromotionAsMoved -= Behave;
+            WaitManager.Instance.OnWait -= Vanish;
             GameManager.Instance.onStateChanged -= CO_Cleanup;
         }
 
@@ -57,9 +60,7 @@ namespace Gambonanza.EnPassantsGambit
         //Trigger the gambit effect if this move is equal to last move, update the last move otherwise
         private IEnumerator DisplayImage(BasePieceBehaviour movedPiece, TileBehaviour tile, float delay)
         {
-            // Wait for PointAManager to update its attributes first
-            yield return new WaitForSeconds(delay);
-            // Check for any existing afterImages in case of things like player turn skipping
+            // Check for any existing afterImages and remove them
             if (enPassantImage != null)
             {
                 PhantomDisappear(enPassantImage);
@@ -67,6 +68,8 @@ namespace Gambonanza.EnPassantsGambit
                 enPassantTarget = null;
                 enPassantVoodoo = null;
             }
+            // Wait for PointAManager to update its attributes first
+            yield return new WaitForSeconds(delay);
             // We don't want to make an afterImage if the enemy piece is Elite or Stasis
             if (!movedPiece.EnemyAbilityModifier.IsBoss && !movedPiece.EnemyAbilityModifier.IsClock)
             {
@@ -177,5 +180,36 @@ namespace Gambonanza.EnPassantsGambit
                 }
             }
         }
+
+        private void Vanish()
+        {
+            // Check for any existing afterImages and remove them
+            if (enPassantImage is not null)
+            {
+                PhantomDisappear(enPassantImage);
+                enPassantImage = null;
+                enPassantTarget = null;
+                enPassantVoodoo = null;
+            }
+        }
+        //DEBUG
+        public static void UpdateDescription(string s)
+        {
+            var locManager = SingletonMonoBehaviour<LocalizationManager>.Instance;
+            if (locManager == null)
+                return;
+
+            var traduction = locManager.GetTraduction();
+            if (traduction == null)
+                return;
+
+            var gambitNode = traduction["gambit"];
+            if (gambitNode == null)
+                return;
+
+            // Update the gambit's description with the passed string,
+            // or with the default description if no argument was passed.
+            gambitNode[$"en-passant_description"] = s;
+        }  
     }
 }
