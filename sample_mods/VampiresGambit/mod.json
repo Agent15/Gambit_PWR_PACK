@@ -6,6 +6,6 @@
   "entry": "Gambonanza.VampiresGambit.VampiresGambitBuild",
   "enabled": true,
   "gameVersion": ">=1.0",
-  "description": "Immediately turns golden pieces default and earns $2 for each of them",
+  "description": "Golden pieces immediately reset and give $2.",
   "dependencies": ["GambitApi"]
 }

@@ -1,0 +1,17 @@
+        // DEBUG
+	public static void UpdateDescription(string s)
+        {
+            var locManager = SingletonMonoBehaviour<LocalizationManager>.Instance;
+            if (locManager == null)
+                return;
+
+            var traduction = locManager.GetTraduction();
+            if (traduction == null)
+                return;
+
+            var gambitNode = traduction["gambit"];
+            if (gambitNode == null)
+                return;
+            
+            gambitNode["null_description"] = s;
+        }  

@@ -1,0 +1,11 @@
+{
+  "id": "FrankensteinsGambit",
+  "name": "Frankenstein's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.FrankensteinsGambit.FrankensteinsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "After 3 of your pieces are captured, earn a random piece among those 3.",
+  "dependencies": ["GambitApi"]
+}

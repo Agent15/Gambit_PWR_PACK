@@ -1,0 +1,11 @@
+{
+  "id": "NullsGambit",
+  "name": "Null's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.NullsGambit.NullsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "_____________",
+  "dependencies": ["GambitApi"]
+}
