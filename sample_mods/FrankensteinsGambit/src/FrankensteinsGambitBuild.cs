@@ -37,9 +37,9 @@ namespace Gambonanza.FrankensteinsGambit
             var def = GambitBuilder.Create("frankenstein")
                 .WithName("Frankenstein's Gambit")
                 .WithDescription(DefaultDescription)
-                .WithRarity(Rarity.RARE)
+                .WithRarity(Rarity.COMMON)
                 .WithFocus(Gambit_Focus.SACRIFICE)
-                .WithPrice(1)
+                .WithPrice(5)
                 .WithVisual(sprite)
                 .WithVisualScale(1f)
                 // This tells GambitApi to attach FrankensteinsGambit to the in-run

@@ -8,6 +8,7 @@ namespace Gambonanza.FrankensteinsGambit
 	/// This gambit keeps a list of three PieceTypes. If one of your pieces is captured, that piece's
     /// type is added to the list and the description is updated. After three piece types have been 
     /// added, we select one at random to give and clear the list
+    /// </summary>
     public sealed class GambitFrankenstein : BaseGambit
     {
         PieceType[] capturedTypes = { PieceType.NONE, PieceType.NONE, PieceType.NONE };

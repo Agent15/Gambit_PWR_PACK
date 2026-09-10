@@ -1,0 +1,11 @@
+{
+  "id": "PossessionsGambit",
+  "name": "Possession's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.PossessionsGambit.PossessionsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capturing with a phantom piece transforms it into a default copy of the captured piece",
+  "dependencies": ["GambitApi"]
+}

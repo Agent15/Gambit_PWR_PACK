@@ -10,7 +10,7 @@ namespace Gambonanza.NullsGambit
     /// <summary>
     /// Null's Gambit: ________________________
 	///
-	///
+	/// </summary>
     public sealed class GambitNull : BaseGambit
     {
         private void Start()
