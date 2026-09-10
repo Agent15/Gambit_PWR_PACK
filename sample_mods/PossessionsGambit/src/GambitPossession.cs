@@ -10,18 +10,23 @@ namespace Gambonanza.PossessionsGambit
     /// <summary>
     /// Possession's Gambit: Capturing with a phantom piece transforms it into a default copy of the captured piece
 	///
+	/// This gambit listens for every player capture and executes a piece transformation similar
+	/// to Evangelist's gambit if the capturing piece is phantom.
 	/// </summary>
     public sealed class GambitPossession : BaseGambit
     {
         private void Start()
         {
+		    // After every player capture, run the Behave() method.
             SelectionManager.Instance.OnCapture += Behave;
+			// This gambit doesn't work well with exorcists ;)
             GambitManager.Instance.OnGetGambit += ExorcistCheck;
             ExorcistCheck();
         }
 
         private void OnDestroy()
         {
+		    // Unassign action calls
             SelectionManager.Instance.OnCapture -= Behave;
             GambitManager.Instance.OnGetGambit -= ExorcistCheck;
         }
@@ -30,6 +35,7 @@ namespace Gambonanza.PossessionsGambit
         {
             if (attacker.Modifier.IsPhantom)
             {
+			    // The player captured with a phantom piece. Execute the possession
                 base.StartCoroutine(CO_Possess(0.3f, attacker, victim.GetPieceType()));
             }
         }
