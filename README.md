@@ -56,3 +56,9 @@ I don't consider these mods as official members of the PWR_PACK, but I did make 
 **- Vampire's Gambit**: Immediately turns golden pieces default and earns $2 for each of them.
 
 **- Zombie's Gambit**: Capturing with a king earns a king.
+
+**- Frankenstein's Gambit**: After 3 of your pieces are captured, earn a random piece among those 3.
+
+**- Possession's Gambit**: Capturing with a phantom piece transforms it into a default copy of the captured piece.
+
+**- Halloween Blood/Pumpkin Pieces**: Re-skins the chess pieces with a Jack-o-lantern (player) and Dark/Bloody (Enemy) theme
