@@ -1,0 +1,42 @@
+{
+  "formatVersion": 1,
+  "id": "tp-f292eb63",
+  "name": "Halloween Blood/Pumpkin Pieces",
+  "author": "",
+  "summary": "",
+  "description": "",
+  "version": "1.0.0",
+  "gameBuild": "24858528",
+  "createdAt": "2026-09-10T22:31:40.121Z",
+  "updatedAt": "2026-09-11T00:40:26.298Z",
+  "images": [
+    {
+      "assetId": "spr-chesspieces",
+      "kind": "texture",
+      "name": "SPR_ChessPieces",
+      "label": "ChessPieces",
+      "category": "Chess pieces",
+      "width": 256,
+      "height": 64,
+      "format": "RGBA32",
+      "compressed": false,
+      "atlasId": "spr-chesspieces",
+      "atlasName": "SPR_ChessPieces",
+      "rect": null,
+      "file": "images\\spr-chesspieces.png",
+      "addedAt": "2026-09-11T00:14:20.491Z"
+    }
+  ],
+  "texts": [],
+  "textures": [
+    {
+      "targetId": "spr-chesspieces",
+      "name": "SPR_ChessPieces",
+      "label": "ChessPieces",
+      "width": 256,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-chesspieces.png"
+    }
+  ]
+}
