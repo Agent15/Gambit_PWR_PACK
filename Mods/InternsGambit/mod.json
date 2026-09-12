@@ -1,0 +1,11 @@
+{
+  "id": "InternsGambit",
+  "name": "Intern's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.InternsGambit.InternsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "The enemy pawns instead promote to random pieces.",
+  "dependencies": ["GambitApi"]
+}
