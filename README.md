@@ -47,6 +47,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Hydraulic Press's Gambit**: Capturing with a rook on an adjacent tile skips the enemy's turn.
 
+**- Intern's Gambit**: Enemy pawns instead promote to random pieces.
+
 ## Other Mods
 
 I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
