@@ -1,0 +1,42 @@
+{
+  "formatVersion": 1,
+  "id": "tp-2ff6261f",
+  "name": "Classic Chess Pieces",
+  "author": "",
+  "summary": "",
+  "description": "",
+  "version": "1.0.0",
+  "gameBuild": "24858528",
+  "createdAt": "2026-09-11T23:43:38.869Z",
+  "updatedAt": "2026-09-11T23:44:01.126Z",
+  "images": [
+    {
+      "assetId": "spr-chesspieces",
+      "kind": "texture",
+      "name": "SPR_ChessPieces",
+      "label": "ChessPieces",
+      "category": "Chess pieces",
+      "width": 256,
+      "height": 64,
+      "format": "RGBA32",
+      "compressed": false,
+      "atlasId": "spr-chesspieces",
+      "atlasName": "SPR_ChessPieces",
+      "rect": null,
+      "file": "images\\spr-chesspieces.png",
+      "addedAt": "2026-09-11T23:44:01.011Z"
+    }
+  ],
+  "texts": [],
+  "textures": [
+    {
+      "targetId": "spr-chesspieces",
+      "name": "SPR_ChessPieces",
+      "label": "ChessPieces",
+      "width": 256,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-chesspieces.png"
+    }
+  ]
+}
