@@ -67,4 +67,6 @@ I don't consider these mods as official members of the PWR_PACK, but I did make 
 
 **- Classic Chess Pieces**: Re-skins the chess pieces to match the pure white (player) and pure black (enemy) color scheme of the Classic board style
 
-**- Kat Chess Pieces**: Reskins the chess pieces into cats. :3
+**- Kat Chess Pieces**: Re-skins the chess pieces into cats. :3
+
+**- Slimer Hikarul**: Re-skins Hikarul the Banished into Slimer from Ghostbusters. 
