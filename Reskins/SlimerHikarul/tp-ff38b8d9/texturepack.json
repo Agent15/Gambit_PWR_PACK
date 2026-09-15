@@ -1,0 +1,65 @@
+{
+  "formatVersion": 1,
+  "id": "tp-ff38b8d9",
+  "name": "Slimer Hikarul",
+  "author": "",
+  "summary": "",
+  "description": "",
+  "version": "1.0.0",
+  "gameBuild": "24858528",
+  "createdAt": "2026-09-13T19:28:46.915Z",
+  "updatedAt": "2026-09-13T22:30:14.118Z",
+  "images": [
+    {
+      "assetId": "spr-boss-torturer",
+      "kind": "texture",
+      "name": "SPR_Boss_Torturer",
+      "label": "Boss Torturer",
+      "category": "Bosses",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "compressed": false,
+      "atlasId": "spr-boss-torturer",
+      "atlasName": "SPR_Boss_Torturer",
+      "rect": null,
+      "file": "images\\spr-boss-torturer.png",
+      "addedAt": "2026-09-13T22:30:14.025Z"
+    }
+  ],
+  "texts": [
+    {
+      "section": "boss-infos",
+      "key": "portal-name",
+      "values": [
+        {
+          "lang": "en",
+          "value": "Slimer"
+        }
+      ],
+      "original": "Hikarul the Banished"
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "hikarul",
+      "values": [
+        {
+          "lang": "en",
+          "value": "Glutton of the Astral Plane"
+        }
+      ],
+      "original": "Specter of the Lost Game"
+    }
+  ],
+  "textures": [
+    {
+      "targetId": "spr-boss-torturer",
+      "name": "SPR_Boss_Torturer",
+      "label": "Boss Torturer",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-torturer.png"
+    }
+  ]
+}
