@@ -47,6 +47,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Hydraulic Press's Gambit**: Capturing with a rook on an adjacent tile skips the enemy's turn.
 
+**- Intern's Gambit**: Enemy pawns instead promote to random pieces.
+
 ## Other Mods
 
 I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
@@ -65,4 +67,6 @@ I don't consider these mods as official members of the PWR_PACK, but I did make 
 
 **- Classic Chess Pieces**: Re-skins the chess pieces to match the pure white (player) and pure black (enemy) color scheme of the Classic board style
 
-**- Kat Chess Pieces**: Reskins the chess pieces into cats. :3
+**- Kat Chess Pieces**: Re-skins the chess pieces into cats. :3
+
+**- Slimer Hikarul**: Re-skins Hikarul the Banished into Slimer from Ghostbusters. 
