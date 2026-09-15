@@ -78,27 +78,46 @@ namespace Gambonanza.LobbyistsGambit
         //Credit to Bentrd for laying the groundwork with Kamikaze's gambit
         private void PerformLobbyistKill(BasePieceBehaviour enemy, TileBehaviour tile)
         {
-            enemy.IsDead = true;
+            // Notify other classes that this piece has been captured by itself
+            var selectionManager = SelectionManager.Instance;
+            if(selectionManager is not null && selectionManager.OnCapture is not null)
+                selectionManager.OnCapture.Invoke(enemy, enemy, tile);
 
+            // Tell this tile it doesn't have a piece on it anymore
+            tile.Piece = null;
+
+            // Mark the enemy piece as dead and disabled
+            enemy.IsDead = true;
+            enemy.enabled = false;
+
+            // Unregister the piece with PieceManager
             var pieceManager = SingletonMonoBehaviour<PieceManager>.Instance;
             if (pieceManager != null)
                 pieceManager.UnregisterPiece(enemy);
 
+            // Remove this piece from EnemyManager's list of pieces
             var enemyManager = SingletonMonoBehaviour<EnemyManager>.Instance;
             if (enemyManager != null)
                 enemyManager.EnemyPieces.Remove(enemy);
 
+            // Remove the piece from the screen
             if (enemy.VisualEffect != null)
                 enemy.VisualEffect.Disappear(0.25f);
 
-            enemy.enabled = false;
+            // Destroy this piece's game object
             UnityEngine.Object.Destroy(enemy.gameObject, 0.6f);
 
+            // Increment the PiecesCaptured counter
             var chessData = SingletonMonoBehaviour<ChessDataManager>.Instance;
             if (chessData != null)
                 chessData.PiecesCaptured++;
 
+            // Make the piece explode in a cloud of bits
             try { enemy.CaptureEffect(); } catch { }
+
+            // Play the saucy shockwave animation
+            if(ShockWaveManager.Instance is not null)
+                ShockWaveManager.Instance.StartWave(tile.GetWaveBehaviour());
         }
     }
 }
