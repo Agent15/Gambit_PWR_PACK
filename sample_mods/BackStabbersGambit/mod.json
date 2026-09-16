@@ -1,0 +1,11 @@
+{
+  "id": "BackStabbersGambit",
+  "name": "BackStabber's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.BackStabbersGambit.BackStabbersGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capturing with a backward move skips the enemy's turn.",
+  "dependencies": ["GambitApi", "PointAMngr"]
+}
