@@ -1,0 +1,11 @@
+{
+  "id": "DootsGambit",
+  "name": "Doot's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.DootsGambit.DootsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Moving adjacent to an enemy piece has a 1/7 chance to capture it.",
+  "dependencies": ["GambitApi"]
+}
