@@ -65,6 +65,8 @@ I don't consider these mods as official members of the PWR_PACK, but I did make 
 
 **- Back-Stabber's Gambit**: Capturing with a backward move skips the enemy's turn.
 
+**- Doot's Gambit**: Moving adjacent to an enemy piece has a 1/7 chance to capture it.
+
 **- Halloween Blood/Pumpkin Pieces**: Re-skins the chess pieces with a Jack-o-lantern (player) and Dark/Bloody (Enemy) theme
 
 **- Classic Chess Pieces**: Re-skins the chess pieces to match the pure white (player) and pure black (enemy) color scheme of the Classic board style
@@ -72,3 +74,5 @@ I don't consider these mods as official members of the PWR_PACK, but I did make 
 **- Kat Chess Pieces**: Re-skins the chess pieces into cats. :3
 
 **- Slimer Hikarul**: Re-skins Hikarul the Banished into Slimer from Ghostbusters. 
+
+**- Dracula Botezzaro**: Re-skins Botezzaro into Count Dracula from the Castlevania series
