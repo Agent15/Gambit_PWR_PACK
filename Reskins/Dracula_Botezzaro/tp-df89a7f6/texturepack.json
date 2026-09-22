@@ -1,0 +1,65 @@
+{
+  "formatVersion": 1,
+  "id": "tp-df89a7f6",
+  "name": "Dracula Botezzaro",
+  "author": "",
+  "summary": "",
+  "description": "",
+  "version": "1.0.0",
+  "gameBuild": "24858528",
+  "createdAt": "2026-09-19T16:28:37.263Z",
+  "updatedAt": "2026-09-20T20:46:04.890Z",
+  "images": [
+    {
+      "assetId": "spr-onikaru-v2",
+      "kind": "texture",
+      "name": "SPR_Onikaru_V2",
+      "label": "Onikaru V2",
+      "category": "Bosses",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "compressed": false,
+      "atlasId": "spr-onikaru-v2",
+      "atlasName": "SPR_Onikaru_V2",
+      "rect": null,
+      "file": "images\\spr-onikaru-v2.png",
+      "addedAt": "2026-09-20T20:46:04.843Z"
+    }
+  ],
+  "texts": [
+    {
+      "section": "boss-infos",
+      "key": "mask-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Count Dracula"
+        }
+      ],
+      "original": "Botezzaro"
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "mask",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Lord of a Dark Kingdom"
+        }
+      ],
+      "original": "Hollow Imitator"
+    }
+  ],
+  "textures": [
+    {
+      "targetId": "spr-onikaru-v2",
+      "name": "SPR_Onikaru_V2",
+      "label": "Onikaru V2",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-onikaru-v2.png"
+    }
+  ]
+}
