@@ -1,0 +1,125 @@
+{
+  "formatVersion": 1,
+  "id": "tp-8b0811f8",
+  "name": "Xenomorph Tal",
+  "author": "",
+  "summary": "",
+  "description": "",
+  "version": "1.0.0",
+  "gameBuild": "24858528",
+  "createdAt": "2026-09-23T21:26:47.454Z",
+  "updatedAt": "2026-09-29T01:37:03.315Z",
+  "images": [
+    {
+      "assetId": "spr-boss-tal",
+      "kind": "texture",
+      "name": "SPR_Boss_Tal",
+      "label": "Boss Tal",
+      "category": "Bosses",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "compressed": false,
+      "atlasId": "spr-boss-tal",
+      "atlasName": "SPR_Boss_Tal",
+      "rect": null,
+      "file": "images\\spr-boss-tal.png",
+      "addedAt": "2026-09-29T00:47:50.040Z"
+    },
+    {
+      "assetId": "spr-cursedtile",
+      "kind": "sprite",
+      "name": "SPR_CursedTile",
+      "label": "CursedTile",
+      "category": "Board & tiles",
+      "width": 204,
+      "height": 204,
+      "format": "DXT5",
+      "compressed": true,
+      "atlasId": "spr-cursedtile-2",
+      "atlasName": "SPR_CursedTile",
+      "rect": [
+        26,
+        26,
+        204,
+        204
+      ],
+      "file": "images\\spr-cursedtile.png",
+      "addedAt": "2026-09-29T01:21:13.699Z"
+    },
+    {
+      "assetId": "spr-tilesfontasset-projet-4",
+      "kind": "sprite",
+      "name": "SPR_TilesFontAsset projet_4",
+      "label": "TilesFontAsset projet 4",
+      "category": "Board & tiles",
+      "width": 249,
+      "height": 272,
+      "format": "DXT5",
+      "compressed": true,
+      "atlasId": "spr-tilesfontasset-projet",
+      "atlasName": "SPR_TilesFontAsset projet",
+      "rect": [
+        1036,
+        405,
+        249,
+        272
+      ],
+      "file": "images\\spr-tilesfontasset-projet-4.png",
+      "addedAt": "2026-09-29T01:37:02.139Z"
+    }
+  ],
+  "texts": [
+    {
+      "section": "boss-infos",
+      "key": "deer-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Xenomorph"
+        }
+      ],
+      "original": "Tal the Cursed"
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "deer",
+      "values": [
+        {
+          "lang": "*",
+          "value": "The Galactic Hunter"
+        }
+      ],
+      "original": "Fallen Prodigy"
+    }
+  ],
+  "textures": [
+    {
+      "targetId": "spr-boss-tal",
+      "name": "SPR_Boss_Tal",
+      "label": "Boss Tal",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-tal.png"
+    },
+    {
+      "targetId": "spr-cursedtile-2",
+      "name": "SPR_CursedTile",
+      "label": "CursedTile",
+      "width": 256,
+      "height": 256,
+      "format": "DXT5",
+      "file": "atlases/spr-cursedtile-2.png"
+    },
+    {
+      "targetId": "spr-tilesfontasset-projet",
+      "name": "SPR_TilesFontAsset projet",
+      "label": "TilesFontAsset projet",
+      "width": 2048,
+      "height": 1024,
+      "format": "DXT5",
+      "file": "atlases/spr-tilesfontasset-projet.png"
+    }
+  ]
+}
