@@ -1,0 +1,11 @@
+{
+  "id": "NegativeGambit",
+  "name": "Negative Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.NegativeGambit.NegativeGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Other gambits can be placed on top of this.",
+  "dependencies": ["GambitApi"]
+}
