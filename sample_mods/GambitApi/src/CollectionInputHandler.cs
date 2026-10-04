@@ -50,7 +50,7 @@ namespace Gambonanza.GambitApi
         private void NavigateCollection(int direction)
         {
             // Find the active collection slide
-            var slides = FindObjectsOfType<GambitCollectionSlide>();
+            var slides = FindObjectsByType<GambitCollectionSlide>();
             if (slides == null || slides.Length == 0)
             {
                 Debug.Log("[GambitApi] No active GambitCollectionSlide found.");

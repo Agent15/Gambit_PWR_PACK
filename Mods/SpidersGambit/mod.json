@@ -1,0 +1,11 @@
+{
+  "id": "SpidersGambit",
+  "name": "Spider's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.SpidersGambit.SpidersGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "After moving a knight, trap every piece it can capture.",
+  "dependencies": ["GambitApi"]
+}

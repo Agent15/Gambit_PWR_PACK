@@ -1,0 +1,11 @@
+{
+  "id": "SkeletonsGambit",
+  "name": "Skeleton's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.SkeletonsGambit.SkeletonsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If you only have 1 piece on the board, 1/3 chance to protect it each turn.",
+  "dependencies": ["GambitApi"]
+}

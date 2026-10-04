@@ -4,9 +4,6 @@ using Gambonanza.GambitApi;
 using Gambonanza.ModSdk;
 using UnityEngine;
 
-using System;
-using Blukulele.Core;
-
 namespace Gambonanza.NullsGambit
 {
     /// <summary>
