@@ -49,6 +49,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Intern's Gambit**: Enemy pawns instead promote to random pieces.
 
+**- Negative Gambit**: Other gambits can be placed on top of this.
+
 ## Other Mods
 
 I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
