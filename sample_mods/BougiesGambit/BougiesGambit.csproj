@@ -38,10 +38,6 @@
       <HintPath>..\..\refs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="GamboMoves">
-      <HintPath>..\..\refs\GamboMoves.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
 
 </Project>
