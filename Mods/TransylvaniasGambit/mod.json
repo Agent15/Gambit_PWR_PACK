@@ -1,0 +1,11 @@
+{
+  "id": "TransylvaniasGambit",
+  "name": "Transylvania's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.TransylvaniasGambit.TransylvaniasGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Selling this gambit earns three random Halloween-themed gambits.",
+  "dependencies": ["GambitApi"]
+}
