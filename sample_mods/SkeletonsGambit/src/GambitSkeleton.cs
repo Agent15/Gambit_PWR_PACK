@@ -1,4 +1,6 @@
+using System.Collections;
 using Blukulele.CHE;
+using UnityEngine;
 
 namespace Gambonanza.SkeletonsGambit
 {
@@ -15,29 +17,37 @@ namespace Gambonanza.SkeletonsGambit
     {
         private void Start()
         {
-            TurnManager.Instance.OnPlayerTurn += CO_Trigger;
+            TurnManager.Instance.OnPlayerTurn += Behave;
         }
 
         private void OnDestroy()
         {
-            TurnManager.Instance.OnPlayerTurn -= CO_Trigger;
+            TurnManager.Instance.OnPlayerTurn -= Behave;
         }
 
-        private void CO_Trigger()
+        private void Behave()
         {
             // If the player has one piece on the board...
             if (BoardManager.Instance.GetPlayerPiecesInBoardCount() == 1)
             {
                 //Roll a 1/3 chance
                 if (ChanceManager.Instance.ComputeChance(1f, 3f, "SKELETON_OCCURRANCE"))
-                {// The chance passed, Execute the Trigger() method
-                    Trigger();
+                {// The chance passed, Execute the CO_Trigger() method
+                    base.StartCoroutine(CO_Trigger());
                 }
                 else
                 {// The chance failed. Play the "No luck" animation
                     this.m_Gambit.Nope();
                 }
             }
+        }
+
+        private IEnumerator CO_Trigger()
+        {
+            // If a piece is already protected, protecting without a delay will
+            // trigger before the old protection expires, so I'm adding a short delay
+            yield return new WaitForSeconds(0.3f);
+            Trigger();
         }
 
         public override void Trigger()

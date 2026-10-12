@@ -34,6 +34,7 @@ namespace Gambonanza.SkeletonsGambit
             var def = GambitBuilder.Create("skeleton")
                 .WithName("Skeleton's Gambit")
                 .WithDescription("If you only have 1 piece on the board, <color=Ø>1/3 chance</color> to <color=æ>PROTECT</color> it each turn.")
+                .ShowProtect()
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.PROTECTIVE)
                 .WithPrice(8)

@@ -37,6 +37,7 @@ namespace Gambonanza.PossessionsGambit
             var def = GambitBuilder.Create("possession")
                 .WithName("Possession's Gambit")
                 .WithDescription("Capturing with a <color=ß>PHANTOM</color> piece transforms it into a DEFAULT copy of the captured piece.")
+                .ShowPhantom()
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.PHANTOM)
                 .WithPrice(7)

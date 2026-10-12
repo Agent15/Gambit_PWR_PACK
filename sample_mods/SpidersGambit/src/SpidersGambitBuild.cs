@@ -34,6 +34,7 @@ namespace Gambonanza.SpidersGambit
             var def = GambitBuilder.Create("spider")
                 .WithName("Spider's Gambit")
                 .WithDescription("After moving a <sprite=7> <color=|>KNIGHT</color>, <color=◊>TRAP</color>, every enemy piece it can capture.")
+                .ShowTrap()
                 .WithRarity(Rarity.EPIC)
                 .WithFocus(Gambit_Focus.KNIGHT, Gambit_Focus.TRAP)
                 .WithPrice(11)
