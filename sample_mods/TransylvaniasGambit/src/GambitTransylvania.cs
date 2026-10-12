@@ -23,7 +23,8 @@ namespace Gambonanza.TransylvaniasGambit
                 "doot", "frankenstein", "headless-horseman"},
             // Rare
             new string[]{"cauldron", "candle", "exorcist", "witch", "demon", "soul", "scream",
-                "necromancer", "ouija", "soulLantern", "sacrifice", "possession", "skeleton", "vampire"},
+                "necromancer", "ouija", "soulLantern", "sacrifice", "possession", "skeleton",
+				"vampire", "ParanormalActivity"},
             // Epic
             new string[]{"stallion", "warlock", "lich", "ghost", "back-stabber", "spider", "zombie"},
             // Legendary
@@ -39,6 +40,8 @@ namespace Gambonanza.TransylvaniasGambit
             State gameState = GameManager.Instance.CurrentState;
             if (gameState == State.PAUSE || gameState == State.MENU)
                 return;
+            // BOING!
+            VisualEffect();
             // Find the gambit place this gambit is standing in and mark it as empty
             foreach(GambitPlaceBehaviour g in GambitManager.Instance.GambitPlaces)
             {
@@ -47,13 +50,11 @@ namespace Gambonanza.TransylvaniasGambit
                     g.CurrentGambit = null;
                 }
             }
-            // BOING!
-            VisualEffect();
             // To improve the diversity of earned gambits, I'm going to ensure that each
             // gambit is a different rarity. Here, we're defining one of the four rarities
             // not to use when looping through the gambitIDs array. 
             int skipRarity = Random.Range(0, 4);
-            // for "gambit rarity"...
+            // for every "gambit rarity"...
             for (int i = 0; i < 4; i++)
             {
                 // If there's no room for more gambits, stop the trigger early
