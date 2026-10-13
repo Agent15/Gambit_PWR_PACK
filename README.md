@@ -93,6 +93,8 @@ This is a list of every gambit and reskin I made for the GamBOOnanza Halloween m
 
 I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
 
+**- 'Point A' Manager**: A C# class to track the tile a piece moves from, as well as a function to calculate the displacement between two tiles.
+
 **- Classic Chess Pieces**: Re-skins the chess pieces to match the pure white (player) and pure black (enemy) color scheme of the Classic board style
 
 **- Kat Chess Pieces**: Re-skins the chess pieces into cats. :3
