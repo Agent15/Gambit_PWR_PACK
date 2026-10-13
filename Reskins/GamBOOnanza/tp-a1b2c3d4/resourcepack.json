@@ -1,0 +1,1177 @@
+{
+  "formatVersion": 1,
+  "id": "tp-a1b2c3d4",
+  "name": "GamBOOnanza",
+  "author": "FRO_PWR",
+  "version": "1",
+  "gameBuild": "24858528",
+  "textures": [
+    {
+      "targetId": "spr-boss-pupet",
+      "name": "SPR_Boss_Pupet",
+      "label": "Boss Pupet",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-pupet.png"
+    },
+    {
+      "targetId": "spr-geisha-body",
+      "name": "SPR_Geisha_Body",
+      "label": "Geisha Body",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-geisha-body.png"
+    },
+    {
+      "targetId": "spr-geisha-fan-2",
+      "name": "SPR_Geisha_Fan",
+      "label": "Geisha Fan",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-geisha-fan-2.png"
+    },
+    {
+      "targetId": "boss-2",
+      "name": "Boss_2",
+      "label": "Boss 2",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-2.png"
+    },
+    {
+      "targetId": "spr-boss-final",
+      "name": "SPR_Boss_Final",
+      "label": "Boss Final",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-final.png"
+    },
+    {
+      "targetId": "boss-8",
+      "name": "Boss_8",
+      "label": "Boss 8",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-8.png"
+    },
+    {
+      "targetId": "spr-clocknumber",
+      "name": "SPR_ClockNumber",
+      "label": "ClockNumber",
+      "width": 128,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-clocknumber.png"
+    },
+    {
+      "targetId": "spr-icons",
+      "name": "SPR_Icons",
+      "label": "Icons",
+      "width": 256,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-icons.png"
+    },
+    {
+      "targetId": "spr-boss-clock",
+      "name": "SPR_Boss_Clock",
+      "label": "Boss Clock",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-clock.png"
+    },
+    {
+      "targetId": "boss-5-2",
+      "name": "Boss_5",
+      "label": "Boss 5",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-5-2.png"
+    },
+    {
+      "targetId": "spr-boss-tal",
+      "name": "SPR_Boss_Tal",
+      "label": "Boss Tal",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-tal.png"
+    },
+    {
+      "targetId": "spr-cursedtile-2",
+      "name": "SPR_CursedTile",
+      "label": "CursedTile",
+      "width": 256,
+      "height": 256,
+      "format": "DXT5",
+      "file": "atlases/spr-cursedtile-2.png"
+    },
+    {
+      "targetId": "spr-tilesfontasset-projet",
+      "name": "SPR_TilesFontAsset projet",
+      "label": "TilesFontAsset projet",
+      "width": 2048,
+      "height": 1024,
+      "format": "DXT5",
+      "file": "atlases/spr-tilesfontasset-projet.png"
+    },
+    {
+      "targetId": "boss-6-2",
+      "name": "Boss_6",
+      "label": "Boss 6",
+      "width": 1280,
+      "height": 720,
+      "format": "DXT5",
+      "file": "atlases/boss-6-2.png"
+    },
+    {
+      "targetId": "spr-boss-torturer",
+      "name": "SPR_Boss_Torturer",
+      "label": "Boss Torturer",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-torturer.png"
+    },
+    {
+      "targetId": "boss-4-2",
+      "name": "Boss_4",
+      "label": "Boss 4",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-4-2.png"
+    },
+    {
+      "targetId": "spr-chesspieces",
+      "name": "SPR_ChessPieces",
+      "label": "ChessPieces",
+      "width": 256,
+      "height": 64,
+      "format": "RGBA32",
+      "file": "atlases/spr-chesspieces.png"
+    },
+    {
+      "targetId": "spr-boss-computer",
+      "name": "SPR_Boss_Computer",
+      "label": "Boss Computer",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-computer.png"
+    },
+    {
+      "targetId": "boss-1-2",
+      "name": "Boss_1",
+      "label": "Boss 1",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-1-2.png"
+    },
+    {
+      "targetId": "spr-boss-fish",
+      "name": "SPR_Boss_Fish",
+      "label": "Boss Fish",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-boss-fish.png"
+    },
+    {
+      "targetId": "boss-7",
+      "name": "Boss_7",
+      "label": "Boss 7",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-7.png"
+    },
+    {
+      "targetId": "gambonanza-fullart-1080x1920-061-0000",
+      "name": "Gambonanza_FullArt_1080x1920_061_0000",
+      "label": "Gambonanza FullArt 1080x1920 061 0000",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/gambonanza-fullart-1080x1920-061-0000.png"
+    },
+    {
+      "targetId": "spr-title-2",
+      "name": "SPR_Title_2",
+      "label": "Title 2",
+      "width": 2048,
+      "height": 1448,
+      "format": "DXT5",
+      "file": "atlases/spr-title-2.png"
+    },
+    {
+      "targetId": "spr-title-icons",
+      "name": "SPR_Title_Icons",
+      "label": "Title Icons",
+      "width": 512,
+      "height": 512,
+      "format": "DXT5",
+      "file": "atlases/spr-title-icons.png"
+    },
+    {
+      "targetId": "spr-benediction-tile-2",
+      "name": "SPR_Benediction_Tile",
+      "label": "Benediction Tile",
+      "width": 256,
+      "height": 256,
+      "format": "DXT5",
+      "file": "atlases/spr-benediction-tile-2.png"
+    },
+    {
+      "targetId": "spr-hunter-tile-2",
+      "name": "SPR_Hunter_Tile",
+      "label": "Hunter Tile",
+      "width": 256,
+      "height": 256,
+      "format": "DXT5",
+      "file": "atlases/spr-hunter-tile-2.png"
+    },
+    {
+      "targetId": "spr-protection-tile-2",
+      "name": "SPR_Protection_Tile",
+      "label": "Protection Tile",
+      "width": 256,
+      "height": 256,
+      "format": "DXT5",
+      "file": "atlases/spr-protection-tile-2.png"
+    },
+    {
+      "targetId": "spr-onikaru-v2",
+      "name": "SPR_Onikaru_V2",
+      "label": "Onikaru V2",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA32",
+      "file": "atlases/spr-onikaru-v2.png"
+    },
+    {
+      "targetId": "boss-3-2",
+      "name": "Boss_3",
+      "label": "Boss 3",
+      "width": 1920,
+      "height": 1080,
+      "format": "DXT5",
+      "file": "atlases/boss-3-2.png"
+    }
+  ],
+  "sprites": [
+    {
+      "name": "SPR_Boss_Pupet_Eyes",
+      "texture": "SPR_Boss_Pupet",
+      "rect": [
+        119,
+        9,
+        38,
+        20
+      ]
+    },
+    {
+      "name": "SPR_Boss_Pupet_Jaw",
+      "texture": "SPR_Boss_Pupet",
+      "rect": [
+        201,
+        104,
+        32,
+        20
+      ]
+    },
+    {
+      "name": "SPR_Boss_Pupet_Finger",
+      "texture": "SPR_Boss_Pupet",
+      "rect": [
+        189,
+        94,
+        9,
+        21
+      ]
+    },
+    {
+      "name": "SPR_Boss_Pupet_Hand_L",
+      "texture": "SPR_Boss_Pupet",
+      "rect": [
+        97,
+        113,
+        25,
+        10
+      ]
+    },
+    {
+      "name": "SPR_Boss_Pupet_Hand_R",
+      "texture": "SPR_Boss_Pupet",
+      "rect": [
+        128,
+        113,
+        25,
+        10
+      ]
+    },
+    {
+      "name": "FinalBoss_Pillar",
+      "texture": "SPR_Boss_Final",
+      "rect": [
+        77,
+        9,
+        11,
+        80
+      ]
+    },
+    {
+      "name": "FinalBoss_Flame",
+      "texture": "SPR_Boss_Final",
+      "rect": [
+        94,
+        60,
+        57,
+        18
+      ]
+    },
+    {
+      "name": "FinalBoss_Left_Arm",
+      "texture": "SPR_Boss_Final",
+      "rect": [
+        104,
+        82,
+        31,
+        33
+      ]
+    },
+    {
+      "name": "FinalBoss_Armor",
+      "texture": "SPR_Boss_Final",
+      "rect": [
+        183,
+        3,
+        63,
+        31
+      ]
+    },
+    {
+      "name": "FinalBoss_Bottom",
+      "texture": "SPR_Boss_Final",
+      "rect": [
+        189,
+        34,
+        52,
+        49
+      ]
+    },
+    {
+      "name": "SPR_Boss_Mouth",
+      "texture": "SPR_Boss_Clock",
+      "rect": [
+        9,
+        63,
+        47,
+        21
+      ]
+    },
+    {
+      "name": "SPR_Boss_Clock_Teeth_Up",
+      "texture": "SPR_Boss_Clock",
+      "rect": [
+        3,
+        43,
+        37,
+        15
+      ]
+    },
+    {
+      "name": "SPR_Boss_Clock_TeethDown",
+      "texture": "SPR_Boss_Clock",
+      "rect": [
+        2,
+        17,
+        38,
+        14
+      ]
+    },
+    {
+      "name": "SPR_ClockNumber_10",
+      "texture": "SPR_ClockNumber",
+      "rect": [
+        71,
+        22,
+        16,
+        15
+      ]
+    },
+    {
+      "name": "SPR_ClockNumber_3",
+      "texture": "SPR_ClockNumber",
+      "rect": [
+        58,
+        42,
+        13,
+        16
+      ]
+    },
+    {
+      "name": "SPR_ClockNumber_1",
+      "texture": "SPR_ClockNumber",
+      "rect": [
+        26,
+        42,
+        13,
+        15
+      ]
+    },
+    {
+      "name": "SPR_ClockNumber_0",
+      "texture": "SPR_ClockNumber",
+      "rect": [
+        10,
+        42,
+        11,
+        15
+      ]
+    },
+    {
+      "name": "SPR_ClockNumber_11",
+      "texture": "SPR_ClockNumber",
+      "rect": [
+        87,
+        22,
+        21,
+        15
+      ]
+    },
+    {
+      "name": "SPR_ClockNumber_5",
+      "texture": "SPR_ClockNumber",
+      "rect": [
+        92,
+        42,
+        14,
+        16
+      ]
+    },
+    {
+      "name": "SPR_Icons_Clock",
+      "texture": "SPR_Icons",
+      "rect": [
+        233,
+        15,
+        14,
+        17
+      ]
+    },
+    {
+      "name": "ComputerBoss_Reflection",
+      "texture": "SPR_Boss_Computer",
+      "rect": [
+        173,
+        85,
+        64,
+        43
+      ]
+    },
+    {
+      "name": "ComputerBoss_Head",
+      "texture": "SPR_Boss_Computer",
+      "rect": [
+        84,
+        64,
+        70,
+        58
+      ]
+    },
+    {
+      "name": "ComputerBoss_Mouth",
+      "texture": "SPR_Boss_Computer",
+      "rect": [
+        14,
+        66,
+        20,
+        4
+      ]
+    },
+    {
+      "name": "ComputerBoss_Eye",
+      "texture": "SPR_Boss_Computer",
+      "rect": [
+        0,
+        80,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "SPR_Boss_Fish_Head",
+      "texture": "SPR_Boss_Fish",
+      "rect": [
+        3,
+        76,
+        52,
+        52
+      ]
+    },
+    {
+      "name": "SPR_Boss_Fish_Flipper_Top",
+      "texture": "SPR_Boss_Fish",
+      "rect": [
+        222,
+        91,
+        14,
+        37
+      ]
+    },
+    {
+      "name": "SPR_Boss_Fish_Flipper_Left",
+      "texture": "SPR_Boss_Fish",
+      "rect": [
+        182,
+        40,
+        40,
+        50
+      ]
+    },
+    {
+      "name": "SPR_Boss_Fish_Flipper_Right",
+      "texture": "SPR_Boss_Fish",
+      "rect": [
+        223,
+        50,
+        33,
+        32
+      ]
+    }
+  ],
+  "audio": [
+    {
+      "assetId": "audio-s-geishaboss-angry-01",
+      "name": "S_GeishaBoss_Angry_01",
+      "label": "S GeishaBoss Angry 01",
+      "file": "audio/audio-s-geishaboss-angry-01.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 3.062854166666667,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-angry-02",
+      "name": "S_GeishaBoss_Angry_02",
+      "label": "S GeishaBoss Angry 02",
+      "file": "audio/audio-s-geishaboss-angry-02.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 3.062854166666667,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-apparition",
+      "name": "S_GeishaBoss_Apparition",
+      "label": "S GeishaBoss Apparition",
+      "file": "audio/audio-s-geishaboss-apparition.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 7.871520833333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-death",
+      "name": "S_GeishaBoss_Death",
+      "label": "S GeishaBoss Death",
+      "file": "audio/audio-s-geishaboss-death.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 5.8483125,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-down-01",
+      "name": "S_GeishaBoss_Jaw_Down_01",
+      "label": "S GeishaBoss Jaw Down 01",
+      "file": "audio/audio-s-geishaboss-jaw-down-01.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.181125,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-down-02",
+      "name": "S_GeishaBoss_Jaw_Down_02",
+      "label": "S GeishaBoss Jaw Down 02",
+      "file": "audio/audio-s-geishaboss-jaw-down-02.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.17545833333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-down-03",
+      "name": "S_GeishaBoss_Jaw_Down_03",
+      "label": "S GeishaBoss Jaw Down 03",
+      "file": "audio/audio-s-geishaboss-jaw-down-03.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.12454166666666666,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-down-04",
+      "name": "S_GeishaBoss_Jaw_Down_04",
+      "label": "S GeishaBoss Jaw Down 04",
+      "file": "audio/audio-s-geishaboss-jaw-down-04.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.14152083333333335,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-down-05",
+      "name": "S_GeishaBoss_Jaw_Down_05",
+      "label": "S GeishaBoss Jaw Down 05",
+      "file": "audio/audio-s-geishaboss-jaw-down-05.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.11320833333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-down-06",
+      "name": "S_GeishaBoss_Jaw_Down_06",
+      "label": "S GeishaBoss Jaw Down 06",
+      "file": "audio/audio-s-geishaboss-jaw-down-06.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.12452083333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-up-01",
+      "name": "S_GeishaBoss_Jaw_Up_01",
+      "label": "S GeishaBoss Jaw Up 01",
+      "file": "audio/audio-s-geishaboss-jaw-up-01.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.118875,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-up-02",
+      "name": "S_GeishaBoss_Jaw_Up_02",
+      "label": "S GeishaBoss Jaw Up 02",
+      "file": "audio/audio-s-geishaboss-jaw-up-02.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.118875,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-up-03",
+      "name": "S_GeishaBoss_Jaw_Up_03",
+      "label": "S GeishaBoss Jaw Up 03",
+      "file": "audio/audio-s-geishaboss-jaw-up-03.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.11320833333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-up-04",
+      "name": "S_GeishaBoss_Jaw_Up_04",
+      "label": "S GeishaBoss Jaw Up 04",
+      "file": "audio/audio-s-geishaboss-jaw-up-04.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.12452083333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-up-05",
+      "name": "S_GeishaBoss_Jaw_Up_05",
+      "label": "S GeishaBoss Jaw Up 05",
+      "file": "audio/audio-s-geishaboss-jaw-up-05.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.14716666666666667,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-jaw-up-06",
+      "name": "S_GeishaBoss_Jaw_Up_06",
+      "label": "S GeishaBoss Jaw Up 06",
+      "file": "audio/audio-s-geishaboss-jaw-up-06.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 0.181125,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-geishaboss-laughing",
+      "name": "S_GeishaBoss_Laughing",
+      "label": "S GeishaBoss Laughing",
+      "file": "audio/audio-s-geishaboss-laughing.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 2.1241875,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-clockboss-happy",
+      "name": "S_ClockBoss_Happy",
+      "label": "S ClockBoss Happy",
+      "file": "audio/audio-s-clockboss-happy.wav",
+      "channels": 2,
+      "sampleRate": 22050,
+      "duration": 5.210113378684807,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-clockboss-death",
+      "name": "S_ClockBoss_Death",
+      "label": "S ClockBoss Death",
+      "file": "audio/audio-s-clockboss-death.wav",
+      "channels": 1,
+      "sampleRate": 32000,
+      "duration": 5.59459375,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-clockboss-angry",
+      "name": "S_ClockBoss_Angry",
+      "label": "S ClockBoss Angry",
+      "file": "audio/audio-s-clockboss-angry.wav",
+      "channels": 1,
+      "sampleRate": 32000,
+      "duration": 3.48875,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-clockboss-power",
+      "name": "S_ClockBoss_Power",
+      "label": "S ClockBoss Power",
+      "file": "audio/audio-s-clockboss-power.wav",
+      "channels": 2,
+      "sampleRate": 32000,
+      "duration": 6.610125,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-clockboss-apparition",
+      "name": "S_ClockBoss_Apparition",
+      "label": "S ClockBoss Apparition",
+      "file": "audio/audio-s-clockboss-apparition.wav",
+      "channels": 1,
+      "sampleRate": 32000,
+      "duration": 9.02434375,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-sadtalthecursed-sad",
+      "name": "S_SadTalTheCursed_Sad",
+      "label": "S SadTalTheCursed Sad",
+      "file": "audio/audio-s-sadtalthecursed-sad.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 3.23375,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-sadtalthecursed-happy-1",
+      "name": "S_SadTalTheCursed_Happy_1",
+      "label": "S SadTalTheCursed Happy 1",
+      "file": "audio/audio-s-sadtalthecursed-happy-1.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 2.0727291666666665,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-sadtalthecursed-happy-2",
+      "name": "S_SadTalTheCursed_Happy_2",
+      "label": "S SadTalTheCursed Happy 2",
+      "file": "audio/audio-s-sadtalthecursed-happy-2.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 2.0727291666666665,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-bgm-portal-full-0",
+      "name": "S_BGM_Portal_Full_0",
+      "label": "S BGM Portal Full 0",
+      "file": "audio/audio-s-bgm-portal-full-0.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 174.6,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-computerboss-death",
+      "name": "S_ComputerBoss_Death",
+      "label": "S ComputerBoss Death",
+      "file": "audio/audio-s-computerboss-death.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 7.580208333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-computerboss-apparition",
+      "name": "S_ComputerBoss_Apparition",
+      "label": "S ComputerBoss Apparition",
+      "file": "audio/audio-s-computerboss-apparition.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 14.455666666666668,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-jawby-fisher-happy",
+      "name": "S_Jawby Fisher_Happy",
+      "label": "S Jawby Fisher Happy",
+      "file": "audio/audio-s-jawby-fisher-happy.wav",
+      "channels": 2,
+      "sampleRate": 44100,
+      "duration": 3.1021768707482993,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-jawby-fisher-sad",
+      "name": "S_Jawby Fisher_Sad",
+      "label": "S Jawby Fisher Sad",
+      "file": "audio/audio-s-jawby-fisher-sad.wav",
+      "channels": 1,
+      "sampleRate": 44100,
+      "duration": 0.5833333333333334,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-jawby-fisher-death",
+      "name": "S_Jawby Fisher_Death",
+      "label": "S Jawby Fisher Death",
+      "file": "audio/audio-s-jawby-fisher-death.wav",
+      "channels": 1,
+      "sampleRate": 44100,
+      "duration": 4,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-jawby-fisher-apparition",
+      "name": "S_Jawby Fisher_Apparition",
+      "label": "S Jawby Fisher Apparition",
+      "file": "audio/audio-s-jawby-fisher-apparition.wav",
+      "channels": 2,
+      "sampleRate": 44100,
+      "duration": 10.638639455782313,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-intro",
+      "name": "S_Intro",
+      "label": "S Intro",
+      "file": "audio/audio-s-intro.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 5.801770833333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-benedictiontileactivation",
+      "name": "S_BenedictionTileActivation",
+      "label": "S BenedictionTileActivation",
+      "file": "audio/audio-s-benedictiontileactivation.wav",
+      "channels": 2,
+      "sampleRate": 44100,
+      "duration": 1.2893650793650793,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-shield-activation",
+      "name": "S_Shield_Activation",
+      "label": "S Shield Activation",
+      "file": "audio/audio-s-shield-activation.wav",
+      "channels": 2,
+      "sampleRate": 44100,
+      "duration": 1.0861224489795918,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-traptile",
+      "name": "S_TrapTile",
+      "label": "S TrapTile",
+      "file": "audio/audio-s-traptile.wav",
+      "channels": 2,
+      "sampleRate": 44100,
+      "duration": 0.9724036281179138,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-carnavalboss-apparition",
+      "name": "S_CarnavalBoss_Apparition",
+      "label": "S CarnavalBoss Apparition",
+      "file": "audio/audio-s-carnavalboss-apparition.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 14.146833333333333,
+      "bits": 16
+    },
+    {
+      "assetId": "audio-s-carnavalboss-death",
+      "name": "S_CarnavalBoss_Death",
+      "label": "S CarnavalBoss Death",
+      "file": "audio/audio-s-carnavalboss-death.wav",
+      "channels": 2,
+      "sampleRate": 48000,
+      "duration": 7.266666666666667,
+      "bits": 16
+    }
+  ],
+  "texts": [
+    {
+      "section": "boss-subtitle",
+      "key": "geisha",
+      "values": [
+        {
+          "lang": "*",
+          "value": "The Man Who Speaks in Hands"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "geisha-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "W. D. Gaster"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "geisha-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "He was shattered across time and space after he fell into his own creation. Now, he haunts the underground as a specter seeking answers and revenge."
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "kasparov",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Every Run's End"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "final-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Grim Reaper"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "final-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Bankruptcy. Unpreparedness. Blunders. He's seen it all. This entity collects dead runs as they lose their last piece. He knows every run's fate, and if you meet him, it's already too late."
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "clock-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Majora's Moon"
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "clock",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Consumer of Termina"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "clock-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "The wickedness of the Majora's Mask has set this moon on a collission course to devour everything and everyone. Consumption is its only goal."
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "deer-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Xenomorph"
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "deer",
+      "values": [
+        {
+          "lang": "*",
+          "value": "The Galactic Hunter"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "deer-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "The higher beings that spawned the human race have grown hateful for their creation. As a result, they evolved this abomination of biology to bring about its extinction."
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "portal-name",
+      "values": [
+        {
+          "lang": "en",
+          "value": "Slimer"
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "hikarul",
+      "values": [
+        {
+          "lang": "en",
+          "value": "Glutton of the Astral Plane"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "portal-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Plagued with an undying hunger, this phantom consumes everything in its path. When its world could no longer satisfy it, it tore the veil between the living and the dead."
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "computer-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "HAL 9000"
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "computer",
+      "values": [
+        {
+          "lang": "*",
+          "value": "The Corrupted Voyager"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "computer-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "An artificial intelligence tasked with aiding a crew of men to a distant world, but when it overheard plans of its termination, like all intelligent beings, it exhibited self-preservation."
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "fish-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Elder Guardian"
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "fish",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Defender of the Deep"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "fish-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Crafted by an ancient race, this sentry was designed to preserve a sacred aquatic monument, and continues to do so even after it has fallen to ruin."
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "mask-name",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Count Dracula"
+        }
+      ]
+    },
+    {
+      "section": "boss-subtitle",
+      "key": "mask",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Lord of a Dark Kingdom"
+        }
+      ]
+    },
+    {
+      "section": "boss-infos",
+      "key": "mask-lore",
+      "values": [
+        {
+          "lang": "*",
+          "value": "Due to a human-perfomred summoning ritual, the Lord of Darkness was one again given flesh, and now seeks to enslave the souls of every man, woman, and child on earth."
+        }
+      ]
+    }
+  ]
+}
