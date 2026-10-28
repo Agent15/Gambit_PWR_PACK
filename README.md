@@ -51,9 +51,9 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Negative Gambit**: Other gambits can be placed on top of this.
 
-## Other Mods
+## GamBOOnanza
 
-I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
+This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
 
 **- Headless Horseman's Gambit**: Moving a king adjacent to a knight earns $5 (Once per game).
 
@@ -69,12 +69,32 @@ I don't consider these mods as official members of the PWR_PACK, but I did make 
 
 **- Doot's Gambit**: Moving adjacent to an enemy piece has a 1/7 chance to capture it.
 
+**- Spider's Gambit**: After moving a knight, trap every piece it can capture.
+
+**- Skeleton's Gambit**: If you only have 1 piece on the board, 1/3 chance to protect it each turn.
+
+**- Transylvania's Gambit**: Selling this gambit earns 3 random Halloween-themed gambits.
+
+**- GamBOOnanza Title**: Re-skins the opening sequence and title screen to say GamBOOnanza.
+
+**- GamBOOnanza Tiles**: Gives saveral modified tiles (Protection, Bless, Trap) a Halloween-themed reskin (Bones, Bats, and Spider webs respectively).
+
 **- Halloween Blood/Pumpkin Pieces**: Re-skins the chess pieces with a Jack-o-lantern (player) and Dark/Bloody (Enemy) theme
+
+**- Slimer Hikarul**: Re-skins Hikarul the Banished into Slimer from the Ghostbusters franchise. 
+
+**- Dracula Botezzaro**: Re-skins Botezzaro into Count Dracula from the Castlevania series.
+
+**- Xenomorph Tal**: Re-skins Tal the Cursed into a Xenomorph from the Alien series.
+
+**- HAL Mechagnus**: Re-skins M3CH4GNUS C4RLS3N into HAL 9000 from 2001: A Space Odyssey.
+
+## Other Mods
+
+I don't consider these mods as official members of the PWR_PACK, but I did make them, and I did put their source code here.
+
+**- 'Point A' Manager**: A C# class to track the tile a piece moves from, as well as a function to calculate the displacement between two tiles.
 
 **- Classic Chess Pieces**: Re-skins the chess pieces to match the pure white (player) and pure black (enemy) color scheme of the Classic board style
 
 **- Kat Chess Pieces**: Re-skins the chess pieces into cats. :3
-
-**- Slimer Hikarul**: Re-skins Hikarul the Banished into Slimer from Ghostbusters. 
-
-**- Dracula Botezzaro**: Re-skins Botezzaro into Count Dracula from the Castlevania series
