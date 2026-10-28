@@ -1,0 +1,11 @@
+{
+  "id": "MoneyTreesGambit",
+  "name": "MoneyTree's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.MoneyTreesGambit.MoneyTreesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "At the end of a game, earn $1 (Increases by +$1 each game).",
+  "dependencies": ["GambitApi"]
+}
