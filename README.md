@@ -51,6 +51,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Negative Gambit**: Other gambits can be placed on top of this.
 
+**- Money Tree's Gambit**: At the end of a game, earn $1 (Increases by +$1 each game).
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
