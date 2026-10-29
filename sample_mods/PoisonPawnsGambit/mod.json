@@ -1,0 +1,11 @@
+{
+  "id": "PoisonPawnsGambit",
+  "name": "PoisonPawn's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.PoisonPawnsGambit.PoisonPawnsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If one of your pawns is captured by a non-pawn piece, skip the enemy's turn.",
+  "dependencies": ["GambitApi"]
+}
