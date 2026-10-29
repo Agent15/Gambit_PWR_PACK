@@ -1,6 +1,6 @@
 # Gambit PWR_PACK
 
-A set of mod files for the Steam game **Gambonanza**. This repo lists sever Gambits under the ``/Mods`` folder where each Gambit is listed as a separate mod, and all made by me (FRO_PWR).
+A set of mod files for the Steam game **Gambonanza**. This repo lists all of its Gambit mods under the ``/Mods`` folder where each Gambit is listed as a separate mod, and all made by me (FRO_PWR).
 The contents of this repo are largely dependent on the resources found in Bentrd's **GambonanzaMods** repo. To install these mods, you can find them on the **Gambonanza mod manager** (https://bentrd.github.io//GambonanzaMods). For more technical information and a guide on building your own Gambonanza mod framework, I recommend going to https://github.com/bentrd/GambonanzaMods.git
 
 ## The Gambits
