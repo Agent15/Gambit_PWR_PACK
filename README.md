@@ -53,6 +53,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Money Tree's Gambit**: At the end of a game, earn $1 (Increases by +$1 each game).
 
+**- Poison Pawn's Gambit**: If one of your pawns is captured by a non-pawn piece, skip the enemy's turn.
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
