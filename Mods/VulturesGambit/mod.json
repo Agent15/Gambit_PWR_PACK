@@ -1,0 +1,11 @@
+{
+  "id": "VulturesGambit",
+  "name": "Vulture's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.VulturesGambit.VulturesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Capturing a trapped piece, traps every piece that was defending it",
+  "dependencies": ["GambitApi"]
+}
