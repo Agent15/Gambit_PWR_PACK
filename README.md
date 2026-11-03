@@ -55,6 +55,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Poison Pawn's Gambit**: If one of your pawns is captured by a non-pawn piece, skip the enemy's turn.
 
+**- Vulture's Gambit**: Capturing a trapped piece traps every piece that was defending it.
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
