@@ -1,0 +1,11 @@
+{
+  "id": "BulletTimesGambit",
+  "name": "Bullet Time's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.BulletTimesGambit.BulletTimesGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Skipping the enemy's turn also delays crumbling tiles from falling.",
+  "dependencies": ["GambitApi"]
+}

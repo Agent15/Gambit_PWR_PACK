@@ -1,0 +1,11 @@
+{
+  "id": "WhiteFlagsGambit",
+  "name": "White Flag's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.WhiteFlagsGambit.WhiteFlagsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Sell this gambit to skip the enemy's turn",
+  "dependencies": ["GambitApi"]
+}
