@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 using Blukulele.CHE;
 using Blukulele.Core;
 using UnityEngine;
@@ -11,11 +8,15 @@ namespace Gambonanza.PitStopsGambit
     /// <summary>
     /// PitStop's Gambit: If a game ends in stalemate, earn $10 and return to the shop.
 	///
+    /// This gambit listens for a stalemate, then rewards $10 and uses several in-game
+    /// action calls to force the game back to the shop without incrementing the game count.
 	/// </summary>
     public sealed class GambitPitStop : BaseGambit
     {
         private void Start()
         {
+            // If this gambit is respawning after a stalemate,
+            // Execute the trigger after 5 seconds.
             if (PitStopsGambitBuild.stalemateHappened)
             {
                 PitStopsGambitBuild.stalemateHappened = false;
@@ -38,11 +39,13 @@ namespace Gambonanza.PitStopsGambit
 
         public override void Trigger()
         {
+            // :3
             base.StartCoroutine(CO_Shop(0f));
         }
 
         private IEnumerator CO_Shop(float delay)
         {
+            // Wait for the specified delay
             yield return new WaitForSeconds(delay);
             //BOING!
             VisualEffect();
@@ -62,6 +65,7 @@ namespace Gambonanza.PitStopsGambit
                 // Find any canvas with a "GO" button and click it
                 CanvasPreparation PrepCanvas = FindAnyObjectByType<CanvasPreparation>();
                 PrepCanvas.Ready();
+                // Wait for the game's animations to play out
                 yield return new WaitForSeconds(1.5f);
             }
             // Find any canvas for mid-game stats and hide it
@@ -79,23 +83,6 @@ namespace Gambonanza.PitStopsGambit
             Instantiate<GameObject>(PhantomPieceManager.Instance.ParticlePhantomDisappear, pieceBehaviour.transform.position + Vector3.up * 0.5f, Quaternion.identity);
             pieceBehaviour.VisualEffect.PhantomDisappearEffect();
             Destroy(pieceBehaviour.gameObject, 1f);
-        }
-        // DEBUG
-        public static void UpdateDescription(string s)
-        {
-            var locManager = SingletonMonoBehaviour<LocalizationManager>.Instance;
-            if (locManager == null)
-                return;
-
-            var traduction = locManager.GetTraduction();
-            if (traduction == null)
-                return;
-
-            var gambitNode = traduction["gambit"];
-            if (gambitNode == null)
-                return;
-
-            gambitNode["pit-stop_description"] = s;
         }
     }
 }
