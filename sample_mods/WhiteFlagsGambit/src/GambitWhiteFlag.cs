@@ -6,6 +6,9 @@ namespace Gambonanza.WhiteFlagsGambit
     /// <summary>
     /// WhiteFlag's Gambit: Sell this gambit to force a stalemate.
 	///
+    /// This gambit doesn't listen to any action calls, instead it invokes the game's
+    /// OnPat action when destroyed (sold) and immediately sells itself if it's created
+    /// after a stalemete it forced.
 	/// </summary>
     public sealed class GambitWhiteFlag : BaseGambit
     {

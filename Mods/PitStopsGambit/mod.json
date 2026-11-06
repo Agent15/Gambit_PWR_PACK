@@ -1,0 +1,11 @@
+{
+  "id": "PitStopsGambit",
+  "name": "Pit Stop's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.PitStopsGambit.PitStopsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If a game ends in stalemate, earn $10 and return to the shop.",
+  "dependencies": ["GambitApi"]
+}
