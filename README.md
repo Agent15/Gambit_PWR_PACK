@@ -57,6 +57,10 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Vulture's Gambit**: Capturing a trapped piece traps every piece that was defending it.
 
+**- White Flag's Gambit**: Sell this gambit to force a stalemate.
+
+**- Pit Stop's Gambit**: If a game ends in stalemate, earn $10 and return to the shop.
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
