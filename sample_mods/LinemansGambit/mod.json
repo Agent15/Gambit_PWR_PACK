@@ -1,0 +1,11 @@
+{
+  "id": "LinemansGambit",
+  "name": "Lineman's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.LinemansGambit.LinemansGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "Protect all your pawns with an enemy pawn directly in fron of them.",
+  "dependencies": ["GambitApi"]
+}
