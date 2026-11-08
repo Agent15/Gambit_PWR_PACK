@@ -61,6 +61,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Pit Stop's Gambit**: If a game ends in stalemate, earn $10 and return to the shop.
 
+**- Lineman's Gambit**: Protect all your pawns with an enemy pawn directly in front of them.
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
