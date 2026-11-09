@@ -34,7 +34,7 @@ namespace Gambonanza.LinemansGambit
             var def = GambitBuilder.Create("lineman")
                 .WithName("Lineman's Gambit")
                 .WithDescription("<color=æ>PROTECT</color> all your<br><sprite=5> <color=&>PAWNS</color> with an enemy<br><sprite=5> <color=&>PAWN</color> directly in front of them.")
-                .WithRarity(Rarity.EPIC)
+                .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.PAWN, Gambit_Focus.PROTECTIVE)
                 .WithPrice(9)
                 .WithVisual(sprite)

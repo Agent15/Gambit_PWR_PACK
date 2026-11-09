@@ -35,7 +35,7 @@ namespace Gambonanza.PitStopsGambit
             // `give gambit pit-stop`, so keep it short and readable.
             var def = GambitBuilder.Create("pit-stop")
                 .WithName("Pit Stop's Gambit")
-                .WithDescription("If a game ends in stalemete, earn <color=*>$10</color> and return to the shop.")
+                .WithDescription("If a game ends in stalemate, earn <color=*>$10</color> and return to the shop.")
                 .WithRarity(Rarity.RARE)
                 .WithFocus(Gambit_Focus.MONEY, Gambit_Focus.UTILITY)
                 .WithPrice(7)
