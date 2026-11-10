@@ -1,0 +1,11 @@
+{
+  "id": "PrismsGambit",
+  "name": "Prism's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.PrismsGambit.PrismsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "After modifying a tile, modify another random tile",
+  "dependencies": ["GambitApi"]
+}
