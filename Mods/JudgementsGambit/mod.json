@@ -1,0 +1,11 @@
+{
+  "id": "JudgementsGambit",
+  "name": "Judgement's Gambit",
+  "version": "1.0.0",
+  "author": "FRO_PWR",
+  "entry": "Gambonanza.JudgementsGambit.JudgementsGambitBuild",
+  "enabled": true,
+  "gameVersion": ">=1.0",
+  "description": "If a blessed piece is captured , cause the captured tile to crumble.",
+  "dependencies": ["GambitApi"]
+}
