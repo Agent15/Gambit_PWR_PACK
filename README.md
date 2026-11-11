@@ -63,6 +63,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Lineman's Gambit**: Protect all your pawns with an enemy pawn directly in front of them.
 
+**- Prism's Gambit**: After modifying a tile, modify another random tile.
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
