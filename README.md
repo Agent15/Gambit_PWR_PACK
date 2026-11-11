@@ -65,6 +65,8 @@ Here is a list of every modded gambit currently in this repo:
 
 **- Prism's Gambit**: After modifying a tile, modify another random tile.
 
+**- Judgement's Gambit**: If a blessed piece is captured, cause the captured tile to crumble.
+
 ## GamBOOnanza
 
 This is a list of every gambit and reskin I made for the GamBOOnanza Halloween modpack
